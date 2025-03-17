@@ -1,6 +1,6 @@
 <div align="center">
   <h3 align="center">📌 Team KkalLongBbong 📌</h3>
-  <img src=https://github.com/user-attachments/assets/95a0ff10-861d-4b18-acb5-df2292a56de5 width="400" height="400" />
+  <img src=https://github.com/user-attachments/assets/cf7ad992-be17-4a46-8f55-f20a9c6272c5 width="400" height="400" />
 </div>
 
 ----
