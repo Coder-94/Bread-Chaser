@@ -2,12 +2,11 @@ using UnityEngine;
 
 public class ObjectRotator : ObjectFloater
 {
-    protected float _rotateSpeed;
+    protected float _rotateSpeed = 270;
 
     protected override void Start()
     {
         base.Start();
-        _rotateSpeed = Random.Range(180, 360);
     }
 
     protected override void Update()

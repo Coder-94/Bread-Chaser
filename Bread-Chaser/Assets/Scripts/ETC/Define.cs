@@ -29,4 +29,14 @@ public class Define
         CantParryAtk = 10
     }
 
+    public enum Scene
+    {
+        Unknown,
+        Main,
+        City,
+        Forest,
+        IceLand,
+        Universe,
+        Score
+    }
 }

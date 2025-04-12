@@ -5,12 +5,15 @@ using UnityEngine;
 
 public class InputManager
 {
+    #region variables
     public Action KeyAction = null;
     public Action<Define.MouseEvent> MouseAction = null;
 
     bool _pressed = false;
     float _pressedTime = 0;
+    #endregion
 
+    #region ForUpdate
     public void OnUpdate()
     {
         if (Input.anyKey && KeyAction != null)
@@ -42,10 +45,13 @@ public class InputManager
             }
         }
     }
+    #endregion
 
+    #region Clear
     public void Clear()
     {
         KeyAction = null;
         MouseAction = null;
     }
+    #endregion
 }
