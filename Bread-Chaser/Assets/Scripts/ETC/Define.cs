@@ -19,6 +19,12 @@ public class Define
         ShortJump, Jump, LongJump
     }
 
+    public enum UIEvent
+    {
+        Click,
+        Drag
+    }
+
     public enum Layer
     {
         Ground = 3,

@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class Util
 {
-    //어느 구현작업에서든 자주 쓰이는 유틸성 높은 코드 모음
-
     public static T GetOrAddComponent<T>(GameObject go) where T : UnityEngine.Component
     {
         T component = go.GetComponent<T>();

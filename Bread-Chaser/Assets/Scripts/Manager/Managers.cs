@@ -15,11 +15,14 @@ public class Managers : MonoBehaviour
     PoolManager         _pool = new PoolManager();
     InputManager        _input = new InputManager();
     AreaManager         _areaManager = new AreaManager();
-
+    UIManager           _uiManager = new UIManager();
+    SceneManagerEX      _sceneManager = new SceneManagerEX();
     public static   ResourceManager   Resource { get { return Instance._resource; } }
     public static   PoolManager       Pool { get { return Instance._pool; } }
     public static   InputManager      Input { get { return Instance._input; } }
     public static   AreaManager       Area {  get { return Instance._areaManager; } }
+    public static   UIManager         UI { get { return Instance._uiManager; } }
+    public static SceneManagerEX      Scene { get { return Instance._sceneManager; } }
     #endregion
 
     #region Start & Update
@@ -51,7 +54,6 @@ public class Managers : MonoBehaviour
             s_instance = go.GetComponent<Managers>();
 
             s_instance._pool.Init();
-            s_instance._areaManager.Init();
 		}		
 	}
 
