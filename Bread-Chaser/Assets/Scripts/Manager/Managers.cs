@@ -14,15 +14,15 @@ public class Managers : MonoBehaviour
     ResourceManager     _resource = new ResourceManager();
     PoolManager         _pool = new PoolManager();
     InputManager        _input = new InputManager();
-    AreaManager         _areaManager = new AreaManager();
     UIManager           _uiManager = new UIManager();
     SceneManagerEX      _sceneManager = new SceneManagerEX();
+    AreaManager         _areaManager = new AreaManager();
     public static   ResourceManager   Resource { get { return Instance._resource; } }
     public static   PoolManager       Pool { get { return Instance._pool; } }
     public static   InputManager      Input { get { return Instance._input; } }
-    public static   AreaManager       Area {  get { return Instance._areaManager; } }
     public static   UIManager         UI { get { return Instance._uiManager; } }
     public static SceneManagerEX      Scene { get { return Instance._sceneManager; } }
+    public static AreaManager         Area { get { return Instance._areaManager; } }
     #endregion
 
     #region Start & Update

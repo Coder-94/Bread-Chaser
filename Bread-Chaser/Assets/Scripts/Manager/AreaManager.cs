@@ -2,31 +2,15 @@ using UnityEngine;
 
 public class AreaManager
 {
-    [SerializeField]
-    private int             _currentStageLV = 1;
+    public float        totalLength;
+    public GameObject   player;
 
-    [SerializeField]
-    public GameObject[]     _areaPrefabs = new GameObject[5];
 
-    private int             _startSpawnAreaCount = 3;
-
-    [SerializeField]
-    private float           _areaDistance;
-
-    public void LoadAreas(string name)
-    {
-        for(int i=0; i< _areaPrefabs.Length; i++)
-        {
-            _areaPrefabs[i] = Managers.Resource.Load<GameObject>($"Area/{name}/{name}Area{i+1}");
-        }
-        
-    }
-
-    public void SpawnArea(string name, bool isRandom = true)
+    public void SpawnArea(string name, ref float totalLength, bool isRandom = true)
     {
         GameObject go = null;
 
-        if(isRandom == false)
+        if (isRandom == false)
         {
             go = Managers.Resource.Instantiate($"Area/{name}/{name}Area1");
         }
@@ -35,5 +19,8 @@ public class AreaManager
             int index = Random.Range(1, 6);
             go = Managers.Resource.Instantiate($"Area/{name}/{name}Area{index}");
         }
+        go.transform.position = new Vector3(0, 0, totalLength);
+        totalLength += go.GetComponent<Area>().AreaSize;
     }
+
 }
