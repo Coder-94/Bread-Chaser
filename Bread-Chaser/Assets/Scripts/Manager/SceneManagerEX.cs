@@ -3,8 +3,8 @@ using UnityEngine.SceneManagement;
 
 public class SceneManagerEX
 {
-    public BaseScene CurrentScene { get { return GameObject.FindAnyObjectByType<BaseScene>(); } }
-
+    public BaseScene    CurrentScene { get { return GameObject.FindAnyObjectByType<BaseScene>(); } }
+    public GameObject   player;
     public void LoadScene(Define.Scene type)
     {
         Managers.Clear();

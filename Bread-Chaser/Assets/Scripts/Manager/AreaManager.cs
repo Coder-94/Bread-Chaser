@@ -3,8 +3,6 @@ using UnityEngine;
 public class AreaManager
 {
     public float        totalLength;
-    public GameObject   player;
-
 
     public void SpawnArea(string name, ref float totalLength, bool isRandom = true)
     {

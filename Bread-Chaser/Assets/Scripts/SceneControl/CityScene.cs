@@ -19,11 +19,6 @@ public class CityScene : BaseScene
         }
     }
 
-    void Update()
-    {
-        
-    }
-
     public override void Clear()
     {
         //throw new System.NotImplementedException();
