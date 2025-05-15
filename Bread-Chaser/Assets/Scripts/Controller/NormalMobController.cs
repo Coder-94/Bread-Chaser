@@ -1,63 +1,59 @@
+using Data;
 using System.Collections;
 using UnityEngine;
 
 public class NormalMobController : BaseMobController
 {
-    public float targetValue = 1.0f;
-    public float duration = 1.0f;
+    enum State
+    {
+        IdleOpen,
+        Atk,
+        DeathSpellCast,
+        Damaged,
+        Die
+    }
 
-    private SkinnedMeshRenderer smr;
-    private Material targetMaterial;
-    private string floatName = "_DissolveHeight";
-    private Coroutine lerpCoroutine;
+    #region variables
+    private float                   _targetValue = 0f;
+    private float                   _duration = 0.2f;
+
+    private NormalMobStat           stat;
+
+    private Vector3                 _spawnPos;
+    #endregion
+
+    #region Unity Scripts
+    protected void OnEnable()
+    {
+        _spawnPos = gameObject.transform.position;
+    }
 
     protected void Update()
     {
         OnUpdate(5.0f);
     }
+    #endregion
 
+    #region Initialize
     protected override void Init()
     {
         base.Init();
 
-        smr = GetComponentInChildren<SkinnedMeshRenderer>();
-
-        if (smr != null && smr.materials.Length > 1)
-            targetMaterial = smr.materials[1];
-
-        StartLerp();
+        stat = gameObject.GetOrAddComponent<NormalMobStat>();
     }
-
-
-    void StartLerp()
-    {
-        if (lerpCoroutine != null)
-            StopCoroutine(lerpCoroutine);
-
-        lerpCoroutine = StartCoroutine(LerpFloat());
-    }
-
-    IEnumerator LerpFloat()
-    {
-        float elapsedTime = 0f;
-        float startValue = targetMaterial.GetFloat(floatName);
-
-        while (elapsedTime < duration)
-        {
-            elapsedTime += Time.deltaTime;
-            float t = Mathf.Clamp01(elapsedTime / duration);
-
-            float newValue = Mathf.Lerp(startValue, targetValue, t);
-            targetMaterial.SetFloat(floatName, newValue);
-
-            yield return null;
-        }
-
-        targetMaterial.SetFloat(floatName, targetValue);
-    }
+    #endregion
 
     protected override void Clear()
     {
-        //throw new System.NotImplementedException();
+        for(int i=0; i<Managers.Scene.CurrentScene.spawnedMobChecker.Length; i++)
+        {
+            if (_spawnPos == Managers.Scene.CurrentScene.spawnedMobChecker[i].spawnedPos)
+            {
+                Managers.Scene.CurrentScene.spawnedMobChecker[i].isEnable = false;
+                Managers.Scene.CurrentScene.monsterCount--;
+                break;
+            }
+        }
+            
     }
 }

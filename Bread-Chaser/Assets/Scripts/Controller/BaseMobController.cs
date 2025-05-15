@@ -20,10 +20,11 @@ public abstract class BaseMobController : MonoBehaviour
     #region Initialize
     protected virtual void Init()
     {
-        target = Managers.Scene.player;
+        target = Managers.Scene.CurrentScene.Player;
     }
     #endregion
 
+    #region OnUpdate
     protected virtual void OnUpdate(float distBtwnPlayer)
     {
         if (target != null)
@@ -37,6 +38,7 @@ public abstract class BaseMobController : MonoBehaviour
                                                         target.transform.position.z + distBtwnPlayer);
         }
     }
+    #endregion
 
     protected abstract void Clear();
 }

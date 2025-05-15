@@ -25,7 +25,10 @@ public class PoolManager
         {
             GameObject go = Object.Instantiate<GameObject>(Original);
             go.name = Original.name;
+
             return go.GetOrAddComponent<Poolable>();
+            
+                
         }
 
         public void Push(Poolable poolable)
@@ -104,10 +107,10 @@ public class PoolManager
     }
 
     //Activing Poolables ========================================
-    public Poolable Pop(GameObject original, Transform parent = null)
+    public Poolable Pop(GameObject original, Transform parent = null, int count = 3)
     {
         if (_pool.ContainsKey(original.name) == false)
-            CreatePool(original);
+            CreatePool(original, count);
 
         return _pool[original.name].Pop(parent);
     }

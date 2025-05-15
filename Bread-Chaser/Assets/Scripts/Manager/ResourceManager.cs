@@ -24,7 +24,7 @@ public class ResourceManager
     #endregion
 
     #region Overloaded Instantiate
-    public GameObject Instantiate(string path, Transform parent = null)
+    public GameObject Instantiate(string path, Transform parent = null, int count = 3)
     {
         GameObject original = Load<GameObject>($"Prefabs/{path}");
         if (original == null)
@@ -34,7 +34,7 @@ public class ResourceManager
         }
 
         if(original.GetComponent<Poolable>() != null)
-            return Managers.Pool.Pop(original, parent).gameObject;
+            return Managers.Pool.Pop(original, parent, count).gameObject;
 
         GameObject go = Object.Instantiate(original, parent);
         go.name = original.name;
