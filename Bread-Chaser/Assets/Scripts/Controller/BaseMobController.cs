@@ -4,7 +4,7 @@ public abstract class BaseMobController : MonoBehaviour
 {
     #region variables
 
-    protected GameObject target;
+    protected GameObject player;
 
     #endregion
 
@@ -17,28 +17,36 @@ public abstract class BaseMobController : MonoBehaviour
 
     #endregion
 
-    #region Initialize
+    #region Init
     protected virtual void Init()
     {
-        target = Managers.Scene.CurrentScene.Player;
+        player = Managers.Scene.CurrentScene.Player;
     }
     #endregion
 
-    #region OnUpdate
-    protected virtual void OnUpdate(float distBtwnPlayer)
+    #region TransformFixer
+
+    protected void RotFixer(GameObject target = null)
     {
+        Vector3 dir;
+
         if (target != null)
-        {
-            Vector3 dir = target.transform.position - transform.position;
-            Quaternion quat = Quaternion.LookRotation(dir);
-            transform.rotation = Quaternion.Lerp(transform.rotation, quat, 20 * Time.deltaTime);
-            
-            gameObject.transform.position = new Vector3(gameObject.transform.position.x,
-                                                        gameObject.transform.position.y,
-                                                        target.transform.position.z + distBtwnPlayer);
-        }
+            dir = target.transform.position - transform.position;
+        else
+            dir = new Vector3(transform.rotation.x, 180f, transform.rotation.z);
+
+        Quaternion quat = Quaternion.LookRotation(dir);
+        transform.rotation = Quaternion.Lerp(transform.rotation, quat, 20 * Time.deltaTime);
     }
+    //각도랑 위치 조정 분리했으니 공격패턴이랑 연동시켜야함
+    protected void PosFixer(Vector3 pos)
+    {
+        gameObject.transform.position = pos;
+    }
+
     #endregion
 
+    
     protected abstract void Clear();
+    protected abstract void StateChecker();
 }

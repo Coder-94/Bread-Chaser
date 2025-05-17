@@ -9,21 +9,21 @@ namespace Data
     [Serializable]
     public class Stat
     {
-        public int grade;
+        public string stage;
         public int hp;
         public int atk;
     }
 
     [Serializable]
-    public class StatData : ILoader<int, Stat>
+    public class StatData : ILoader<string, Stat>
     {
         public List<Stat> normalMobStat = new List<Stat>();
 
-        public Dictionary<int, Stat> MakeDict()
+        public Dictionary<string, Stat> MakeDict()
         {
-            Dictionary<int, Stat> dict = new Dictionary<int, Stat>();
+            Dictionary<string, Stat> dict = new Dictionary<string, Stat>();
             foreach (Stat stat in normalMobStat)
-                dict.Add(stat.grade, stat);
+                dict.Add(stat.stage, stat);
 
             return dict;
         }

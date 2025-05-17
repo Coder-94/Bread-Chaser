@@ -8,7 +8,7 @@ public abstract class BaseScene : MonoBehaviour
 {
     #region variables
     public Define.Scene         SceneType { get; protected set; } = Define.Scene.Unknown;
-    protected string            SceneName { get; private set; }
+    public string               SceneName { get; private set; }
     public GameObject           Player { get; private set; }
 
     protected Coroutine         _coroutineIsActive = null;

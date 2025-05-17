@@ -12,9 +12,7 @@ public class NormalMobStat : MonoBehaviour
 
     void Init()
     {
-        int currentGrade = int.Parse(name[name.Length - 1].ToString());
-
-        Data.Stat stat = Managers.Data.StatDict[currentGrade];
+        Data.Stat stat = Managers.Data.StatDict[Managers.Scene.CurrentScene.SceneName];
 
         Hp = stat.hp;
         Atk = stat.atk;

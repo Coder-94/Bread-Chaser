@@ -45,4 +45,14 @@ public class Define
         Universe,
         Score
     }
+
+    public enum NormalMobState
+    {
+        Spawn,
+        IdleOpen,
+        Atk,
+        DeathSpellCast,
+        Damaged,
+        Die
+    }
 }
