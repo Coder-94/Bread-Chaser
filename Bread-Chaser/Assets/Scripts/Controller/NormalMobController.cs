@@ -32,6 +32,7 @@ public class NormalMobController : BaseMobController
                              gameObject.transform.position.y,
                              player.transform.position.z + 5f));
         RotFixer(player);
+        //
     }
     #endregion
 
