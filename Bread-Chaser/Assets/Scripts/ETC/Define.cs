@@ -49,10 +49,10 @@ public class Define
     public enum NormalMobState
     {
         Spawn,
-        IdleOpen,
+        Idle,
         Atk,
         DeathSpellCast,
-        Damaged,
+        Stunned,
         Die
     }
 }

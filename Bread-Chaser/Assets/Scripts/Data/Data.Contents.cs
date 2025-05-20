@@ -12,6 +12,7 @@ namespace Data
         public string stage;
         public int hp;
         public int atk;
+        public int atkSpeed;
     }
 
     [Serializable]
