@@ -10,10 +10,10 @@ public abstract class BaseScene : MonoBehaviour
     public Define.Scene         SceneType { get; protected set; } = Define.Scene.Unknown;
     public string               SceneName { get; private set; }
     public GameObject           Player { get; private set; }
+    public float                AreaSize { get; protected set; }
 
     protected Coroutine         _coroutineIsActive = null;
     protected const int         _MAXMONSTERCOUNT = 5;
-
     public int                  monsterCount = 0;
     #endregion
 

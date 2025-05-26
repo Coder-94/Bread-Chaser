@@ -19,7 +19,8 @@ public class Area : MonoBehaviour
 
     private void Update()
     {
-        if(Managers.Scene.CurrentScene.Player.transform.position.z - (gameObject.transform.position.z + AreaSize) >= 15f)
+        transform.Translate(Vector3.back * 20f * Time.deltaTime);
+        if (Managers.Scene.CurrentScene.Player.transform.position.z - (gameObject.transform.position.z) >= AreaSize + 15f)
         {
             Managers.Area.SpawnArea(Managers.Scene.GetSceneName(Define.Scene.City), ref Managers.Area.totalLength);
             Managers.Resource.Destroy(gameObject);

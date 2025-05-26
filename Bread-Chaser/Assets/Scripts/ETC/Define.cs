@@ -46,13 +46,4 @@ public class Define
         Score
     }
 
-    public enum NormalMobState
-    {
-        Spawn,
-        Idle,
-        Atk,
-        DeathSpellCast,
-        Stunned,
-        Die
-    }
 }
