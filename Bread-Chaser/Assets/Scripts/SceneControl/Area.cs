@@ -6,6 +6,7 @@ public class Area : MonoBehaviour
 {
     public float        AreaSize { get; protected set; }
     private float       _totalLength;
+
     private void Awake()
     {
         AreaSize = gameObject.GetComponent<BoxCollider>().size.z * gameObject.transform.localScale.z;
