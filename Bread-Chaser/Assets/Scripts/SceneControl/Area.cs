@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -5,25 +6,19 @@ using UnityEngine.EventSystems;
 public class Area : MonoBehaviour
 {
     public float        AreaSize { get; protected set; }
-    private float       _totalLength;
-
+    private float       _disapperRange = -15f;
     private void Awake()
     {
         AreaSize = gameObject.GetComponent<BoxCollider>().size.z * gameObject.transform.localScale.z;
-        
-    }
-
-    private void Start()
-    {
-        _totalLength = Managers.Area.totalLength;
     }
 
     private void Update()
     {
         transform.Translate(Vector3.back * 20f * Time.deltaTime);
-        if (Managers.Scene.CurrentScene.Player.transform.position.z - (gameObject.transform.position.z) >= AreaSize + 15f)
+        if (gameObject.transform.position.z + (AreaSize) <= _disapperRange)
         {
-            Managers.Area.SpawnArea(Managers.Scene.GetSceneName(Define.Scene.City), ref Managers.Area.totalLength);
+            float movedRange = Math.Abs(transform.position.z);
+            Managers.Area.SpawnArea(Managers.Scene.GetSceneName(Define.Scene.City), ref Managers.Area.totalLength, movedRange);
             Managers.Resource.Destroy(gameObject);
         }
     }

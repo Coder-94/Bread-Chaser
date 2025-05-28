@@ -4,7 +4,7 @@ public class AreaManager
 {
     public float        totalLength;
 
-    public void SpawnArea(string name, ref float totalLength, bool isRandom = true)
+    public void SpawnArea(string name, ref float totalLength, float movedRange = 0, bool isRandom = true, bool isInit = false)
     {
         GameObject go = null;
 
@@ -17,8 +17,9 @@ public class AreaManager
             int index = Random.Range(1, 6);
             go = Managers.Resource.Instantiate($"Area/{name}/{name}Area{index}");
         }
-        go.transform.position = new Vector3(0, 0, totalLength);
-        totalLength += go.GetComponent<Area>().AreaSize;
+        go.transform.position = new Vector3(0, 0, totalLength - movedRange);
+        if (isInit == true)
+            totalLength += go.GetComponent<Area>().AreaSize;
     }
 
 }

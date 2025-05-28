@@ -14,9 +14,9 @@ public class CityScene : BaseScene
         for(int i=0; i<3; i++)
         {
             if(i==0)
-                Managers.Area.SpawnArea(SceneName, ref Managers.Area.totalLength, false);
+                Managers.Area.SpawnArea(SceneName, ref Managers.Area.totalLength, 0, false, true);
             else
-                Managers.Area.SpawnArea(SceneName, ref Managers.Area.totalLength);
+                Managers.Area.SpawnArea(SceneName, ref Managers.Area.totalLength, 0, true, true);
         }
     }
 
