@@ -13,7 +13,7 @@ public class NormalMobStat : MonoBehaviour
 
     void Init()
     {
-        Data.Stat stat = Managers.Data.StatDict[Managers.Scene.CurrentScene.SceneName];
+        Data.NormalMobStat stat = Managers.Data.NMStatDict[Managers.Scene.CurrentScene.SceneName];
 
         Hp = stat.hp;
         Atk = stat.atk;

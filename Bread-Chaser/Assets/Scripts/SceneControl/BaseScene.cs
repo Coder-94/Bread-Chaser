@@ -27,11 +27,11 @@ public abstract class BaseScene : MonoBehaviour
     public SpawnedMobChecker[]  spawnedMobChecker = new SpawnedMobChecker[]
     {
         new SpawnedMobChecker { isEnable = false, spawnedPos = new Vector3(0, 1.65f, 5f) },
-        new SpawnedMobChecker { isEnable = false, spawnedPos = new Vector3(-0.82f, 1.65f, 0) },
-        new SpawnedMobChecker { isEnable = false, spawnedPos = new Vector3(0.82f, 1.65f, 0) },
-        new SpawnedMobChecker { isEnable = false, spawnedPos = new Vector3(-1.62f, 1.65f, 0) },
-        new SpawnedMobChecker { isEnable = false, spawnedPos = new Vector3(1.62f, 1.65f, 0) },
-        new SpawnedMobChecker { isEnable = false, spawnedPos = new Vector3(0, 2.15f, 0) }
+        new SpawnedMobChecker { isEnable = false, spawnedPos = new Vector3(-0.82f, 1.65f, 5f) },
+        new SpawnedMobChecker { isEnable = false, spawnedPos = new Vector3(0.82f, 1.65f, 5f) },
+        new SpawnedMobChecker { isEnable = false, spawnedPos = new Vector3(-1.62f, 1.65f, 5f) },
+        new SpawnedMobChecker { isEnable = false, spawnedPos = new Vector3(1.62f, 1.65f, 5f) },
+        new SpawnedMobChecker { isEnable = false, spawnedPos = new Vector3(0, 2.15f, 5f) }
     };
     #endregion
 
@@ -77,6 +77,9 @@ public abstract class BaseScene : MonoBehaviour
             {
                 GameObject mob = Managers.Resource.Instantiate($"Entity/{SceneName}Mob", null, 5);
                 mob.transform.position = spawnedMobChecker[i].spawnedPos;
+
+                mob.GetComponent<CityMobController>().initPos = spawnedMobChecker[i].spawnedPos;
+
                 spawnedMobChecker[i].isEnable = true;
                 monsterCount++;
                 break;

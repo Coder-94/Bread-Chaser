@@ -7,24 +7,51 @@ namespace Data
 {
     #region Stat
     [Serializable]
-    public class Stat
+    public class NormalMobStat
     {
-        public string stage;
-        public int hp;
-        public int atk;
-        public int atkSpeed;
+        public string       stage;
+        public int          hp;
+        public int          atk;
+        public int          atkSpeed;
     }
 
     [Serializable]
-    public class StatData : ILoader<string, Stat>
+    public class PlayerStat
     {
-        public List<Stat> normalMobStat = new List<Stat>();
+        public int          level;
+        public int          hp;
+        public int          atk;
+        public float        moveSpeed;
+    }
+    #endregion
 
-        public Dictionary<string, Stat> MakeDict()
+    #region StatDict
+
+    [Serializable]
+    public class NMStatData : ILoader<string, NormalMobStat>
+    {
+        public List<NormalMobStat> normalMobStat = new List<NormalMobStat>();
+
+        public Dictionary<string, NormalMobStat> MakeDict()
         {
-            Dictionary<string, Stat> dict = new Dictionary<string, Stat>();
-            foreach (Stat stat in normalMobStat)
+            Dictionary<string, NormalMobStat> dict = new Dictionary<string, NormalMobStat>();
+            foreach (NormalMobStat stat in normalMobStat)
                 dict.Add(stat.stage, stat);
+
+            return dict;
+        }
+    }
+
+    [Serializable]
+    public class PLStatData : ILoader<int, PlayerStat>
+    {
+        public List<PlayerStat> playerStat = new List<PlayerStat>();
+
+        public Dictionary<int, PlayerStat> MakeDict()
+        {
+            Dictionary<int, PlayerStat> dict = new Dictionary<int, PlayerStat>();
+            foreach (PlayerStat stat in playerStat)
+                dict.Add(stat.level, stat);
 
             return dict;
         }

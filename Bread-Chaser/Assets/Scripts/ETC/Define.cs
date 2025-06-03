@@ -4,21 +4,6 @@ using UnityEngine;
 
 public class Define
 {
-    public enum MouseEvent
-    {
-        Press,
-        PointerDown,
-        PointerUp,
-        Click
-    }
-
-    public enum BtnMoveEvt
-    {
-        Left,
-        Right,
-        ShortJump, Jump, LongJump
-    }
-
     public enum UIEvent
     {
         Click,
