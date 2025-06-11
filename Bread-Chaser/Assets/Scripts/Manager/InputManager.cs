@@ -17,7 +17,6 @@ public class InputManager
     #region ForUpdate
     public void OnUpdate()
     {
-        //드래그 추가
         if (TouchAction != null)
         {
             if (UnityEngine.Input.touchCount > 0)
