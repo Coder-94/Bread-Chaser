@@ -22,6 +22,7 @@ namespace Data
         public int          hp;
         public int          atk;
         public float        moveSpeed;
+        public float        atkSpeed;
     }
     #endregion
 

@@ -94,5 +94,4 @@ public abstract class BaseScene : MonoBehaviour
     //플레이어 위치 초기화
     //totalLength 초기화
     //몹은 자동초기화 됨
-    //.
 }

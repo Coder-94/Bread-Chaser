@@ -15,9 +15,8 @@ public class Define
         Ground = 3,
         Wall = 6,
         Obstacle = 7,
-        SlideObstacle = 8,
-        CanParryAtk = 9,
-        CantParryAtk = 10
+        Player = 8,
+        Enemy = 9
     }
 
     public enum Scene
@@ -29,6 +28,18 @@ public class Define
         IceLand,
         Universe,
         Score
+    }
+
+    public enum TouchEvent
+    {
+        FingerPressed,
+        FingerReleased,
+        Tap,
+        Holding,
+        LeftSwipe,
+        RightSwipe,
+        DownSwipe,
+        UpSwipe
     }
 
 }
