@@ -66,7 +66,36 @@ public class PlayerController : MonoBehaviour
 
     void PlayerActor(Define.TouchEvent evt)
     {
-
+        switch(evt)
+        {
+            case Define.TouchEvent.Tap:
+                Debug.Log("탭");
+                break;
+            case Define.TouchEvent.LeftTap:
+                Debug.Log("타깃 좌로 변경");
+                break;
+            case Define.TouchEvent.RightTap:
+                Debug.Log("타깃 우로 변경");
+                break;
+            case Define.TouchEvent.HoldedFingerReleased:
+                Debug.Log("스킬발동");
+                break;
+            case Define.TouchEvent.FingerReleased:
+                Debug.Log("손가락 제거");
+                break;
+            case Define.TouchEvent.UpSwipe:
+                Debug.Log("점프");
+                break;
+            case Define.TouchEvent.DownSwipe:
+                Debug.Log("슬라이딩");
+                break;
+            case Define.TouchEvent.LeftSwipe:
+                Debug.Log("좌로 이동");
+                break;
+            case Define.TouchEvent.RightSwipe:
+                Debug.Log("우로 이동");
+                break;
+        }
     }
 
     #region auto attack

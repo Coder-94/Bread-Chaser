@@ -33,8 +33,11 @@ public class Define
     public enum TouchEvent
     {
         FingerPressed,
+        HoldedFingerReleased,
         FingerReleased,
         Tap,
+        LeftTap,
+        RightTap,
         Holding,
         LeftSwipe,
         RightSwipe,
