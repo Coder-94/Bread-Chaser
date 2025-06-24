@@ -35,11 +35,6 @@ public class PlayerController : MonoBehaviour
         Init();
     }
 
-    private void Update()
-    {
-        Attack();
-    }
-
     private void OnAnimatorIK(int layerIndex)
     {
         if (_targetPos == null) return;
@@ -118,61 +113,6 @@ public class PlayerController : MonoBehaviour
     void Jump()
     {
         Debug.Log("มกวม");
-    }
-
-    #endregion
-
-    #region auto attack
-
-    void Attack()
-    {
-        Targeting();
-
-        if (_isAtk)
-            return;
-
-        float atkSpeed = 1 / _stat.AtkSpd;
-        StartCoroutine(AttackCoroutine(atkSpeed));
-    }
-
-    void Targeting()
-    {
-        Debug.DrawRay(transform.position + Vector3.up, _targetPos.normalized, Color.green);
-        RaycastHit hit;
-
-        if (Physics.Raycast(transform.position + Vector3.up, _targetPos, out hit, 100.0f, _targetMask) && _alreadyLockedOn == false)
-        {
-            Debug.Log("Mob Detected!");
-
-            GameObject target = hit.collider.gameObject;
-            GameObject cursor = Managers.Resource.Instantiate("UI/Targeting");
-            LockOnController cursorControl = cursor.GetComponent<LockOnController>();
-
-            Vector3 pos = cursor.transform.position;
-
-            pos.x = target.transform.position.x;
-            pos.y = target.transform.position.y + 1.5f;
-            pos.z = target.transform.position.z + 0.5f;
-
-            cursorControl.pos = pos;
-            cursor.transform.position = pos;
-
-            _alreadyLockedOn = true;
-        }
-    }
-
-    protected IEnumerator AttackCoroutine(float attackSpeed)
-    {
-        if (_isAtk)
-            yield break;
-
-        _isAtk = true;
-
-        _anim.SetTrigger((_hashedParams[(int)AnimParameters.TriggerAtk]));
-
-        yield return new WaitForSeconds(attackSpeed);
-
-        _isAtk = false;
     }
 
     #endregion
