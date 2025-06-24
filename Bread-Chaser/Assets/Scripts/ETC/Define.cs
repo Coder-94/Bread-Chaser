@@ -19,6 +19,13 @@ public class Define
         Enemy = 9
     }
 
+    public enum Sound
+    {
+        Bgm,
+        Effect,
+        MaxCount
+    }
+
     public enum Scene
     {
         Unknown,

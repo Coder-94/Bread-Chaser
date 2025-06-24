@@ -9,8 +9,12 @@ public class PlayerController : MonoBehaviour
 
     protected enum AnimParameters
     {
-        TriggerAtk
+        TriggerAtk,
+        TriggerJump
     }
+
+    public bool         _inputBlock = false;
+    public bool         _isAtk = false;
 
     PlayerStat          _stat;
     Animator            _anim;
@@ -19,6 +23,9 @@ public class PlayerController : MonoBehaviour
     Vector3             _targetPos;
     int                 _targetMask = (1 << (int)Define.Layer.Enemy);
     bool                _alreadyLockedOn = false;
+
+    float               _jumpForce = 3;
+
     #endregion
 
     #region unity scripts
@@ -26,6 +33,11 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         Init();
+    }
+
+    private void Update()
+    {
+        Attack();
     }
 
     private void OnAnimatorIK(int layerIndex)
@@ -66,6 +78,9 @@ public class PlayerController : MonoBehaviour
 
     void PlayerActor(Define.TouchEvent evt)
     {
+        if (_inputBlock)
+            return;
+
         switch(evt)
         {
             case Define.TouchEvent.Tap:
@@ -84,7 +99,7 @@ public class PlayerController : MonoBehaviour
                 Debug.Log("손가락 제거");
                 break;
             case Define.TouchEvent.UpSwipe:
-                Debug.Log("점프");
+                Jump();
                 break;
             case Define.TouchEvent.DownSwipe:
                 Debug.Log("슬라이딩");
@@ -98,13 +113,22 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    #region jump
+
+    void Jump()
+    {
+        Debug.Log("점프");
+    }
+
+    #endregion
+
     #region auto attack
 
     void Attack()
     {
         Targeting();
 
-        if (_stat.isAtk)
+        if (_isAtk)
             return;
 
         float atkSpeed = 1 / _stat.AtkSpd;
@@ -139,24 +163,30 @@ public class PlayerController : MonoBehaviour
 
     protected IEnumerator AttackCoroutine(float attackSpeed)
     {
-        if (_stat.isAtk)
+        if (_isAtk)
             yield break;
 
-        _stat.isAtk = true;
+        _isAtk = true;
 
         _anim.SetTrigger((_hashedParams[(int)AnimParameters.TriggerAtk]));
 
         yield return new WaitForSeconds(attackSpeed);
 
-        _stat.isAtk = false;
+        _isAtk = false;
     }
 
     #endregion
 
     #endregion
 
-    private void Update()
+    #region Anim Events
+
+    void BooleanInit()
     {
-        Attack();
+        _inputBlock = false;
+        _isAtk = false;
     }
+
+    #endregion
+    
 }

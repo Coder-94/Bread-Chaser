@@ -9,9 +9,6 @@ public class PlayerStat : MonoBehaviour
 
     public float    moveSpeed;
 
-
-    public bool isAtk = false;
-
     private void Start()
     {
         Init();
