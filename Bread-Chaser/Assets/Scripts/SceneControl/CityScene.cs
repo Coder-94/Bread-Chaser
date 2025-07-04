@@ -4,7 +4,7 @@ public class CityScene : BaseScene
 {
     private void Update()
     {
-        MobSpawner(5, 11);
+        MobSpawner((int)MonsterID.CityMob, 5, 11);
     }
 
     protected override void Init()

@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Floor
   - SmallMob
+  - Cursor
   layers:
   - Default
   - TransparentFX

@@ -7,31 +7,50 @@ using UnityEngine.SceneManagement;
 public abstract class BaseScene : MonoBehaviour
 {
     #region variables
-    public Define.Scene         SceneType { get; protected set; } = Define.Scene.Unknown;
-    public string               SceneName { get; private set; }
-    public GameObject           Player { get; private set; }
-    public float                AreaSize { get; protected set; }
+    public enum StageState
+    {
+        Normal,
+        BossEncounter,
+        BossBattle
+    }
 
-    protected Coroutine         _coroutineIsActive = null;
-    protected const int         _MAXMONSTERCOUNT = 5;
-    public int                  monsterCount = 0;
+    protected enum MonsterID
+    {
+        CityMob = 1,
+        CityBoss = 2,
+        ForestMob = 3,
+        ForestBoss = 4,
+        IcycleMob = 5,
+        IcycleBoss = 6,
+        SpaceMob = 7,
+        SpaceBoss = 8,
+    }
+
+    public Define.Scene             SceneType { get; protected set; } = Define.Scene.Unknown;
+    public string                   SceneName { get; private set; }
+    public GameObject               Player { get; private set; }
+    
+    public float                    AreaSize { get; protected set; }
+
+    public int                      MonsterCount { get; protected set; } = 0;
+
+    protected Define.PlayerStatus   playerStatus;
+    protected Coroutine             _coroutineIsActive = null;
+    protected const int             _MAXMONSTERCOUNT = 5;
+    
     #endregion
 
     #region MobChecker Struct
-    public struct SpawnedMobChecker
-    {
-        public bool isEnable;
-        public Vector3 spawnedPos;
-    }
+    
 
-    public SpawnedMobChecker[]  spawnedMobChecker = new SpawnedMobChecker[]
+    public Define.SpawnedMobChecker[]  spawnedMobChecker = new Define.SpawnedMobChecker[]
     {
-        new SpawnedMobChecker { isEnable = false, spawnedPos = new Vector3(0, 1.65f, 5f) },
-        new SpawnedMobChecker { isEnable = false, spawnedPos = new Vector3(-0.82f, 1.65f, 5f) },
-        new SpawnedMobChecker { isEnable = false, spawnedPos = new Vector3(0.82f, 1.65f, 5f) },
-        new SpawnedMobChecker { isEnable = false, spawnedPos = new Vector3(-1.62f, 1.65f, 5f) },
-        new SpawnedMobChecker { isEnable = false, spawnedPos = new Vector3(1.62f, 1.65f, 5f) },
-        new SpawnedMobChecker { isEnable = false, spawnedPos = new Vector3(0, 2.15f, 5f) }
+        new Define.SpawnedMobChecker { Object = null, spawnedPos = new Vector3(0, 0.38f, 5f) },
+        new Define.SpawnedMobChecker { Object = null, spawnedPos = new Vector3(-0.82f, 0.38f, 5f) },
+        new Define.SpawnedMobChecker { Object = null, spawnedPos = new Vector3(0.82f, 0.38f, 5f) },
+        new Define.SpawnedMobChecker { Object = null, spawnedPos = new Vector3(-1.62f, 0.38f, 5f) },
+        new Define.SpawnedMobChecker { Object = null, spawnedPos = new Vector3(1.62f, 0.38f, 5f) },
+        new Define.SpawnedMobChecker { Object = null, spawnedPos = new Vector3(0, 1.65f, 5f) }
     };
     #endregion
 
@@ -46,7 +65,7 @@ public abstract class BaseScene : MonoBehaviour
     #region Init
     protected virtual void Init()
     {
-        monsterCount = 0;
+        MonsterCount = 0;
         SceneName = SceneManager.GetActiveScene().name;
 
         UnityEngine.Object obj = GameObject.FindAnyObjectByType(typeof(EventSystem));
@@ -59,29 +78,30 @@ public abstract class BaseScene : MonoBehaviour
     #endregion
 
     #region Spawn Mob In Scene
-    protected void MobSpawner(int lessTIme, int maxTime)
+    protected void MobSpawner(int id, int lessTIme, int maxTime)
     {
-        if (monsterCount >= _MAXMONSTERCOUNT || _coroutineIsActive != null)
+        if (MonsterCount >= _MAXMONSTERCOUNT || _coroutineIsActive != null)
             return;
 
         int time = UnityEngine.Random.Range(lessTIme, maxTime);
 
-        _coroutineIsActive = StartCoroutine(SpawnTimer(time));
+        _coroutineIsActive = StartCoroutine(SpawnTimer(id, time));
     }
 
-    IEnumerator SpawnTimer(int time)
+    IEnumerator SpawnTimer(int id, int time)
     {
        for(int i=0; i<spawnedMobChecker.Length; i++)
        {
-            if (spawnedMobChecker[i].isEnable == false)
+            if (spawnedMobChecker[i].Object == null)
             {
                 GameObject mob = Managers.Resource.Instantiate($"Entity/{SceneName}Mob", null, 5);
                 mob.transform.position = spawnedMobChecker[i].spawnedPos;
 
-                mob.GetComponent<CityMobController>().initPos = spawnedMobChecker[i].spawnedPos;
+                mob.GetComponent<NormalMobBase>().initPos = spawnedMobChecker[i].spawnedPos;
+                mob.GetComponent<NormalMobStat>().SetID(id);
 
-                spawnedMobChecker[i].isEnable = true;
-                monsterCount++;
+                spawnedMobChecker[i].Object = mob;
+                MobCountController(true);
                 break;
             }
         }
@@ -89,6 +109,14 @@ public abstract class BaseScene : MonoBehaviour
         _coroutineIsActive = null;
     }
     #endregion
+
+    public void MobCountController(bool increased )
+    {
+        if(increased)
+            MonsterCount++;
+        else
+            MonsterCount--;
+    }
 
     public abstract void Clear();
     //플레이어 위치 초기화

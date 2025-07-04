@@ -109,8 +109,9 @@ public class NormalMobBase : BaseMobController
         {
             if (_spawnPos == Managers.Scene.CurrentScene.spawnedMobChecker[i].spawnedPos)
             {
-                Managers.Scene.CurrentScene.spawnedMobChecker[i].isEnable = false;
-                Managers.Scene.CurrentScene.monsterCount--;
+                Managers.Resource.Destroy(Managers.Scene.CurrentScene.spawnedMobChecker[i].Object);
+                Managers.Scene.CurrentScene.spawnedMobChecker[i].Object = null;
+                Managers.Scene.CurrentScene.MobCountController(false);
                 break;
             }
         }

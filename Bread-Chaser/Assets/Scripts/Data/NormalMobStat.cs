@@ -2,18 +2,25 @@ using UnityEngine;
 
 public class NormalMobStat : MonoBehaviour
 {
+    public int Id { get; private set; }
     public int Hp { get; private set; }
     public int Atk { get; private set; }
     public int AtkSpeed { get; private set; }
 
-    private void Start()
+    public void SetID(int id)
     {
+        Id = id;
         Init();
+    }
+
+    public void OnAttacked(int power)
+    {
+        Hp -= power;
     }
 
     void Init()
     {
-        Data.NormalMobStat stat = Managers.Data.NMStatDict[Managers.Scene.CurrentScene.SceneName];
+        Data.MobStat stat = Managers.Data.NMStatDict[Id];
 
         Hp = stat.hp;
         Atk = stat.atk;

@@ -10,8 +10,8 @@ public class InputManager
 {
     #region variables
 
-    public Action<Define.TouchEvent> TouchAction = null;
-
+    public Action<Define.TouchEvent>    TouchAction = null;
+    public Action<float>                HoldedTimeAction = null;
 
     float           _pressedTime = 0;
     bool            _pressed = false;
@@ -40,7 +40,6 @@ public class InputManager
                     _holded = false;
                     _pressedTime = Time.time;
                     _touchStartPos = touch.position;
-
                     TouchAction.Invoke(Define.TouchEvent.FingerPressed);
                 }
 
@@ -86,6 +85,7 @@ public class InputManager
                     else if (_holded)
                     {
                         TouchAction.Invoke(Define.TouchEvent.HoldedFingerReleased);
+                        HoldedTimeAction.Invoke(_pressedTime);
                     }
 
                     //tapped result check ====================================================================
@@ -114,6 +114,7 @@ public class InputManager
     public void Clear()
     {
         TouchAction = null;
+        HoldedTimeAction = null;
     }
     #endregion
 }

@@ -37,6 +37,14 @@ public class Define
         Score
     }
 
+    public enum PlayerStatus
+    {
+        Running,
+        Jumping,
+        Attacking,
+        BackStepping
+    }
+
     public enum TouchEvent
     {
         FingerPressed,
@@ -50,6 +58,12 @@ public class Define
         RightSwipe,
         DownSwipe,
         UpSwipe
+    }
+
+    public struct SpawnedMobChecker
+    {
+        public GameObject Object;
+        public Vector3 spawnedPos;
     }
 
 }
