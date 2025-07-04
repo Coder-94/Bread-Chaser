@@ -209,7 +209,6 @@ public class PlayerController : MonoBehaviour
                     _lockOnCursor = Managers.Resource.Instantiate("UI/Targeting");
 
                 LockOnController target = _lockOnCursor.GetComponent<LockOnController>();
-                target.target = _target.Object;
 
                 _alreadyLockedOn = true;
                 return;
