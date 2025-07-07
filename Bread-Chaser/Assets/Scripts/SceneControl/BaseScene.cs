@@ -37,20 +37,20 @@ public abstract class BaseScene : MonoBehaviour
     protected Define.PlayerStatus   playerStatus;
     protected Coroutine             _coroutineIsActive = null;
     protected const int             _MAXMONSTERCOUNT = 5;
-    
+
     #endregion
 
     #region MobChecker Struct
-    
 
-    public Define.SpawnedMobChecker[]  spawnedMobChecker = new Define.SpawnedMobChecker[]
+
+    public Define.SpawnedMobChecker[] spawnedMobChecker = new Define.SpawnedMobChecker[]
     {
-        new Define.SpawnedMobChecker { Object = null, spawnedPos = new Vector3(0, 0.38f, 5f) },
-        new Define.SpawnedMobChecker { Object = null, spawnedPos = new Vector3(-0.82f, 0.38f, 5f) },
-        new Define.SpawnedMobChecker { Object = null, spawnedPos = new Vector3(0.82f, 0.38f, 5f) },
-        new Define.SpawnedMobChecker { Object = null, spawnedPos = new Vector3(-1.62f, 0.38f, 5f) },
-        new Define.SpawnedMobChecker { Object = null, spawnedPos = new Vector3(1.62f, 0.38f, 5f) },
-        new Define.SpawnedMobChecker { Object = null, spawnedPos = new Vector3(0, 1.65f, 5f) }
+        new Define.SpawnedMobChecker { spawnedMob = null, spawnedPos = new Vector3(0, 0.38f, 5f) },
+        new Define.SpawnedMobChecker { spawnedMob = null, spawnedPos = new Vector3(-0.82f, 0.38f, 5f) },
+        new Define.SpawnedMobChecker { spawnedMob = null, spawnedPos = new Vector3(0.82f, 0.38f, 5f) },
+        new Define.SpawnedMobChecker { spawnedMob = null, spawnedPos = new Vector3(-1.62f, 0.38f, 5f) },
+        new Define.SpawnedMobChecker { spawnedMob = null, spawnedPos = new Vector3(1.62f, 0.38f, 5f) },
+        new Define.SpawnedMobChecker { spawnedMob = null, spawnedPos = new Vector3(0, 1.65f, 5f) }
     };
     #endregion
 
@@ -92,7 +92,7 @@ public abstract class BaseScene : MonoBehaviour
     {
        for(int i=0; i<spawnedMobChecker.Length; i++)
        {
-            if (spawnedMobChecker[i].Object == null)
+            if (!spawnedMobChecker[i].spawnedMob)
             {
                 GameObject mob = Managers.Resource.Instantiate($"Entity/{SceneName}Mob", null, 5);
                 mob.transform.position = spawnedMobChecker[i].spawnedPos;
@@ -100,7 +100,8 @@ public abstract class BaseScene : MonoBehaviour
                 mob.GetComponent<NormalMobBase>().initPos = spawnedMobChecker[i].spawnedPos;
                 mob.GetComponent<NormalMobStat>().SetID(id);
 
-                spawnedMobChecker[i].Object = mob;
+                //Check init
+                spawnedMobChecker[i].spawnedMob = mob;
                 MobCountController(true);
                 break;
             }

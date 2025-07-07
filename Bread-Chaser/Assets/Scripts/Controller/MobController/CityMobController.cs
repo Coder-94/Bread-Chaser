@@ -10,7 +10,7 @@ public class CityMobController : NormalMobBase
 
         NormalMobStat stat = GetComponent<NormalMobStat>();
         if (stat.Hp == 0)
-            Managers.Resource.Destroy(gameObject);
+            Clear();
     }
 
     private void LateUpdate()

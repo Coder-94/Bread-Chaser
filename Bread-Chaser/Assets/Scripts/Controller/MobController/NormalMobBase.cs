@@ -107,11 +107,12 @@ public class NormalMobBase : BaseMobController
     {
         for(int i=0; i<Managers.Scene.CurrentScene.spawnedMobChecker.Length; i++)
         {
-            if (_spawnPos == Managers.Scene.CurrentScene.spawnedMobChecker[i].spawnedPos)
+            if (gameObject == Managers.Scene.CurrentScene.spawnedMobChecker[i].spawnedMob)
             {
-                Managers.Resource.Destroy(Managers.Scene.CurrentScene.spawnedMobChecker[i].Object);
-                Managers.Scene.CurrentScene.spawnedMobChecker[i].Object = null;
+                //Check Init
+                Managers.Scene.CurrentScene.spawnedMobChecker[i].spawnedMob = null;
                 Managers.Scene.CurrentScene.MobCountController(false);
+                Managers.Resource.Destroy(gameObject);
                 break;
             }
         }

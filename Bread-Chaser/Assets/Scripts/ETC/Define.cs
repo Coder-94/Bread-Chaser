@@ -62,8 +62,8 @@ public class Define
 
     public struct SpawnedMobChecker
     {
-        public GameObject Object;
-        public Vector3 spawnedPos;
+        public GameObject   spawnedMob;
+        public Vector3      spawnedPos;
     }
 
 }

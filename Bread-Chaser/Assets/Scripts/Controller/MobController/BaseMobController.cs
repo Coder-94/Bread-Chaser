@@ -44,11 +44,15 @@ public abstract class BaseMobController : MonoBehaviour
 
     protected void PosFixer()
     {
-        Vector3 newPosition = transform.position;
+        Define.PlayerStatus currentStatus = player.GetComponent<PlayerController>().CurrentStatus;
+        if(currentStatus!= Define.PlayerStatus.Attacking && currentStatus != Define.PlayerStatus.BackStepping) 
+        {
+            Vector3 newPosition = transform.position;
 
-        newPosition.x = player.transform.position.x + initPos.x;
+            newPosition.x = player.transform.position.x + initPos.x;
 
-        transform.position = newPosition;
+            transform.position = newPosition;
+        }
     }
 
     #endregion

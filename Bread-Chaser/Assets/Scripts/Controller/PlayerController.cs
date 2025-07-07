@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 using static Define;
 using static UnityEngine.GraphicsBuffer;
@@ -14,7 +15,8 @@ public class PlayerController : MonoBehaviour
     {
         TriggerAtk,
         TriggerJump,
-        TriggerBackStep
+        TriggerBackStep,
+        IsAtk
     }
 
     public Define.PlayerStatus  CurrentStatus { get; protected set; }
@@ -27,13 +29,15 @@ public class PlayerController : MonoBehaviour
     protected int[]             _hashedParams;
     private Queue<Action>       _movementQueue = new Queue<Action>();
 
-    Define.SpawnedMobChecker    _target;
-    int                         _targetNum;
-    GameObject                  _lockOnCursor;
+    GameObject                  _target = null;
     int                         _enemyMask = (1 << (int)Define.Layer.Enemy);
-    bool                        _alreadyLockedOn = false;
 
     Vector3                     _originPos;
+    GameObject                  _cursor= null;
+
+    
+
+    
     #endregion
 
     #region unity scripts
@@ -45,15 +49,10 @@ public class PlayerController : MonoBehaviour
 
     private void OnAnimatorIK(int layerIndex)
     {
-        if (_target.spawnedPos == null) return;
+        if (_target == null) return;
 
         _anim.SetLookAtWeight(1.0f);
-        _anim.SetLookAtPosition(_target.spawnedPos);
-    }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-
+        _anim.SetLookAtPosition(_target.transform.position);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -66,11 +65,14 @@ public class PlayerController : MonoBehaviour
     {
         if(CurrentStatus == Define.PlayerStatus.Attacking)
         {
-            Vector3 dir = _target.Object.transform.position - transform.position;
-            dir.z -= 1.5f;
-            dir.y = 0;
-            float moveDist = Mathf.Clamp(15f * Time.deltaTime, 0, dir.magnitude);
-            transform.position += dir.normalized * moveDist;
+            if (_target)
+            {
+                Vector3 dir = _target.transform.position - transform.position;
+                dir.z -= 1.0f;
+                dir.y = 0;
+                float moveDist = Mathf.Clamp(15f * Time.deltaTime, 0, dir.magnitude);
+                transform.position += dir.normalized * moveDist;
+            }
         }
         else if (CurrentStatus == Define.PlayerStatus.BackStepping)
         {
@@ -117,7 +119,7 @@ public class PlayerController : MonoBehaviour
         _anim = GetComponent<Animator>();
         _stat = GetComponent<PlayerStat>();
 
-        
+
     }
     #endregion
 
@@ -174,7 +176,10 @@ public class PlayerController : MonoBehaviour
         Debug.Log("¡°«¡");
         CurrentStatus = Define.PlayerStatus.Jumping;
         _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerJump]);
-        Managers.Sound.Play("SE/JumpVoice");
+
+        int random = UnityEngine.Random.Range(1, 4);
+
+        Managers.Sound.Play($"SE/JumpVoice{random}");
         _movementQueue.Enqueue(Jumper);
 
         yield return new WaitForSeconds(cooldownTime);
@@ -192,34 +197,48 @@ public class PlayerController : MonoBehaviour
 
     #region targetting
 
-    //≈∏∞Ÿ∆√ ∏Æ∆Â≈‰∏µ
     void LockOn()
     {
-        if (Managers.Scene.CurrentScene.MonsterCount <= 0 || _alreadyLockedOn == true)
-            return;
-
-        for (int i = 0; i < Managers.Scene.CurrentScene.spawnedMobChecker.Length; i++)
+        //auto targeting
+        if (!_target)
         {
-            if (Managers.Scene.CurrentScene.spawnedMobChecker[i].Object != null)
+            Vector3 startPos = gameObject.transform.position + Vector3.up;
+
+            for (int i = 0; i < Managers.Scene.CurrentScene.spawnedMobChecker.Length; i++)
             {
-                _target = Managers.Scene.CurrentScene.spawnedMobChecker[i];
-                _targetNum = i;
 
-                if(_lockOnCursor == null)
-                    _lockOnCursor = Managers.Resource.Instantiate("UI/Targeting");
+                if (!Managers.Scene.CurrentScene.spawnedMobChecker[i].spawnedMob)
+                    continue;
 
-                LockOnController target = _lockOnCursor.GetComponent<LockOnController>();
+                Vector3 endPos = Managers.Scene.CurrentScene.spawnedMobChecker[i].spawnedPos
+                                    + Vector3.up + Vector3.right * transform.position.x;
 
-                _alreadyLockedOn = true;
-                return;
+                Debug.DrawLine(startPos, endPos, Color.red, 0.1f);
+
+                RaycastHit hit;
+                if (Physics.Linecast(startPos, endPos, out hit, _enemyMask))
+                {
+                    _target = hit.collider.gameObject;
+
+                    if (!_cursor)
+                        _cursor = Managers.Resource.Instantiate("UI/Targeting");
+
+                    Vector3 targetPos = _target.GetComponent<Collider>().transform.position;
+                    _cursor.transform.position = targetPos + Vector3.up;
+                    _cursor.GetComponent<LockOnController>().Init(_target, _cursor.transform.position);
+
+                }
             }
+        }
+        //user targeting
+        else
+        {
+
         }
     }
 
     void LockOnChanger(Define.TouchEvent evt)
     {
-        if (!_alreadyLockedOn || CurrentStatus == Define.PlayerStatus.Attacking)
-            return;
 
         if(Managers.Scene.CurrentScene.MonsterCount != 1)
         {
@@ -242,10 +261,10 @@ public class PlayerController : MonoBehaviour
 
     void Attack(float holdedTime)
     {
-        if (!_alreadyLockedOn)
+        if (!_target)
             return;
 
-        if(CurrentStatus != PlayerStatus.Attacking)
+        if(CurrentStatus == Define.PlayerStatus.Running)
         {
             if (Time.time < holdedTime + 1f)
             {
@@ -253,9 +272,6 @@ public class PlayerController : MonoBehaviour
                 _originPos = gameObject.transform.position;
                 _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerAtk]);
                 CurrentStatus = Define.PlayerStatus.Attacking;
-
-                NormalMobStat targetStat = _target.Object.GetComponent<NormalMobStat>();
-                targetStat.OnAttacked(_stat.Atk);
             }
             else
             {
@@ -263,14 +279,6 @@ public class PlayerController : MonoBehaviour
             }
         }
             
-    }
-
-    void Attacking()
-    {
-        if (CurrentStatus != PlayerStatus.Attacking)
-            return;
-
-        //±Ÿ¡¢ƒﬁ∫∏Ω∫≈≥
     }
 
     void BackStep()
@@ -290,10 +298,22 @@ public class PlayerController : MonoBehaviour
 
     #region Anim Events
 
-    void BooleanInit()
+    public void OnAttack()
     {
-        _inputBlock = false;
-        _isAtk = false;
+        NormalMobStat targetStat = _target.GetComponent<NormalMobStat>();
+        Managers.Sound.Play($"SE/Hit");
+        targetStat.OnAttacked(_stat.Atk);
+        if (targetStat.Hp <= 0 || !_target)
+        {
+            _target = null;
+            BackStep();
+        }
+        Debug.Log(_target);
+    }
+
+    public void StatusInit()
+    {
+        CurrentStatus = Define.PlayerStatus.Running;
     }
 
     #endregion
