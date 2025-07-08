@@ -90,8 +90,6 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        LockOn();
-
         Debug.Log($"CurrentStatus: {CurrentStatus}");
     }
     #endregion
@@ -195,66 +193,7 @@ public class PlayerController : MonoBehaviour
 
     #endregion
 
-    #region targetting
 
-    void LockOn()
-    {
-        //auto targeting
-        if (!_target)
-        {
-            Vector3 startPos = gameObject.transform.position + Vector3.up;
-
-            for (int i = 0; i < Managers.Scene.CurrentScene.spawnedMobChecker.Length; i++)
-            {
-
-                if (!Managers.Scene.CurrentScene.spawnedMobChecker[i].spawnedMob)
-                    continue;
-
-                Vector3 endPos = Managers.Scene.CurrentScene.spawnedMobChecker[i].spawnedPos
-                                    + Vector3.up + Vector3.right * transform.position.x;
-
-                Debug.DrawLine(startPos, endPos, Color.red, 0.1f);
-
-                RaycastHit hit;
-                if (Physics.Linecast(startPos, endPos, out hit, _enemyMask))
-                {
-                    _target = hit.collider.gameObject;
-
-                    if (!_cursor)
-                        _cursor = Managers.Resource.Instantiate("UI/Targeting");
-
-                    Vector3 targetPos = _target.GetComponent<Collider>().transform.position;
-                    _cursor.transform.position = targetPos + Vector3.up;
-                    _cursor.GetComponent<LockOnController>().Init(_target, _cursor.transform.position);
-
-                }
-            }
-        }
-        //user targeting
-        else
-        {
-
-        }
-    }
-
-    void LockOnChanger(Define.TouchEvent evt)
-    {
-
-        if(Managers.Scene.CurrentScene.MonsterCount != 1)
-        {
-            if (evt == Define.TouchEvent.LeftTap)
-            {
-                Debug.Log("Å¸±ê ÁÂ·Î º¯°æ");
-            }
-            else if (evt == Define.TouchEvent.RightTap)
-            {
-                Debug.Log("Å¸±ê ¿ì·Î º¯°æ");
-            }
-        }
-        
-    }
-
-    #endregion
 
     #region atk
 
