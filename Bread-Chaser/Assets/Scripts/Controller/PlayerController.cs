@@ -19,25 +19,25 @@ public class PlayerController : MonoBehaviour
         IsAtk
     }
 
-    public Define.PlayerStatus  CurrentStatus { get; protected set; }
+    public Define.PlayerStatus CurrentStatus { get; protected set; }
 
-    bool                        _inputBlock = false;
-    bool                        _isAtk = false;
-    PlayerStat                  _stat;
-    Animator                    _anim;
-    
-    protected int[]             _hashedParams;
-    private Queue<Action>       _movementQueue = new Queue<Action>();
+    bool _inputBlock = false;
+    bool _isAtk = false;
+    PlayerStat _stat;
+    Animator _anim;
 
-    GameObject                  _target = null;
-    int                         _enemyMask = (1 << (int)Define.Layer.Enemy);
+    protected int[] _hashedParams;
+    private Queue<Action> _movementQueue = new Queue<Action>();
 
-    Vector3                     _originPos;
-    GameObject                  _cursor= null;
+    GameObject _target = null;
+    int _enemyMask = (1 << (int)Define.Layer.Enemy);
 
-    
+    Vector3 _originPos;
+    GameObject _cursor = null;
+    Rigidbody _rb;
 
-    
+
+
     #endregion
 
     #region unity scripts
@@ -55,6 +55,12 @@ public class PlayerController : MonoBehaviour
         _anim.SetLookAtPosition(_target.transform.position);
     }
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.layer == (int)Define.Layer.Ground)
+            CurrentStatus = Define.PlayerStatus.Running;
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.layer == (int)Define.Layer.Obstacle)
@@ -63,25 +69,58 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if(CurrentStatus == Define.PlayerStatus.Attacking)
+        //Atk =====================================================================================
+        if (CurrentStatus == Define.PlayerStatus.Attacking)
         {
             if (_target)
             {
-                Vector3 dir = _target.transform.position - transform.position;
-                dir.z -= 1.0f;
-                dir.y = 0;
-                float moveDist = Mathf.Clamp(15f * Time.deltaTime, 0, dir.magnitude);
-                transform.position += dir.normalized * moveDist;
+                Vector3 targetPos = _target.transform.position;
+                float targetZ = targetPos.z - 0.5f;
+                Vector3 currentPos = _rb.position;
+
+                Vector3 direction = (targetPos - currentPos);
+                direction.y = 0;
+
+                float dist = Mathf.Abs(currentPos.z - targetZ);
+
+                if (dist > 0.01f)
+                {
+                    float moveStep = 15f * Time.fixedDeltaTime;
+                    float moveAmount = Mathf.Min(moveStep, dist);
+
+                    Vector3 move = Vector3.forward * Mathf.Sign(targetZ - currentPos.z) * moveAmount;
+                    _rb.MovePosition(currentPos + move);
+                }
+            }
+            else
+            {
+                BackStep();
             }
         }
+        //BackStep =====================================================================================
         else if (CurrentStatus == Define.PlayerStatus.BackStepping)
         {
-            Vector3 dir = _originPos - transform.position;
-            float moveDist = Mathf.Clamp(15f * Time.deltaTime, 0, dir.magnitude);
-            transform.position += dir.normalized * moveDist;
+            Vector3 currentPos = _rb.position;
+            Vector3 dir = _originPos - currentPos;
+            dir.y = 0;
+
+            float dist = dir.magnitude;
+
+            if (dist > 0.01f)
+            {
+                float moveStep = 15f * Time.fixedDeltaTime;
+                float moveAmount = Mathf.Min(moveStep, dist);
+
+                Vector3 moveDir = dir.normalized * moveAmount;
+                _rb.MovePosition(currentPos + moveDir);
+            }
+            else
+                CurrentStatus = Define.PlayerStatus.Running;
+
         }
 
-        while(_movementQueue.Count > 0 )
+        //Mission Delay =====================================================================================
+        while (_movementQueue.Count > 0)
         {
             Action action = _movementQueue.Dequeue();
             action?.Invoke();
@@ -90,6 +129,8 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+        LockOn();
+
         Debug.Log($"CurrentStatus: {CurrentStatus}");
     }
     #endregion
@@ -116,7 +157,7 @@ public class PlayerController : MonoBehaviour
         CurrentStatus = Define.PlayerStatus.Running;
         _anim = GetComponent<Animator>();
         _stat = GetComponent<PlayerStat>();
-
+        _rb = GetComponent<Rigidbody>();
 
     }
     #endregion
@@ -128,16 +169,16 @@ public class PlayerController : MonoBehaviour
         if (_inputBlock)
             return;
 
-        switch(evt)
+        switch (evt)
         {
             case Define.TouchEvent.Tap:
                 Debug.Log("탭");
                 break;
             case Define.TouchEvent.LeftTap:
-                
+
                 break;
             case Define.TouchEvent.RightTap:
-                
+
                 break;
             case Define.TouchEvent.HoldedFingerReleased:
                 break;
@@ -163,15 +204,12 @@ public class PlayerController : MonoBehaviour
 
     void Jump()
     {
-        if (CurrentStatus == Define.PlayerStatus.Jumping)
-            return;
-
-        StartCoroutine(JumpCoroutine(1.5f));
+        if (CurrentStatus == Define.PlayerStatus.Running)
+            StartCoroutine(JumpCoroutine(1.5f));
     }
 
     IEnumerator JumpCoroutine(float cooldownTime)
     {
-        Debug.Log("점프");
         CurrentStatus = Define.PlayerStatus.Jumping;
         _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerJump]);
 
@@ -181,8 +219,6 @@ public class PlayerController : MonoBehaviour
         _movementQueue.Enqueue(Jumper);
 
         yield return new WaitForSeconds(cooldownTime);
-
-        CurrentStatus = Define.PlayerStatus.Running;
     }
 
     void Jumper()
@@ -193,7 +229,66 @@ public class PlayerController : MonoBehaviour
 
     #endregion
 
-    /// 자동락온좆까
+    #region targetting
+
+    void LockOn()
+    {
+        //auto targeting
+        if (!_target)
+        {
+            Vector3 startPos = gameObject.transform.position + Vector3.up;
+
+            for (int i = 0; i < Managers.Scene.CurrentScene.spawnedMobChecker.Length; i++)
+            {
+
+                if (!Managers.Scene.CurrentScene.spawnedMobChecker[i].spawnedMob)
+                    continue;
+
+                Vector3 endPos = Managers.Scene.CurrentScene.spawnedMobChecker[i].spawnedPos
+                                    + Vector3.up + Vector3.right * transform.position.x;
+
+                Debug.DrawLine(startPos, endPos, Color.red, 0.1f);
+
+                RaycastHit hit;
+                if (Physics.Linecast(startPos, endPos, out hit, _enemyMask))
+                {
+                    _target = hit.collider.gameObject;
+
+                    if (!_cursor)
+                        _cursor = Managers.Resource.Instantiate("UI/Targeting");
+
+                    Vector3 targetPos = _target.GetComponent<Collider>().transform.position;
+                    _cursor.transform.position = targetPos + Vector3.up;
+                    _cursor.GetComponent<LockOnController>().Init(_target, _cursor.transform.position);
+
+                }
+            }
+        }
+        //user targeting
+        else
+        {
+
+        }
+    }
+
+    void LockOnChanger(Define.TouchEvent evt)
+    {
+
+        if (Managers.Scene.CurrentScene.MonsterCount != 1)
+        {
+            if (evt == Define.TouchEvent.LeftTap)
+            {
+                Debug.Log("타깃 좌로 변경");
+            }
+            else if (evt == Define.TouchEvent.RightTap)
+            {
+                Debug.Log("타깃 우로 변경");
+            }
+        }
+
+    }
+
+    #endregion
 
     #region atk
 
@@ -203,11 +298,10 @@ public class PlayerController : MonoBehaviour
         if (!_target)
             return;
 
-        if(CurrentStatus == Define.PlayerStatus.Running)
+        if (CurrentStatus == Define.PlayerStatus.Running)
         {
             if (Time.time < holdedTime + 1f)
             {
-                Debug.Log("평타!");
                 _originPos = gameObject.transform.position;
                 _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerAtk]);
                 CurrentStatus = Define.PlayerStatus.Attacking;
@@ -217,7 +311,7 @@ public class PlayerController : MonoBehaviour
                 Debug.Log("스킬발동!");
             }
         }
-            
+
     }
 
     void BackStep()
@@ -242,19 +336,14 @@ public class PlayerController : MonoBehaviour
         NormalMobStat targetStat = _target.GetComponent<NormalMobStat>();
         Managers.Sound.Play($"SE/Hit");
         targetStat.OnAttacked(_stat.Atk);
-        if (targetStat.Hp <= 0 || !_target)
-        {
-            _target = null;
-            BackStep();
-        }
         Debug.Log(_target);
     }
 
     public void StatusInit()
     {
-        CurrentStatus = Define.PlayerStatus.Running;
+        //CurrentStatus = Define.PlayerStatus.Running;
     }
 
     #endregion
-    
+
 }
