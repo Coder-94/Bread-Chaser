@@ -57,8 +57,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.layer == (int)Define.Layer.Ground)
-            CurrentStatus = Define.PlayerStatus.Running;
+
     }
 
     private void OnTriggerEnter(Collider other)
@@ -72,7 +71,7 @@ public class PlayerController : MonoBehaviour
         //Atk =====================================================================================
         if (CurrentStatus == Define.PlayerStatus.Attacking)
         {
-            if (_target)
+            if (_target != null && _target.activeInHierarchy)
             {
                 Vector3 targetPos = _target.transform.position;
                 float targetZ = targetPos.z - 0.5f;
@@ -234,40 +233,9 @@ public class PlayerController : MonoBehaviour
     void LockOn()
     {
         //auto targeting
-        if (!_target)
+        if (Managers.Scene.CurrentScene.MonsterCount <= 0)
         {
-            Vector3 startPos = gameObject.transform.position + Vector3.up;
-
-            for (int i = 0; i < Managers.Scene.CurrentScene.spawnedMobChecker.Length; i++)
-            {
-
-                if (!Managers.Scene.CurrentScene.spawnedMobChecker[i].spawnedMob)
-                    continue;
-
-                Vector3 endPos = Managers.Scene.CurrentScene.spawnedMobChecker[i].spawnedPos
-                                    + Vector3.up + Vector3.right * transform.position.x;
-
-                Debug.DrawLine(startPos, endPos, Color.red, 0.1f);
-
-                RaycastHit hit;
-                if (Physics.Linecast(startPos, endPos, out hit, _enemyMask))
-                {
-                    _target = hit.collider.gameObject;
-
-                    if (!_cursor)
-                        _cursor = Managers.Resource.Instantiate("UI/Targeting");
-
-                    Vector3 targetPos = _target.GetComponent<Collider>().transform.position;
-                    _cursor.transform.position = targetPos + Vector3.up;
-                    _cursor.GetComponent<LockOnController>().Init(_target, _cursor.transform.position);
-
-                }
-            }
-        }
-        //user targeting
-        else
-        {
-
+            
         }
     }
 
@@ -336,12 +304,11 @@ public class PlayerController : MonoBehaviour
         NormalMobStat targetStat = _target.GetComponent<NormalMobStat>();
         Managers.Sound.Play($"SE/Hit");
         targetStat.OnAttacked(_stat.Atk);
-        Debug.Log(_target);
     }
 
     public void StatusInit()
     {
-        //CurrentStatus = Define.PlayerStatus.Running;
+        CurrentStatus = Define.PlayerStatus.Running;
     }
 
     #endregion

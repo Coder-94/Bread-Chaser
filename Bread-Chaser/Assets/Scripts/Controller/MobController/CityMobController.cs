@@ -9,7 +9,7 @@ public class CityMobController : NormalMobBase
         RotFixer(player);
 
         NormalMobStat stat = GetComponent<NormalMobStat>();
-        if (stat.Hp == 0)
+        if (stat.Hp <= 0)
             Clear();
     }
 
