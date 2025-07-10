@@ -184,6 +184,9 @@ public class PlayerController : MonoBehaviour
             case Define.TouchEvent.FingerReleased:
                 Debug.Log("손가락 제거");
                 break;
+            case Define.TouchEvent.Holding:
+                LockOn();
+                break;
             case Define.TouchEvent.UpSwipe:
                 Jump();
                 break;
@@ -232,7 +235,6 @@ public class PlayerController : MonoBehaviour
 
     void LockOn()
     {
-        //auto targeting
         if (Managers.Scene.CurrentScene.MonsterCount <= 0)
         {
             
@@ -261,7 +263,7 @@ public class PlayerController : MonoBehaviour
     #region atk
 
 
-    void Attack(float holdedTime)
+    void Attack()
     {
         if (!_target)
             return;
