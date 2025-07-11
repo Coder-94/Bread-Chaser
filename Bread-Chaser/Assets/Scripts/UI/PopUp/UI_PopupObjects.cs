@@ -23,12 +23,12 @@ public class UI_PopupObjects : UIPopUp
 
     enum GameObjects
     {
-
+        TargetCursor
     }
 
     enum Images
     {
-        Mika
+        
     }
 
     #endregion
@@ -43,6 +43,8 @@ public class UI_PopupObjects : UIPopUp
         Bind<Text>(typeof(Texts));
         Bind<GameObject>(typeof(GameObjects));
 
+        GameObject go = GetObject((int)GameObjects.TargetCursor).gameObject;
+        BindEvent(go, (PointerEventData data) => { go.transform.position = data.position; }, Define.UIEvent.Drag);
     }
 
 }

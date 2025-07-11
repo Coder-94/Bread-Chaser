@@ -39,6 +39,7 @@ public class Define
 
     public enum PlayerStatus
     {
+        LockOning,
         Running,
         Jumping,
         Attacking,

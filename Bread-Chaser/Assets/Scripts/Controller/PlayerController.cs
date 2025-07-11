@@ -68,68 +68,11 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        //Atk =====================================================================================
-        if (CurrentStatus == Define.PlayerStatus.Attacking)
-        {
-            if (_target != null && _target.activeInHierarchy)
-            {
-                Vector3 targetPos = _target.transform.position;
-                float targetZ = targetPos.z - 0.5f;
-                Vector3 currentPos = _rb.position;
-
-                Vector3 direction = (targetPos - currentPos);
-                direction.y = 0;
-
-                float dist = Mathf.Abs(currentPos.z - targetZ);
-
-                if (dist > 0.01f)
-                {
-                    float moveStep = 15f * Time.fixedDeltaTime;
-                    float moveAmount = Mathf.Min(moveStep, dist);
-
-                    Vector3 move = Vector3.forward * Mathf.Sign(targetZ - currentPos.z) * moveAmount;
-                    _rb.MovePosition(currentPos + move);
-                }
-            }
-            else
-            {
-                BackStep();
-            }
-        }
-        //BackStep =====================================================================================
-        else if (CurrentStatus == Define.PlayerStatus.BackStepping)
-        {
-            Vector3 currentPos = _rb.position;
-            Vector3 dir = _originPos - currentPos;
-            dir.y = 0;
-
-            float dist = dir.magnitude;
-
-            if (dist > 0.01f)
-            {
-                float moveStep = 15f * Time.fixedDeltaTime;
-                float moveAmount = Mathf.Min(moveStep, dist);
-
-                Vector3 moveDir = dir.normalized * moveAmount;
-                _rb.MovePosition(currentPos + moveDir);
-            }
-            else
-                CurrentStatus = Define.PlayerStatus.Running;
-
-        }
-
-        //Mission Delay =====================================================================================
-        while (_movementQueue.Count > 0)
-        {
-            Action action = _movementQueue.Dequeue();
-            action?.Invoke();
-        }
+        RbControl();
     }
 
     private void Update()
     {
-        LockOn();
-
         Debug.Log($"CurrentStatus: {CurrentStatus}");
     }
     #endregion
@@ -171,25 +114,16 @@ public class PlayerController : MonoBehaviour
             case Define.TouchEvent.Tap:
                 Debug.Log("ÅÇ");
                 break;
-            case Define.TouchEvent.LeftTap:
-
-                break;
-            case Define.TouchEvent.RightTap:
-
-                break;
             case Define.TouchEvent.HoldedFingerReleased:
                 break;
-            case Define.TouchEvent.FingerReleased:
-                Debug.Log("¼Õ°¡¶ô Á¦°Å");
-                break;
             case Define.TouchEvent.Holding:
-                LockOn();
+                CurrentStatus = Define.PlayerStatus.LockOning;
                 break;
             case Define.TouchEvent.UpSwipe:
                 Jump();
                 break;
             case Define.TouchEvent.DownSwipe:
-                BackStep();
+                CurrentStatus = Define.PlayerStatus.BackStepping;
                 break;
             case Define.TouchEvent.LeftSwipe:
                 Debug.Log("ÁÂ·Î ÀÌµ¿");
@@ -197,6 +131,45 @@ public class PlayerController : MonoBehaviour
             case Define.TouchEvent.RightSwipe:
                 Debug.Log("¿ì·Î ÀÌµ¿");
                 break;
+        }
+    }
+
+    void PlayerControl() 
+    {
+        switch (CurrentStatus)
+        {
+            case Define.PlayerStatus.Running:
+                break;
+            case Define.PlayerStatus.Attacking:
+                break;
+            case Define.PlayerStatus.BackStepping:
+                BackStep();
+                break;
+            case Define.PlayerStatus.LockOning:
+                LockOn();
+                break;
+            case Define.PlayerStatus.Jumping:
+                break;
+        }
+    }
+
+    void RbControl()
+    {
+        switch (CurrentStatus)
+        {
+            case Define.PlayerStatus.Attacking:
+                AttackRB();
+                break;
+            case Define.PlayerStatus.BackStepping:
+                BackStepRB();
+                break;
+        }
+
+        //Mission Delay =====================================================================================
+        while (_movementQueue.Count > 0)
+        {
+            Action action = _movementQueue.Dequeue();
+            action?.Invoke();
         }
     }
 
@@ -233,26 +206,6 @@ public class PlayerController : MonoBehaviour
 
     void LockOn()
     {
-        if (Managers.Scene.CurrentScene.MonsterCount <= 0)
-        {
-            
-        }
-    }
-
-    void LockOnChanger(Define.TouchEvent evt)
-    {
-
-        if (Managers.Scene.CurrentScene.MonsterCount != 1)
-        {
-            if (evt == Define.TouchEvent.LeftTap)
-            {
-                Debug.Log("Å¸±ê ÁÂ·Î º¯°æ");
-            }
-            else if (evt == Define.TouchEvent.RightTap)
-            {
-                Debug.Log("Å¸±ê ¿ì·Î º¯°æ");
-            }
-        }
 
     }
 
@@ -275,6 +228,37 @@ public class PlayerController : MonoBehaviour
 
     }
 
+    void AttackRB()
+    {
+        if (_target != null && _target.activeInHierarchy)
+        {
+            Vector3 targetPos = _target.transform.position;
+            float targetZ = targetPos.z - 0.5f;
+            Vector3 currentPos = _rb.position;
+
+            Vector3 direction = (targetPos - currentPos);
+            direction.y = 0;
+
+            float dist = Mathf.Abs(currentPos.z - targetZ);
+
+            if (dist > 0.01f)
+            {
+                float moveStep = 15f * Time.fixedDeltaTime;
+                float moveAmount = Mathf.Min(moveStep, dist);
+
+                Vector3 move = Vector3.forward * Mathf.Sign(targetZ - currentPos.z) * moveAmount;
+                _rb.MovePosition(currentPos + move);
+            }
+        }
+        else
+        {
+            BackStep();
+        }
+    }
+    #endregion
+
+    #region backstep
+
     void BackStep()
     {
         if (CurrentStatus != Define.PlayerStatus.Attacking)
@@ -283,7 +267,26 @@ public class PlayerController : MonoBehaviour
         Debug.Log("¹é½ºÅÇ!");
 
         _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerBackStep]);
-        CurrentStatus = Define.PlayerStatus.BackStepping;
+    }
+
+    void BackStepRB()
+    {
+        Vector3 currentPos = _rb.position;
+        Vector3 dir = _originPos - currentPos;
+        dir.y = 0;
+
+        float dist = dir.magnitude;
+
+        if (dist > 0.01f)
+        {
+            float moveStep = 15f * Time.fixedDeltaTime;
+            float moveAmount = Mathf.Min(moveStep, dist);
+
+            Vector3 moveDir = dir.normalized * moveAmount;
+            _rb.MovePosition(currentPos + moveDir);
+        }
+        else
+            CurrentStatus = Define.PlayerStatus.Running;
     }
 
     #endregion
