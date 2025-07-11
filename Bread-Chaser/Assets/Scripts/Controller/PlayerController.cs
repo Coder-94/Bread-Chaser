@@ -140,8 +140,6 @@ public class PlayerController : MonoBehaviour
     {
         Managers.Input.TouchAction -= PlayerActor;
         Managers.Input.TouchAction += PlayerActor;
-        Managers.Input.HoldedTimeAction -= Attack;
-        Managers.Input.HoldedTimeAction += Attack;
 
         int animParamLength = System.Enum.GetValues(typeof(AnimParameters)).Length;
         _hashedParams = new int[animParamLength];
@@ -270,16 +268,9 @@ public class PlayerController : MonoBehaviour
 
         if (CurrentStatus == Define.PlayerStatus.Running)
         {
-            if (Time.time < holdedTime + 1f)
-            {
-                _originPos = gameObject.transform.position;
-                _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerAtk]);
-                CurrentStatus = Define.PlayerStatus.Attacking;
-            }
-            else
-            {
-                Debug.Log("스킬발동!");
-            }
+            _originPos = gameObject.transform.position;
+            _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerAtk]);
+            CurrentStatus = Define.PlayerStatus.Attacking;
         }
 
     }

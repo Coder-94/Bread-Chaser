@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class UI_Button : UIPopUp
+public class UI_PopupObjects : UIPopUp
 {
     #region Enums
 

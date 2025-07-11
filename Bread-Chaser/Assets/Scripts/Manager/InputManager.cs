@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.EnhancedTouch;
 using UnityEngine.Windows;
 using static BaseScene;
@@ -11,7 +12,6 @@ public class InputManager
     #region variables
 
     public Action<Define.TouchEvent>    TouchAction = null;
-    public Action<float>                HoldedTimeAction = null;
 
     float           _pressedTime = 0;
     bool            _pressed = false;
@@ -27,11 +27,16 @@ public class InputManager
     #region ForUpdate
     public void OnUpdate()
     {
+
         if (TouchAction != null)
         {
             if (UnityEngine.Input.touchCount > 0)
             {
                 UnityEngine.Touch touch = UnityEngine.Input.GetTouch(0);
+
+                //ui touch blocker ====================================================================
+                if (EventSystem.current.IsPointerOverGameObject(touch.fingerId))
+                    return;
 
                 //first touch input check ====================================================================
                 if (!_pressed)
@@ -85,7 +90,6 @@ public class InputManager
                     else if (_holded)
                     {
                         TouchAction.Invoke(Define.TouchEvent.HoldedFingerReleased);
-                        HoldedTimeAction.Invoke(_pressedTime);
                     }
 
                     //tapped result check ====================================================================
@@ -114,7 +118,6 @@ public class InputManager
     public void Clear()
     {
         TouchAction = null;
-        HoldedTimeAction = null;
     }
     #endregion
 }
