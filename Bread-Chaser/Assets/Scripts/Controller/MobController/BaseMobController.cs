@@ -44,7 +44,7 @@ public abstract class BaseMobController : MonoBehaviour
 
     protected void PosFixer()
     {
-        Define.PlayerStatus currentStatus = player.GetComponent<PlayerController>().CurrentStatus;
+        Define.PlayerStatus currentStatus = player.GetComponent<PlayerController>().CurrentState;
         if(currentStatus!= Define.PlayerStatus.Attacking && currentStatus != Define.PlayerStatus.BackStepping) 
         {
             Vector3 newPosition = transform.position;

@@ -12,7 +12,7 @@ public class CameraController : MonoBehaviour
     void Init()
     {
         _target = Managers.Scene.CurrentScene.Player;
-        _status = _target.GetComponent<PlayerController>().CurrentStatus;
+        _status = _target.GetComponent<PlayerController>().CurrentState;
     }
 
     void Update()

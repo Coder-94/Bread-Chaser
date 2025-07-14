@@ -6,156 +6,43 @@ using UnityEngine;
 using static Define;
 using static UnityEngine.GraphicsBuffer;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : PlayerBase
 {
-
-    #region variables
-
-    protected enum AnimParameters
-    {
-        TriggerAtk,
-        TriggerJump,
-        TriggerBackStep,
-        IsAtk
-    }
-
-    public Define.PlayerStatus CurrentStatus { get; protected set; }
-
-    bool _inputBlock = false;
-    bool _isAtk = false;
-    PlayerStat _stat;
-    Animator _anim;
-
-    protected int[] _hashedParams;
-    private Queue<Action> _movementQueue = new Queue<Action>();
-
-    GameObject _target = null;
-    int _enemyMask = (1 << (int)Define.Layer.Enemy);
-
-    Vector3 _originPos;
-    GameObject _cursor = null;
-    Rigidbody _rb;
-
-
-
-    #endregion
-
-    #region unity scripts
-
-    private void Start()
-    {
-        Init();
-    }
-
-    private void OnAnimatorIK(int layerIndex)
-    {
-        if (_target == null) return;
-
-        _anim.SetLookAtWeight(1.0f);
-        _anim.SetLookAtPosition(_target.transform.position);
-    }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.gameObject.layer == (int)Define.Layer.Obstacle)
-            Debug.Log("Obstacle Collisioned");
-    }
-
-    private void FixedUpdate()
-    {
-        RbControl();
-    }
-
-    private void Update()
-    {
-        Debug.Log($"CurrentStatus: {CurrentStatus}");
-    }
-    #endregion
-
-    #region initialize
-
-    void Init()
-    {
-        Managers.Input.TouchAction -= PlayerActor;
-        Managers.Input.TouchAction += PlayerActor;
-
-        int animParamLength = System.Enum.GetValues(typeof(AnimParameters)).Length;
-        _hashedParams = new int[animParamLength];
-
-        for (int i = 0; i < animParamLength; i++)
-        {
-            AnimParameters param = (AnimParameters)i;
-            string key = param.ToString();
-            _hashedParams[i] = Animator.StringToHash(key);
-        }
-
-        CurrentStatus = Define.PlayerStatus.Running;
-        _anim = GetComponent<Animator>();
-        _stat = GetComponent<PlayerStat>();
-        _rb = GetComponent<Rigidbody>();
-
-    }
-    #endregion
 
     #region player movement
 
-    void PlayerActor(Define.TouchEvent evt)
+    protected override void PlayerActor(Define.TouchEvent evt)
     {
-        if (_inputBlock)
-            return;
-
-        switch (evt)
+        switch (CurrentState)
         {
-            case Define.TouchEvent.Tap:
-                Debug.Log("ÅÇ");
-                break;
-            case Define.TouchEvent.HoldedFingerReleased:
-                break;
-            case Define.TouchEvent.Holding:
-                CurrentStatus = Define.PlayerStatus.LockOning;
-                break;
-            case Define.TouchEvent.UpSwipe:
-                Jump();
-                break;
-            case Define.TouchEvent.DownSwipe:
-                CurrentStatus = Define.PlayerStatus.BackStepping;
-                break;
-            case Define.TouchEvent.LeftSwipe:
-                Debug.Log("ÁÂ·Î ÀÌµ¿");
-                break;
-            case Define.TouchEvent.RightSwipe:
-                Debug.Log("¿ì·Î ÀÌµ¿");
+            case Define.PlayerStatus.LockOning:
+                LockOn(evt);
                 break;
         }
     }
 
-    void PlayerControl() 
+    protected override void PlayerControl() 
     {
-        switch (CurrentStatus)
+        switch (CurrentState)
         {
             case Define.PlayerStatus.Running:
                 break;
             case Define.PlayerStatus.Attacking:
                 break;
             case Define.PlayerStatus.BackStepping:
-                BackStep();
                 break;
             case Define.PlayerStatus.LockOning:
                 LockOn();
                 break;
             case Define.PlayerStatus.Jumping:
+
                 break;
         }
     }
 
-    void RbControl()
+    protected override void RbControl()
     {
-        switch (CurrentStatus)
+        switch (CurrentState)
         {
             case Define.PlayerStatus.Attacking:
                 AttackRB();
@@ -175,26 +62,26 @@ public class PlayerController : MonoBehaviour
 
     #region jump
 
-    void Jump()
+    protected override void Jump()
     {
-        if (CurrentStatus == Define.PlayerStatus.Running)
+        if (CurrentState == Define.PlayerStatus.Running)
             StartCoroutine(JumpCoroutine(1.5f));
     }
 
     IEnumerator JumpCoroutine(float cooldownTime)
     {
-        CurrentStatus = Define.PlayerStatus.Jumping;
+        CurrentState = Define.PlayerStatus.Jumping;
         _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerJump]);
 
         int random = UnityEngine.Random.Range(1, 4);
 
         Managers.Sound.Play($"SE/JumpVoice{random}");
-        _movementQueue.Enqueue(Jumper);
+        _movementQueue.Enqueue(JumpRB);
 
         yield return new WaitForSeconds(cooldownTime);
     }
 
-    void Jumper()
+    void JumpRB()
     {
         Rigidbody rb = GetComponent<Rigidbody>();
         rb.AddForce(Vector3.up * 5f, ForceMode.Impulse);
@@ -204,8 +91,10 @@ public class PlayerController : MonoBehaviour
 
     #region targetting
 
-    void LockOn()
+    protected void LockOn(Define.TouchEvent evt)
     {
+        CurrentState = Define.PlayerStatus.LockOning;
+
 
     }
 
@@ -214,16 +103,18 @@ public class PlayerController : MonoBehaviour
     #region atk
 
 
-    void Attack()
+    protected override void Attack()
     {
-        if (!_target)
-            return;
+        if (_target != null)
+        {
 
-        if (CurrentStatus == Define.PlayerStatus.Running)
+        }
+
+        if (CurrentState == Define.PlayerStatus.Running)
         {
             _originPos = gameObject.transform.position;
             _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerAtk]);
-            CurrentStatus = Define.PlayerStatus.Attacking;
+            CurrentState = Define.PlayerStatus.Attacking;
         }
 
     }
@@ -259,11 +150,8 @@ public class PlayerController : MonoBehaviour
 
     #region backstep
 
-    void BackStep()
+    protected override void BackStep()
     {
-        if (CurrentStatus != Define.PlayerStatus.Attacking)
-            return;
-
         Debug.Log("¹é½ºÅÇ!");
 
         _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerBackStep]);
@@ -286,7 +174,7 @@ public class PlayerController : MonoBehaviour
             _rb.MovePosition(currentPos + moveDir);
         }
         else
-            CurrentStatus = Define.PlayerStatus.Running;
+            CurrentState = Define.PlayerStatus.Running;
     }
 
     #endregion
@@ -304,7 +192,7 @@ public class PlayerController : MonoBehaviour
 
     public void StatusInit()
     {
-        CurrentStatus = Define.PlayerStatus.Running;
+        CurrentState = Define.PlayerStatus.Running;
     }
 
     #endregion

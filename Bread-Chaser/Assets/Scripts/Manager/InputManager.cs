@@ -12,11 +12,11 @@ public class InputManager
     #region variables
 
     public Action<Define.TouchEvent>    TouchAction = null;
-
+    public Action<Vector2>              TouchPosAction = null;
     float           _pressedTime = 0;
     bool            _pressed = false;
     bool            _holded = false;
-
+    bool            _touching = false;
     const float     DRAGDISTANCE = 100;
     Vector2         _touchStartPos;
     Vector2         _touchEndPos;
@@ -35,16 +35,19 @@ public class InputManager
                 UnityEngine.Touch touch = UnityEngine.Input.GetTouch(0);
 
                 //ui touch blocker ====================================================================
-                if (EventSystem.current.IsPointerOverGameObject(touch.fingerId))
+                if (_touching || EventSystem.current.IsPointerOverGameObject(touch.fingerId))
                     return;
+                    
 
                 //first touch input check ====================================================================
                 if (!_pressed)
                 {
                     _pressed = true;
                     _holded = false;
+                    _touching = true;
                     _pressedTime = Time.time;
                     _touchStartPos = touch.position;
+
                     TouchAction.Invoke(Define.TouchEvent.FingerPressed);
                 }
 
@@ -59,6 +62,7 @@ public class InputManager
                 if (Time.time > _pressedTime + 0.2f)
                 {
                     TouchAction.Invoke(Define.TouchEvent.Holding);
+
                     _holded = true;
                 }
             }
@@ -106,6 +110,7 @@ public class InputManager
                     TouchAction.Invoke(Define.TouchEvent.FingerReleased);
                 }
 
+                _touching = false;
                 _pressed = false;
                 _holded = false;
                 _pressedTime = 0;
