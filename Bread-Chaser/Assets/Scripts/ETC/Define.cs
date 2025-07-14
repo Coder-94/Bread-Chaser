@@ -55,6 +55,7 @@ public class Define
         LeftTap,
         RightTap,
         Holding,
+        StartHolding,
         LeftSwipe,
         RightSwipe,
         DownSwipe,

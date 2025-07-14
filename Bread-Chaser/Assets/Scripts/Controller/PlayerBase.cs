@@ -21,7 +21,6 @@ public class PlayerBase : MonoBehaviour
         {
             _state = value;
 
-            Animator anim = GetComponent<Animator>();
             switch (_state)
             {
                 case Define.PlayerStatus.Running:
@@ -63,8 +62,8 @@ public class PlayerBase : MonoBehaviour
 
     void Init()
     {
-        Managers.Input.TouchAction -= PlayerActor;
-        Managers.Input.TouchAction += PlayerActor;
+        Managers.Input.TouchAction -= PlayerControl;
+        Managers.Input.TouchAction += PlayerControl;
 
         int animParamLength = System.Enum.GetValues(typeof(AnimParameters)).Length;
         _hashedParams = new int[animParamLength];
@@ -125,6 +124,6 @@ public class PlayerBase : MonoBehaviour
     protected virtual void BackStep() { }
     protected virtual void Jump() { }
     protected virtual void RbControl() { }
-    protected virtual void PlayerActor(Define.TouchEvent evt) { }
-    protected virtual void PlayerControl() { }
+    protected virtual void PlayerControl(Define.TouchEvent evt) { }
+    protected virtual void PlayerActor() { }
 }

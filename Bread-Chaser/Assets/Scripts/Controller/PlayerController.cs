@@ -9,19 +9,58 @@ using static UnityEngine.GraphicsBuffer;
 public class PlayerController : PlayerBase
 {
 
-    #region player movement
+    #region player control
 
-    protected override void PlayerActor(Define.TouchEvent evt)
+    protected override void PlayerControl(Define.TouchEvent evt)
     {
         switch (CurrentState)
         {
+            case Define.PlayerStatus.Running:
+                Running(evt);
+                break;
             case Define.PlayerStatus.LockOning:
                 LockOn(evt);
                 break;
         }
     }
 
-    protected override void PlayerControl() 
+    void Running(Define.TouchEvent evt)
+    {
+        switch (evt)
+        {
+            case Define.TouchEvent.UpSwipe:
+                CurrentState = Define.PlayerStatus.Jumping;
+                break;
+        }
+    }
+
+    protected void LockOn(Define.TouchEvent evt)
+    {
+        CurrentState = Define.PlayerStatus.LockOning;
+
+
+    }
+
+    protected override void Attack()
+    {
+        if (_target != null)
+        {
+            _originPos = gameObject.transform.position;
+            _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerAtk]);
+            CurrentState = Define.PlayerStatus.Attacking;
+        }
+    }
+
+    protected override void BackStep()
+    {
+        Debug.Log("¹é½ºÅÇ!");
+
+        _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerBackStep]);
+    }
+    #endregion
+
+    #region player act
+    protected override void PlayerActor() 
     {
         switch (CurrentState)
         {
@@ -32,14 +71,15 @@ public class PlayerController : PlayerBase
             case Define.PlayerStatus.BackStepping:
                 break;
             case Define.PlayerStatus.LockOning:
-                LockOn();
                 break;
             case Define.PlayerStatus.Jumping:
 
                 break;
         }
     }
+    #endregion
 
+    #region rb
     protected override void RbControl()
     {
         switch (CurrentState)
@@ -58,65 +98,6 @@ public class PlayerController : PlayerBase
             Action action = _movementQueue.Dequeue();
             action?.Invoke();
         }
-    }
-
-    #region jump
-
-    protected override void Jump()
-    {
-        if (CurrentState == Define.PlayerStatus.Running)
-            StartCoroutine(JumpCoroutine(1.5f));
-    }
-
-    IEnumerator JumpCoroutine(float cooldownTime)
-    {
-        CurrentState = Define.PlayerStatus.Jumping;
-        _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerJump]);
-
-        int random = UnityEngine.Random.Range(1, 4);
-
-        Managers.Sound.Play($"SE/JumpVoice{random}");
-        _movementQueue.Enqueue(JumpRB);
-
-        yield return new WaitForSeconds(cooldownTime);
-    }
-
-    void JumpRB()
-    {
-        Rigidbody rb = GetComponent<Rigidbody>();
-        rb.AddForce(Vector3.up * 5f, ForceMode.Impulse);
-    }
-
-    #endregion
-
-    #region targetting
-
-    protected void LockOn(Define.TouchEvent evt)
-    {
-        CurrentState = Define.PlayerStatus.LockOning;
-
-
-    }
-
-    #endregion
-
-    #region atk
-
-
-    protected override void Attack()
-    {
-        if (_target != null)
-        {
-
-        }
-
-        if (CurrentState == Define.PlayerStatus.Running)
-        {
-            _originPos = gameObject.transform.position;
-            _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerAtk]);
-            CurrentState = Define.PlayerStatus.Attacking;
-        }
-
     }
 
     void AttackRB()
@@ -146,16 +127,6 @@ public class PlayerController : PlayerBase
             BackStep();
         }
     }
-    #endregion
-
-    #region backstep
-
-    protected override void BackStep()
-    {
-        Debug.Log("¹é½ºÅÇ!");
-
-        _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerBackStep]);
-    }
 
     void BackStepRB()
     {
@@ -176,12 +147,37 @@ public class PlayerController : PlayerBase
         else
             CurrentState = Define.PlayerStatus.Running;
     }
+    #endregion
+
+    #region jump
+
+    protected override void Jump()
+    {
+        StartCoroutine(JumpCoroutine(1.5f));
+    }
+
+    IEnumerator JumpCoroutine(float cooldownTime)
+    {
+        CurrentState = Define.PlayerStatus.Jumping;
+        _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerJump]);
+
+        int random = UnityEngine.Random.Range(1, 4);
+
+        Managers.Sound.Play($"SE/JumpVoice{random}");
+        _movementQueue.Enqueue(JumpRB);
+
+        yield return new WaitForSeconds(cooldownTime);
+    }
+
+    void JumpRB()
+    {
+        Rigidbody rb = GetComponent<Rigidbody>();
+        rb.AddForce(Vector3.up * 5f, ForceMode.Impulse);
+    }
 
     #endregion
 
-    #endregion
-
-    #region Anim Events
+    #region anim Events
 
     public void OnAttack()
     {
