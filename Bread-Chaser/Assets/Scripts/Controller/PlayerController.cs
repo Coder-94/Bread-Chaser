@@ -92,12 +92,6 @@ public class PlayerController : PlayerBase
                 break;
         }
 
-        //Mission Delay =====================================================================================
-        while (_movementQueue.Count > 0)
-        {
-            Action action = _movementQueue.Dequeue();
-            action?.Invoke();
-        }
     }
 
     void AttackRB()
