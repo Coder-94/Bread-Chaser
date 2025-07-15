@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
+using UnityEditor.DeviceSimulation;
 using UnityEngine;
 using static Define;
 using static UnityEngine.GraphicsBuffer;
@@ -11,7 +12,7 @@ public class PlayerController : PlayerBase
 
     #region player control
 
-    protected override void PlayerControl(Define.TouchEvent evt)
+    protected override void PlayerControl(Define.TouchEvent evt, Vector2? dist = null)
     {
         switch (CurrentState)
         {
@@ -19,7 +20,7 @@ public class PlayerController : PlayerBase
                 Running(evt);
                 break;
             case Define.PlayerStatus.LockOning:
-                LockOn(evt);
+                LockOn(evt, dist);
                 break;
         }
     }
@@ -31,14 +32,51 @@ public class PlayerController : PlayerBase
             case Define.TouchEvent.UpSwipe:
                 CurrentState = Define.PlayerStatus.Jumping;
                 break;
+            case Define.TouchEvent.StartHolding:
+                CurrentState = Define.PlayerStatus.LockOning;
+                break;
         }
     }
 
-    protected void LockOn(Define.TouchEvent evt)
+    protected override void StartLockOn()
     {
-        CurrentState = Define.PlayerStatus.LockOning;
+        _cursor = Managers.Resource.Instantiate("UI/LockOn");
+        _cursorRect = _cursor.transform.Find("TargetCursor").GetComponent<RectTransform>();
 
+        Touch touch = Input.GetTouch(0);
+        Vector2 currentTouchPos = touch.position;
+        _lastTouchPos = currentTouchPos;
+        _isTouching = true;
+    }
 
+    protected void LockOn(Define.TouchEvent evt, Vector2? dist)
+    {
+       if(_cursor != null)
+        {
+            switch (evt)
+            {
+                case Define.TouchEvent.Holding:
+                    if (Input.touchCount > 0)
+                    {
+                        Touch touch = Input.GetTouch(0);
+                        Vector2 currentTouchPos = touch.position;
+
+                        if (_isTouching)
+                        {
+                            Vector2 delta = currentTouchPos - _lastTouchPos;
+                            _lastTouchPos = currentTouchPos;
+                            _cursorRect.anchoredPosition += delta * 3.5f;
+                        }
+                    }
+                    break;
+                case Define.TouchEvent.HoldedFingerReleased:
+                    _isTouching = false;
+                    Managers.Resource.Destroy(_cursor);
+                    CurrentState = Define.PlayerStatus.Running;
+                    break;
+            }
+
+        }
     }
 
     protected override void Attack()
@@ -73,7 +111,6 @@ public class PlayerController : PlayerBase
             case Define.PlayerStatus.LockOning:
                 break;
             case Define.PlayerStatus.Jumping:
-
                 break;
         }
     }
@@ -92,6 +129,12 @@ public class PlayerController : PlayerBase
                 break;
         }
 
+        //Mission Delay =====================================================================================
+        while (_movementQueue.Count > 0)
+        {
+            Action action = _movementQueue.Dequeue();
+            action?.Invoke();
+        }
     }
 
     void AttackRB()
@@ -147,20 +190,16 @@ public class PlayerController : PlayerBase
 
     protected override void Jump()
     {
-        StartCoroutine(JumpCoroutine(1.5f));
-    }
+        if(!_isJumping)
+        {
+            _isJumping = true;
+            _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerJump]);
 
-    IEnumerator JumpCoroutine(float cooldownTime)
-    {
-        CurrentState = Define.PlayerStatus.Jumping;
-        _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerJump]);
-
-        int random = UnityEngine.Random.Range(1, 4);
-
-        Managers.Sound.Play($"SE/JumpVoice{random}");
-        _movementQueue.Enqueue(JumpRB);
-
-        yield return new WaitForSeconds(cooldownTime);
+            int random = UnityEngine.Random.Range(1, 4);
+            
+            Managers.Sound.Play($"SE/JumpVoice{random}");
+            _movementQueue.Enqueue(JumpRB);
+        }
     }
 
     void JumpRB()
@@ -182,7 +221,7 @@ public class PlayerController : PlayerBase
 
     public void StatusInit()
     {
-        CurrentState = Define.PlayerStatus.Running;
+        //CurrentState = Define.PlayerStatus.Running;
     }
 
     #endregion

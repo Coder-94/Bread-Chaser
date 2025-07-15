@@ -29,6 +29,7 @@ public class PlayerBase : MonoBehaviour
                     Jump();
                     break;
                 case Define.PlayerStatus.LockOning:
+                    StartLockOn();
                     break;
                 case Define.PlayerStatus.Attacking:
                     Attack();
@@ -40,21 +41,26 @@ public class PlayerBase : MonoBehaviour
         }
     }
 
-    protected Define.PlayerStatus _state;
-    protected bool _inputBlock = false;
-    protected bool _isAtk = false;
-    protected PlayerStat _stat;
-    protected Animator _anim;
+    protected Define.PlayerStatus       _state;
+    protected bool                      _inputBlock = false;
+    protected bool                      _isAtk = false;
+    protected bool                      _isJumping = false;
+    protected PlayerStat                _stat;
+    protected Animator                  _anim;
 
-    protected int[] _hashedParams;
-    protected Queue<Action> _movementQueue = new Queue<Action>();
+    protected int[]                     _hashedParams;
+    protected Queue<Action>             _movementQueue = new Queue<Action>();
 
-    protected GameObject _target = null;
-    protected int _enemyMask = (1 << (int)Define.Layer.Enemy);
+    protected Vector2                   _lastTouchPos;
+    protected bool                      _isTouching = false;
+    protected GameObject                _target = null;
+    protected int                       _enemyMask = (1 << (int)Define.Layer.Enemy);
 
-    protected Vector3 _originPos;
-    protected GameObject _cursor = null;
-    protected Rigidbody _rb;
+    protected Vector3                   _originPos;
+    protected GameObject                _cursor = null;
+    protected RectTransform             _cursorRect = null;
+
+    protected Rigidbody                 _rb;
 
     #endregion
 
@@ -100,7 +106,12 @@ public class PlayerBase : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-
+        if(CurrentState == Define.PlayerStatus.Jumping &&
+            collision.collider.gameObject.layer == (int)Define.Layer.Ground)
+        {
+            _isJumping = false;
+            CurrentState = Define.PlayerStatus.Running;
+        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -117,13 +128,15 @@ public class PlayerBase : MonoBehaviour
     private void Update()
     {
         Debug.Log($"CurrentStatus: {CurrentState}");
+        PlayerActor();
     }
     #endregion
 
+    protected virtual void StartLockOn() { }
     protected virtual void Attack() { }
     protected virtual void BackStep() { }
     protected virtual void Jump() { }
     protected virtual void RbControl() { }
-    protected virtual void PlayerControl(Define.TouchEvent evt) { }
+    protected virtual void PlayerControl(Define.TouchEvent evt, Vector2? dist = null) { }
     protected virtual void PlayerActor() { }
 }
