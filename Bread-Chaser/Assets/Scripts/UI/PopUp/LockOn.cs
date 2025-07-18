@@ -11,7 +11,8 @@ public class LockOn: UIPopUp
     enum GameObjects
     {
         LockOn,
-        TargetCursor
+        TargetCursor,
+        OnTargetCursor
     }
 
     public override void Init()
@@ -20,6 +21,8 @@ public class LockOn: UIPopUp
 
         _myPos = GetComponent<RectTransform>();
         Bind<GameObject>(typeof(GameObjects));
+        Managers.Input.TouchAction -= LockOnMoving;
+        Managers.Input.TouchAction += LockOnMoving;
     }
 
     void Update()
@@ -36,6 +39,11 @@ public class LockOn: UIPopUp
         {
             _target = hit.collider.gameObject;
         }
+    }
+
+    void LockOnMoving(Define.TouchEvent evt)
+    {
+
     }
 
     public GameObject SetTarget(GameObject target)
