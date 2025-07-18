@@ -22,6 +22,9 @@ public class PlayerController : PlayerBase
             case Define.PlayerStatus.LockOning:
                 LockOn(evt);
                 break;
+            case Define.PlayerStatus.Attacking:
+                LockOn(evt);
+                break;
         }
     }
 
@@ -41,73 +44,27 @@ public class PlayerController : PlayerBase
     protected override void StartLockOn()
     {
         if(_targeting == null)
-        {
             _targeting = Managers.UI.ShowPopUpUI<LockOn>().gameObject;
-            _cursor = _targeting.GetComponent<LockOn>().SetCursor();
-        }
 
         Touch touch = Input.GetTouch(0);
         Vector2 currentTouchPos = touch.position;
 
-        _lastTouchPos = currentTouchPos;
-        _isTouching = true;
+        _targeting.GetComponent<LockOn>().SetFirstTouch(currentTouchPos);
     }
 
     protected void LockOn(Define.TouchEvent evt)
     {
-        if (_cursor == null)
-            return;
 
-        switch (evt)
+        if(evt == Define.TouchEvent.HoldedFingerReleased)
         {
-            case Define.TouchEvent.Holding:
-                {
-                    if (Input.touchCount > 0)
-                    {
-                        Touch touch = Input.GetTouch(0);
-                        Vector2 currentTouchPos = touch.position;
+            _target = _targeting.GetComponent<LockOn>().GetTarget();
 
-                        if (_isTouching)
-                        {
-                            Vector2 delta = currentTouchPos - _lastTouchPos;
-                            _lastTouchPos = currentTouchPos;
+            if (_target == null)
+                CurrentState = Define.PlayerStatus.Running;
+            else
+                CurrentState = Define.PlayerStatus.Attacking;
 
-                            RectTransform cursorRect = _cursor.GetComponent<RectTransform>();
-                            cursorRect.anchoredPosition += delta * 3.5f;
-
-                            _target = _targeting.GetComponent<LockOn>().SetTarget(_target);
-
-                            if (_target != null)
-                            {
-                                Debug.Log("≈∏∞Ÿ ¿÷¿Ω");
-                                if(_onTarget == null)
-                                {
-                                    Debug.Log("ø¬≈∏∞Ÿ ¡¢±Ÿ");
-                                    _onTarget = Managers.UI.ShowPopUpUI<OnTarget>().gameObject;
-                                    _onTargetcursor = _onTarget.GetComponent<OnTarget>().SetCursor();
-                                }
-                                
-                                RectTransform onTargetRect = _onTargetcursor.GetComponent<RectTransform>();
-                                Vector3 screenPos = Camera.main.ScreenToWorldPoint(_target.GetComponent<Collider>().transform.position);
-                            }
-
-                        }
-                    }
-                }
-                break;
-
-            case Define.TouchEvent.HoldedFingerReleased:
-                {
-                    if (_target == null)
-                        CurrentState = Define.PlayerStatus.Running;
-                    else
-                        CurrentState = Define.PlayerStatus.Attacking;
-
-                    _isTouching = false;
-                    _targeting.GetComponent<LockOn>().ClosePopUpUI();
-                    //Managers.Resource.Destroy(_onTarget);
-                }
-                break;
+            _targeting = null;
         }
     }
 
@@ -117,7 +74,6 @@ public class PlayerController : PlayerBase
         {
             _originPos = gameObject.transform.position;
             _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerAtk]);
-            CurrentState = Define.PlayerStatus.Attacking;
         }
     }
 
@@ -171,7 +127,7 @@ public class PlayerController : PlayerBase
 
     void AttackRB()
     {
-        if (_target != null && _target.activeInHierarchy)
+        if (_target != null)
         {
             Vector3 targetPos = _target.transform.position;
             float targetZ = targetPos.z - 0.5f;
@@ -190,10 +146,6 @@ public class PlayerController : PlayerBase
                 Vector3 move = Vector3.forward * Mathf.Sign(targetZ - currentPos.z) * moveAmount;
                 _rb.MovePosition(currentPos + move);
             }
-        }
-        else
-        {
-            BackStep();
         }
     }
 
@@ -246,6 +198,7 @@ public class PlayerController : PlayerBase
 
     public void OnAttack()
     {
+        
         NormalMobStat targetStat = _target.GetComponent<NormalMobStat>();
         Managers.Sound.Play($"SE/Hit");
         targetStat.OnAttacked(_stat.Atk);

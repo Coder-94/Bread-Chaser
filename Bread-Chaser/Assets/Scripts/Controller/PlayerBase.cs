@@ -51,16 +51,11 @@ public class PlayerBase : MonoBehaviour
     protected int[]                     _hashedParams;
     protected Queue<Action>             _movementQueue = new Queue<Action>();
 
-    protected Vector2                   _lastTouchPos;
-    protected bool                      _isTouching = false;
     protected GameObject                _target = null;
     protected int                       _enemyMask = (1 << (int)Define.Layer.Enemy);
 
     protected Vector3                   _originPos;
     protected GameObject                _targeting = null;
-    protected GameObject                _cursor = null;
-    protected GameObject                _onTarget = null;
-    protected GameObject                _onTargetcursor = null;
     protected Rigidbody                 _rb;
 
     #endregion

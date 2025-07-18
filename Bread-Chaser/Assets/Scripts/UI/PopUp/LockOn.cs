@@ -4,15 +4,27 @@ using static UnityEngine.UI.Image;
 public class LockOn: UIPopUp
 {
     const float             MAXDISTANCE = 100f;
-    private int             _enemyMask = (1 << (int)Define.Layer.Enemy);
     private GameObject      _target = null;
     private RectTransform   _myPos;
 
+    protected Vector2 _lastTouchPos;
+    protected bool _isTouching = false;
+
+    protected GameObject _cursor = null;
+    protected GameObject _onTargetcursor = null;
+    protected int _enemyMask = (1 << (int)Define.Layer.Enemy);
+
+    protected float _cameraRotCorrection = 3f;
     enum GameObjects
     {
         LockOn,
         TargetCursor,
         OnTargetCursor
+    }
+
+    void Update()
+    {
+        Targeting();
     }
 
     public override void Init()
@@ -23,50 +35,75 @@ public class LockOn: UIPopUp
         Bind<GameObject>(typeof(GameObjects));
         Managers.Input.TouchAction -= LockOnMoving;
         Managers.Input.TouchAction += LockOnMoving;
+
+        _cursor = GetObject((int)GameObjects.TargetCursor);
+        _onTargetcursor = GetObject((int)GameObjects.OnTargetCursor);
     }
 
-    void Update()
+    void Targeting()
     {
-        Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(Camera.main, _myPos.position);
-
-
-        Ray ray = Camera.main.ScreenPointToRay(screenPos);
-
-
-        Debug.DrawRay(ray.origin, ray.direction * 100f, Color.red);
-
-        if (Physics.Raycast(ray, out RaycastHit hit, MAXDISTANCE, _enemyMask))
+        if (_cursor != null)
         {
-            _target = hit.collider.gameObject;
+            RectTransform rt = _cursor.GetComponent<RectTransform>();
+
+            Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(null, rt.position);
+            Ray ray = Camera.main.ScreenPointToRay(screenPos);
+
+            Debug.DrawRay(ray.origin, ray.direction * 10f, Color.red, 0.1f);
+
+            if (Physics.Raycast(ray, out RaycastHit hit, 100f, _enemyMask))
+            {
+                _target = hit.collider.gameObject;
+            }
+
+            if (_target != null)
+            {
+                Debug.Log("≈∏∞Ÿ ¿÷¿Ω");
+
+                RectTransform onTargetRect = _onTargetcursor.GetComponent<RectTransform>();
+                Vector3 targetPos = _target.GetComponent<Collider>().bounds.center;
+
+                Vector3 onTargetScreenPos = Camera.main.WorldToScreenPoint(targetPos);
+                onTargetRect.position = onTargetScreenPos;
+            }
         }
     }
 
     void LockOnMoving(Define.TouchEvent evt)
     {
+        if (_cursor == null)
+            return;
 
-    }
-
-    public GameObject SetTarget(GameObject target)
-    {
-        if(_target != null)
+        if (evt == Define.TouchEvent.Holding)
         {
-            target = _target;
+            if (Input.touchCount > 0)
+            {
+                Touch touch = Input.GetTouch(0);
+                Vector2 currentTouchPos = touch.position;
 
-            return target;
+                if (_isTouching)
+                {
+                    Vector2 delta = currentTouchPos - _lastTouchPos;
+                    _lastTouchPos = currentTouchPos;
+
+                    RectTransform cursorRect = _cursor.GetComponent<RectTransform>();
+                    cursorRect.anchoredPosition += delta * 3.5f;
+                }
+            }
+        }
+        else if(evt == Define.TouchEvent.HoldedFingerReleased)
+        {
+            _isTouching = false;
+            ClosePopUpUI();
         }
 
-        return null;
-
     }
 
-    public GameObject SetCursor()
-    {
-        GameObject cursor = GetObject((int)GameObjects.TargetCursor);
-        Debug.Log(cursor);
+    public GameObject GetTarget() { return _target; }
 
-        if (cursor != null)
-            return cursor;
-        
-        return null;
+    public void SetFirstTouch(Vector2 currentTouchPos)
+    {
+        _lastTouchPos = currentTouchPos;
+        _isTouching = true;
     }
 }
