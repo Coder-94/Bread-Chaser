@@ -12,7 +12,7 @@ public class PlayerController : PlayerBase
 
     #region player control
 
-    protected override void PlayerControl(Define.TouchEvent evt, Vector2? dist = null)
+    protected override void PlayerControl(Define.TouchEvent evt)
     {
         switch (CurrentState)
         {
@@ -20,7 +20,7 @@ public class PlayerController : PlayerBase
                 Running(evt);
                 break;
             case Define.PlayerStatus.LockOning:
-                LockOn(evt, dist);
+                LockOn(evt);
                 break;
         }
     }
@@ -40,22 +40,28 @@ public class PlayerController : PlayerBase
 
     protected override void StartLockOn()
     {
-        _cursor = Managers.Resource.Instantiate("UI/LockOn");
-        _cursorRect = _cursor.transform.Find("TargetCursor").GetComponent<RectTransform>();
+        if(_targeting == null)
+        {
+            _targeting = Managers.UI.ShowPopUpUI<LockOn>().gameObject;
+            _cursor = _targeting.GetComponent<LockOn>().SetCursor();
+        }
 
         Touch touch = Input.GetTouch(0);
         Vector2 currentTouchPos = touch.position;
+
         _lastTouchPos = currentTouchPos;
         _isTouching = true;
     }
 
-    protected void LockOn(Define.TouchEvent evt, Vector2? dist)
+    protected void LockOn(Define.TouchEvent evt)
     {
-       if(_cursor != null)
+        if (_cursor == null)
+            return;
+
+        switch (evt)
         {
-            switch (evt)
-            {
-                case Define.TouchEvent.Holding:
+            case Define.TouchEvent.Holding:
+                {
                     if (Input.touchCount > 0)
                     {
                         Touch touch = Input.GetTouch(0);
@@ -65,17 +71,43 @@ public class PlayerController : PlayerBase
                         {
                             Vector2 delta = currentTouchPos - _lastTouchPos;
                             _lastTouchPos = currentTouchPos;
-                            _cursorRect.anchoredPosition += delta * 3.5f;
+
+                            RectTransform cursorRect = _cursor.GetComponent<RectTransform>();
+                            cursorRect.anchoredPosition += delta * 3.5f;
+
+                            _target = _targeting.GetComponent<LockOn>().SetTarget(_target);
+
+                            if (_target != null)
+                            {
+                                Debug.Log("≈∏∞Ÿ ¿÷¿Ω");
+                                if(_onTarget == null)
+                                {
+                                    Debug.Log("ø¬≈∏∞Ÿ ¡¢±Ÿ");
+                                    _onTarget = Managers.UI.ShowPopUpUI<OnTarget>().gameObject;
+                                    _onTargetcursor = _onTarget.GetComponent<OnTarget>().SetCursor();
+                                }
+                                
+                                RectTransform onTargetRect = _onTargetcursor.GetComponent<RectTransform>();
+                                Vector3 screenPos = Camera.main.ScreenToWorldPoint(_target.GetComponent<Collider>().transform.position);
+                            }
+
                         }
                     }
-                    break;
-                case Define.TouchEvent.HoldedFingerReleased:
-                    _isTouching = false;
-                    Managers.Resource.Destroy(_cursor);
-                    CurrentState = Define.PlayerStatus.Running;
-                    break;
-            }
+                }
+                break;
 
+            case Define.TouchEvent.HoldedFingerReleased:
+                {
+                    if (_target == null)
+                        CurrentState = Define.PlayerStatus.Running;
+                    else
+                        CurrentState = Define.PlayerStatus.Attacking;
+
+                    _isTouching = false;
+                    _targeting.GetComponent<LockOn>().ClosePopUpUI();
+                    //Managers.Resource.Destroy(_onTarget);
+                }
+                break;
         }
     }
 

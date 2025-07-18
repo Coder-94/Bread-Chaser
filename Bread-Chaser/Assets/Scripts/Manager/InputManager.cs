@@ -11,7 +11,7 @@ public class InputManager
 {
     #region variables
 
-    public Action<Define.TouchEvent, Vector2?>    TouchAction = null;
+    public Action<Define.TouchEvent>    TouchAction = null;
 
     float           _pressedTime = 0;
     bool            _pressed = false;
@@ -46,7 +46,7 @@ public class InputManager
                     _pressedTime = Time.time;
                     _touchStartPos = touch.position;
 
-                    TouchAction.Invoke(Define.TouchEvent.FingerPressed, null);
+                    TouchAction.Invoke(Define.TouchEvent.FingerPressed);
                 }
 
                 //swipe check ====================================================================
@@ -61,12 +61,12 @@ public class InputManager
                 {
                     if (!_holded)
                     {
-                        TouchAction.Invoke(Define.TouchEvent.StartHolding, null);
+                        TouchAction.Invoke(Define.TouchEvent.StartHolding);
                         _holded = true;
                     }
                         
 
-                    TouchAction.Invoke(Define.TouchEvent.Holding, _swipeDelta);
+                    TouchAction.Invoke(Define.TouchEvent.Holding);
 
                    
                 }
@@ -82,37 +82,37 @@ public class InputManager
                         if (Mathf.Abs(_swipeDelta.x) > Mathf.Abs(_swipeDelta.y))
                         {
                             if (_swipeDelta.x > 0)
-                                TouchAction.Invoke(Define.TouchEvent.RightSwipe, null);
+                                TouchAction.Invoke(Define.TouchEvent.RightSwipe);
                             else
-                                TouchAction.Invoke(Define.TouchEvent.LeftSwipe, null);
+                                TouchAction.Invoke(Define.TouchEvent.LeftSwipe);
                         }
                         else
                         {
                             if (_swipeDelta.y > 0)
-                                TouchAction.Invoke(Define.TouchEvent.UpSwipe, null);
+                                TouchAction.Invoke(Define.TouchEvent.UpSwipe);
                             else
-                                TouchAction.Invoke(Define.TouchEvent.DownSwipe, null);
+                                TouchAction.Invoke(Define.TouchEvent.DownSwipe);
                         }
                     }
 
                     //holded result check ====================================================================
                     else if (_holded)
                     {
-                        TouchAction.Invoke(Define.TouchEvent.HoldedFingerReleased, null);
+                        TouchAction.Invoke(Define.TouchEvent.HoldedFingerReleased);
                     }
 
                     //tapped result check ====================================================================
                     else
                     {
                         if (_touchStartPos.x - (Screen.width / 2) < 0)
-                            TouchAction.Invoke(Define.TouchEvent.LeftTap, null);
+                            TouchAction.Invoke(Define.TouchEvent.LeftTap);
                         else
-                            TouchAction.Invoke(Define.TouchEvent.RightTap, null);
+                            TouchAction.Invoke(Define.TouchEvent.RightTap);
 
                         //TouchAction.Invoke(Define.TouchEvent.Tap);
                     }
 
-                    TouchAction.Invoke(Define.TouchEvent.FingerReleased, null);
+                    TouchAction.Invoke(Define.TouchEvent.FingerReleased);
                 }
 
                 _pressed = false;

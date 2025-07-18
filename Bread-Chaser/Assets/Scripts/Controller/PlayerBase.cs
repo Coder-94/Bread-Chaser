@@ -57,9 +57,10 @@ public class PlayerBase : MonoBehaviour
     protected int                       _enemyMask = (1 << (int)Define.Layer.Enemy);
 
     protected Vector3                   _originPos;
+    protected GameObject                _targeting = null;
     protected GameObject                _cursor = null;
-    protected RectTransform             _cursorRect = null;
-
+    protected GameObject                _onTarget = null;
+    protected GameObject                _onTargetcursor = null;
     protected Rigidbody                 _rb;
 
     #endregion
@@ -137,6 +138,6 @@ public class PlayerBase : MonoBehaviour
     protected virtual void BackStep() { }
     protected virtual void Jump() { }
     protected virtual void RbControl() { }
-    protected virtual void PlayerControl(Define.TouchEvent evt, Vector2? dist = null) { }
+    protected virtual void PlayerControl(Define.TouchEvent evt) { }
     protected virtual void PlayerActor() { }
 }

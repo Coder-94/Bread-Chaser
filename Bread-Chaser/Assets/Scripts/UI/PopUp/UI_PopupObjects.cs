@@ -11,9 +11,7 @@ public class UI_PopupObjects : UIPopUp
 
     enum Texts
     {
-        ButtonText,
-        PanelText,
-        TestText
+
     }
 
     enum Buttons
@@ -23,7 +21,10 @@ public class UI_PopupObjects : UIPopUp
 
     enum GameObjects
     {
-        TargetCursor
+        LockOn,
+        OnTarget,
+        TargetCursor,
+        OnTargetCursor
     }
 
     enum Images
@@ -42,9 +43,6 @@ public class UI_PopupObjects : UIPopUp
         Bind<Image>(typeof(Images));
         Bind<Text>(typeof(Texts));
         Bind<GameObject>(typeof(GameObjects));
-
-        GameObject go = GetObject((int)GameObjects.TargetCursor).gameObject;
-        BindEvent(go, (PointerEventData data) => { go.transform.position = data.position; }, Define.UIEvent.Drag);
     }
 
 }

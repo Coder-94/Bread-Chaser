@@ -47,7 +47,7 @@ public class UIManager
     #endregion
 
     #region HUD
-    public T MakeWorldSpaceUI<T>(Transform parent = null, string name = null) where T : UIBase
+    public T MakeWorldSpaceUI<T>(string name = null, Transform parent = null) where T : UIBase
     {
         if (string.IsNullOrEmpty(name))
             name = typeof(T).Name;
