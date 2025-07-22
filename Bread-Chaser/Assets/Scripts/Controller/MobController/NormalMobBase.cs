@@ -21,7 +21,7 @@ public class NormalMobBase : BaseMobController
     private Material                    _targetMaterial;
     private Coroutine                   _lerpCoroutine;
 
-    private NormalMobStat               mobStat;
+    protected NormalMobStat             mobStat;
     private Vector3                     _spawnPos;
 
     protected int[]                     _hashedParams;
@@ -43,7 +43,6 @@ public class NormalMobBase : BaseMobController
 
         int animParamLength = System.Enum.GetValues(typeof(AnimParameters)).Length;
         _hashedParams = new int[animParamLength];
-
         for (int i = 0; i < animParamLength; i++)
         {
             AnimParameters param    = (AnimParameters)i;
@@ -110,6 +109,9 @@ public class NormalMobBase : BaseMobController
             if (gameObject == Managers.Scene.CurrentScene.spawnedMobChecker[i].spawnedMob)
             {
                 //Check Init
+
+                _targetMaterial.SetFloat("_DissolveHeight", 1);
+                mobStat.Clear();
                 Managers.Scene.CurrentScene.spawnedMobChecker[i].spawnedMob = null;
                 Managers.Scene.CurrentScene.MobCountController(false);
                 Managers.Resource.Destroy(gameObject);

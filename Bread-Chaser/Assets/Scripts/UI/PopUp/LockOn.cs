@@ -49,8 +49,6 @@ public class LockOn: UIPopUp
             Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(null, rt.position);
             Ray ray = Camera.main.ScreenPointToRay(screenPos);
 
-            Debug.DrawRay(ray.origin, ray.direction * 10f, Color.red, 0.1f);
-
             if (Physics.Raycast(ray, out RaycastHit hit, 100f, _enemyMask))
             {
                 _target = hit.collider.gameObject;
@@ -58,8 +56,6 @@ public class LockOn: UIPopUp
 
             if (_target != null)
             {
-                Debug.Log("≈∏∞Ÿ ¿÷¿Ω");
-
                 RectTransform onTargetRect = _onTargetcursor.GetComponent<RectTransform>();
                 Vector3 targetPos = _target.GetComponent<Collider>().bounds.center;
 

@@ -12,6 +12,8 @@ public class PlayerController : PlayerBase
 
     #region player control
 
+    //input control ======================================================================================
+
     protected override void PlayerControl(Define.TouchEvent evt)
     {
         switch (CurrentState)
@@ -22,12 +24,10 @@ public class PlayerController : PlayerBase
             case Define.PlayerStatus.LockOning:
                 LockOn(evt);
                 break;
-            case Define.PlayerStatus.Attacking:
-                LockOn(evt);
-                break;
         }
     }
 
+    //run ======================================================================================
     void Running(Define.TouchEvent evt)
     {
         switch (evt)
@@ -41,17 +41,7 @@ public class PlayerController : PlayerBase
         }
     }
 
-    protected override void StartLockOn()
-    {
-        if(_targeting == null)
-            _targeting = Managers.UI.ShowPopUpUI<LockOn>().gameObject;
-
-        Touch touch = Input.GetTouch(0);
-        Vector2 currentTouchPos = touch.position;
-
-        _targeting.GetComponent<LockOn>().SetFirstTouch(currentTouchPos);
-    }
-
+    //lock on ======================================================================================
     protected void LockOn(Define.TouchEvent evt)
     {
 
@@ -68,24 +58,28 @@ public class PlayerController : PlayerBase
         }
     }
 
-    protected override void Attack()
+    //atk ======================================================================================
+
+    protected void Atk()
     {
-        if (_target != null)
+        if (_target == null || _target.GetComponent<NormalMobStat>().Hp <= 0)
         {
-            _originPos = gameObject.transform.position;
-            _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerAtk]);
+            CurrentState = Define.PlayerStatus.BackStepping;
+            _target = null;
+            TargetNotDead = false;
         }
+        else 
+        {
+            TargetNotDead = true;
+        }
+
     }
 
-    protected override void BackStep()
-    {
-        Debug.Log("¹é½ºÅÇ!");
-
-        _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerBackStep]);
-    }
     #endregion
 
     #region player act
+
+    //state control ======================================================================================
     protected override void PlayerActor() 
     {
         switch (CurrentState)
@@ -93,6 +87,7 @@ public class PlayerController : PlayerBase
             case Define.PlayerStatus.Running:
                 break;
             case Define.PlayerStatus.Attacking:
+                Atk();
                 break;
             case Define.PlayerStatus.BackStepping:
                 break;
@@ -105,6 +100,8 @@ public class PlayerController : PlayerBase
     #endregion
 
     #region rb
+
+    //rb control ======================================================================================
     protected override void RbControl()
     {
         switch (CurrentState)
@@ -125,6 +122,7 @@ public class PlayerController : PlayerBase
         }
     }
 
+    //rb atk ======================================================================================
     void AttackRB()
     {
         if (_target != null)
@@ -149,6 +147,7 @@ public class PlayerController : PlayerBase
         }
     }
 
+    // rb backstep ======================================================================================
     void BackStepRB()
     {
         Vector3 currentPos = _rb.position;
@@ -172,21 +171,8 @@ public class PlayerController : PlayerBase
 
     #region jump
 
-    protected override void Jump()
-    {
-        if(!_isJumping)
-        {
-            _isJumping = true;
-            _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerJump]);
-
-            int random = UnityEngine.Random.Range(1, 4);
-            
-            Managers.Sound.Play($"SE/JumpVoice{random}");
-            _movementQueue.Enqueue(JumpRB);
-        }
-    }
-
-    void JumpRB()
+    //jump rb ======================================================================================
+    protected override void JumpRB()
     {
         Rigidbody rb = GetComponent<Rigidbody>();
         rb.AddForce(Vector3.up * 5f, ForceMode.Impulse);
@@ -198,17 +184,14 @@ public class PlayerController : PlayerBase
 
     public void OnAttack()
     {
-        
         NormalMobStat targetStat = _target.GetComponent<NormalMobStat>();
         Managers.Sound.Play($"SE/Hit");
+        Camera.main.GetComponent<CameraController>().CamShake(10f, 1f, 0.4f);
         targetStat.OnAttacked(_stat.Atk);
+        _punchEffect.GetComponent<ParticleSystem>().Play();
     }
 
-    public void StatusInit()
-    {
-        //CurrentState = Define.PlayerStatus.Running;
-    }
-
+    
     #endregion
 
 }

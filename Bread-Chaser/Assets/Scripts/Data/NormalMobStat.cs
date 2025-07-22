@@ -26,4 +26,10 @@ public class NormalMobStat : MonoBehaviour
         Atk = stat.atk;
         AtkSpeed = stat.atkSpeed;
     }
+
+    public void Clear()
+    {
+        Data.MobStat stat = Managers.Data.NMStatDict[Id];
+        Hp = stat.hp;
+    }
 }
