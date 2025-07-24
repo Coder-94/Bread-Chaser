@@ -82,6 +82,7 @@ public class PlayerBase : MonoBehaviour
     {
         if (_target != null)
         {
+            TargetNotDead = false;
             _originPos = gameObject.transform.position;
             _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerAtk]);
             _dashEffect.GetComponent<ParticleSystem>().Play();

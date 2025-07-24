@@ -128,20 +128,20 @@ public class PlayerController : PlayerBase
         if (_target != null)
         {
             Vector3 targetPos = _target.transform.position;
-            float targetZ = targetPos.z - 0.5f;
             Vector3 currentPos = _rb.position;
 
-            Vector3 direction = (targetPos - currentPos);
-            direction.y = 0;
+            targetPos.y = currentPos.y;
 
-            float dist = Mathf.Abs(currentPos.z - targetZ);
+            Vector3 direction = (targetPos - currentPos).normalized;
+
+            float dist = Vector3.Distance(currentPos, targetPos);
 
             if (dist > 0.01f)
             {
                 float moveStep = 15f * Time.fixedDeltaTime;
                 float moveAmount = Mathf.Min(moveStep, dist);
 
-                Vector3 move = Vector3.forward * Mathf.Sign(targetZ - currentPos.z) * moveAmount;
+                Vector3 move = direction * moveAmount;
                 _rb.MovePosition(currentPos + move);
             }
         }

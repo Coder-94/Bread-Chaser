@@ -15,6 +15,7 @@ public class NormalMobBase : BaseMobController
     }
 
     #region variables
+    private bool                        _isInitialized = false;
     private float                       _targetValue = 0;
     private float                       _duration = 0.5f;
     private SkinnedMeshRenderer         _smr;
@@ -33,6 +34,9 @@ public class NormalMobBase : BaseMobController
     protected void OnEnable()
     {
         _spawnPos = gameObject.transform.position;
+
+        if (_isInitialized)
+            Init();
     }
     #endregion
 
@@ -55,6 +59,8 @@ public class NormalMobBase : BaseMobController
         _anim       = GetComponent<Animator>();
         if (_smr != null && _smr.materials.Length > 1)
             _targetMaterial = _smr.materials[1];
+
+        _isInitialized = true;
         StartLerp();
     }
     #endregion
@@ -70,7 +76,7 @@ public class NormalMobBase : BaseMobController
 
     IEnumerator LerpFloat()
     {
-
+        Debug.Log("러프플롯");
         string floatName =      "_DissolveHeight";
         float elapsedTime =         0f;
         float startValue =      _targetMaterial.GetFloat(floatName);
@@ -108,12 +114,24 @@ public class NormalMobBase : BaseMobController
         {
             if (gameObject == Managers.Scene.CurrentScene.spawnedMobChecker[i].spawnedMob)
             {
+                ///if조건문 통째로 좆박은거 고치기. 최대한 몬스터카운트만 쓰는 쪽으로
+                ///플레이어 전진할때 적이 회전하는 버그
+                ///플레이어 전진할때 방향 적용이 안되는 버그
+                ///공격시 null 뜨는 버그 << _target 관련 버그로 추정
+                
                 //Check Init
+                Debug.Log("클리어");
+                StopCoroutine(_lerpCoroutine);
+                _lerpCoroutine = null;
 
                 _targetMaterial.SetFloat("_DissolveHeight", 1);
+                _targetValue = 0;
+                _duration = 0.5f;
+
                 mobStat.Clear();
                 Managers.Scene.CurrentScene.spawnedMobChecker[i].spawnedMob = null;
                 Managers.Scene.CurrentScene.MobCountController(false);
+                _isInitialized = false;
                 Managers.Resource.Destroy(gameObject);
                 break;
             }
