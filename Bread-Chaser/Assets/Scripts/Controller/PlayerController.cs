@@ -131,6 +131,7 @@ public class PlayerController : PlayerBase
             Vector3 currentPos = _rb.position;
 
             targetPos.y = currentPos.y;
+            targetPos.z -= 0.5f;
 
             Vector3 direction = (targetPos - currentPos).normalized;
 

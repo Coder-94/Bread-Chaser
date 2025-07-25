@@ -115,8 +115,6 @@ public class NormalMobBase : BaseMobController
             if (gameObject == Managers.Scene.CurrentScene.spawnedMobChecker[i].spawnedMob)
             {
                 ///if조건문 통째로 좆박은거 고치기. 최대한 몬스터카운트만 쓰는 쪽으로
-                ///플레이어 전진할때 적이 회전하는 버그
-                ///플레이어 전진할때 방향 적용이 안되는 버그
                 ///공격시 null 뜨는 버그 << _target 관련 버그로 추정
                 
                 //Check Init
