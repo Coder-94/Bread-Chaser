@@ -82,7 +82,6 @@ public class PlayerBase : MonoBehaviour
     {
         if (_target != null)
         {
-            TargetNotDead = false;
             _originPos = gameObject.transform.position;
             _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerAtk]);
             _dashEffect.GetComponent<ParticleSystem>().Play();
@@ -91,8 +90,7 @@ public class PlayerBase : MonoBehaviour
 
     protected void BackStep()
     {
-        Debug.Log("¹é½ºÅÇ!");
-
+        TargetNotDead = false;
         _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerBackStep]);
     }
 
@@ -132,7 +130,7 @@ public class PlayerBase : MonoBehaviour
         _stat = GetComponent<PlayerStat>();
         _rb = GetComponent<Rigidbody>();
         _punchEffect = Util.FindChild(gameObject, "PunchHitBlue", true);
-        _dashEffect = Util.FindChild(gameObject, "BlueDash");
+        _dashEffect = Util.FindChild(gameObject, "DashSmoke");
     }
     #endregion
 

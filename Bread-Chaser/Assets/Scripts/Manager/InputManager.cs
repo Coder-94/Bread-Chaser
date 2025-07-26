@@ -109,7 +109,7 @@ public class InputManager
                         else
                             TouchAction.Invoke(Define.TouchEvent.RightTap);
 
-                        //TouchAction.Invoke(Define.TouchEvent.Tap);
+                        TouchAction.Invoke(Define.TouchEvent.Tap);
                     }
 
                     TouchAction.Invoke(Define.TouchEvent.FingerReleased);

@@ -24,6 +24,9 @@ public class PlayerController : PlayerBase
             case Define.PlayerStatus.LockOning:
                 LockOn(evt);
                 break;
+            case Define.PlayerStatus.Attacking:
+                Attacking(evt);
+                break;
         }
     }
 
@@ -60,13 +63,31 @@ public class PlayerController : PlayerBase
 
     //atk ======================================================================================
 
+    void Attacking(Define.TouchEvent evt)
+    {
+        if (TargetNotDead)
+        {
+            if (evt == Define.TouchEvent.Tap)
+                Attack();
+            ///Attack에 연타기능 추가
+            ///지민이 영상보고 적용
+            ///될수있으면 사이드 이동까지 제작
+        }
+    }
+
     protected void Atk()
     {
+        if (_target != null)
+        {
+            Vector3 dir = _target.transform.position - transform.position;
+            dir.y = 0;
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir), 10 * Time.deltaTime);
+        }
+
         if (_target == null || _target.GetComponent<NormalMobStat>().Hp <= 0)
         {
             CurrentState = Define.PlayerStatus.BackStepping;
             _target = null;
-            TargetNotDead = false;
         }
         else 
         {
@@ -131,7 +152,7 @@ public class PlayerController : PlayerBase
             Vector3 currentPos = _rb.position;
 
             targetPos.y = currentPos.y;
-            targetPos.z -= 0.5f;
+            targetPos.z -= 1f;
 
             Vector3 direction = (targetPos - currentPos).normalized;
 
@@ -188,7 +209,7 @@ public class PlayerController : PlayerBase
         NormalMobStat targetStat = _target.GetComponent<NormalMobStat>();
         Managers.Sound.Play($"SE/Hit");
         Camera.main.GetComponent<CameraController>().CamShake(10f, 1f, 0.4f);
-        targetStat.OnAttacked(_stat.Atk);
+        targetStat.OnAttacked(0.5f);
         _punchEffect.GetComponent<ParticleSystem>().Play();
     }
 

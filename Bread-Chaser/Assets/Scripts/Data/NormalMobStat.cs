@@ -2,10 +2,10 @@ using UnityEngine;
 
 public class NormalMobStat : MonoBehaviour
 {
-    public int Id { get; private set; }
-    public int Hp { get; private set; }
-    public int Atk { get; private set; }
-    public int AtkSpeed { get; private set; }
+    public int      Id { get; private set; }
+    public float    Hp { get; private set; }
+    public int      Atk { get; private set; }
+    public int      AtkSpeed { get; private set; }
 
     public void SetID(int id)
     {
@@ -13,7 +13,7 @@ public class NormalMobStat : MonoBehaviour
         Init();
     }
 
-    public void OnAttacked(int power)
+    public void OnAttacked(float power)
     {
         Hp -= power;
     }

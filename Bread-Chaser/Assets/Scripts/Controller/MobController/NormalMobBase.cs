@@ -36,7 +36,7 @@ public class NormalMobBase : BaseMobController
         _spawnPos = gameObject.transform.position;
 
         if (_isInitialized)
-            Init();
+            StartLerp();
     }
     #endregion
 
@@ -76,7 +76,6 @@ public class NormalMobBase : BaseMobController
 
     IEnumerator LerpFloat()
     {
-        Debug.Log("러프플롯");
         string floatName =      "_DissolveHeight";
         float elapsedTime =         0f;
         float startValue =      _targetMaterial.GetFloat(floatName);
@@ -113,15 +112,7 @@ public class NormalMobBase : BaseMobController
         for(int i=0; i<Managers.Scene.CurrentScene.spawnedMobChecker.Length; i++)
         {
             if (gameObject == Managers.Scene.CurrentScene.spawnedMobChecker[i].spawnedMob)
-            {
-                ///if조건문 통째로 좆박은거 고치기. 최대한 몬스터카운트만 쓰는 쪽으로
-                ///공격시 null 뜨는 버그 << _target 관련 버그로 추정
-                
-                //Check Init
-                Debug.Log("클리어");
-                StopCoroutine(_lerpCoroutine);
-                _lerpCoroutine = null;
-
+            { 
                 _targetMaterial.SetFloat("_DissolveHeight", 1);
                 _targetValue = 0;
                 _duration = 0.5f;
@@ -129,7 +120,6 @@ public class NormalMobBase : BaseMobController
                 mobStat.Clear();
                 Managers.Scene.CurrentScene.spawnedMobChecker[i].spawnedMob = null;
                 Managers.Scene.CurrentScene.MobCountController(false);
-                _isInitialized = false;
                 Managers.Resource.Destroy(gameObject);
                 break;
             }

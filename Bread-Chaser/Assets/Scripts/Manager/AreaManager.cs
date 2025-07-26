@@ -14,7 +14,7 @@ public class AreaManager
         }
         else
         {
-            int index = Random.Range(1, 6);
+            int index = Random.Range(1, 4);
             go = Managers.Resource.Instantiate($"Area/{name}/{name}Area{index}");
         }
         go.transform.position = new Vector3(0, 0, totalLength - movedRange);

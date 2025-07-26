@@ -3,7 +3,7 @@ using UnityEngine;
 public class PlayerStat : MonoBehaviour
 {
     public int      Level { get; private set; } = 1;
-    public int      Hp { get; private set; }
+    public float    Hp { get; private set; }
     public int      Atk { get; private set; }
     public float    AtkSpd { get; private set; }
 

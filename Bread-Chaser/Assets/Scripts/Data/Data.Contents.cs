@@ -10,7 +10,7 @@ namespace Data
     public class MobStat
     {
         public int          id;
-        public int          hp;
+        public float        hp;
         public int          atk;
         public int          atkSpeed;
     }
@@ -19,7 +19,7 @@ namespace Data
     public class PlayerStat
     {
         public int          level;
-        public int          hp;
+        public float        hp;
         public int          atk;
         public float        moveSpeed;
         public float        atkSpeed;

@@ -25,12 +25,11 @@ public class CameraController : MonoBehaviour
 
     void CameraControl()
     {
-
         switch (_status)
         {
             case Define.PlayerStatus.Running:
                 RotFixer(15.83f);
-                PosFixer(-1.7f, 2.445f, -2.27f);
+                PosFixer(-1.7f, 2.445f, -2.85f);
                 break;
             case Define.PlayerStatus.Attacking:
                 _targetNotDead = _target.GetComponent<PlayerController>().TargetNotDead;
