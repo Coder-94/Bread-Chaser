@@ -11,29 +11,32 @@ public class PlayerBase : MonoBehaviour
         TriggerAtk,
         TriggerJump,
         TriggerBackStep,
+        TriggerLeftSlide,
+        TriggerRightSlide,
         IsAtk
     }
 
+
     public bool TargetNotDead { get; protected set; } = false;
 
-    protected Define.PlayerStatus _state;
+    protected Define.PlayerStatus   _state;
+    protected Define.PLRailPos      _railPos;
+    protected bool                  _isJumping = false;
+    protected PlayerStat            _stat;
+    protected Animator              _anim;
 
-    protected bool _isJumping = false;
-    protected PlayerStat _stat;
-    protected Animator _anim;
+    protected int[]                 _hashedParams;
+    protected Queue<Action>         _movementQueue = new Queue<Action>();
 
-    protected int[] _hashedParams;
-    protected Queue<Action> _movementQueue = new Queue<Action>();
+    protected GameObject            _target = null;
+    protected int                   _enemyMask = (1 << (int)Define.Layer.Enemy);
 
-    protected GameObject _target = null;
-    protected int _enemyMask = (1 << (int)Define.Layer.Enemy);
+    protected Vector3               _originPos;
+    protected GameObject            _targeting = null;
+    protected Rigidbody             _rb;
 
-    protected Vector3 _originPos;
-    protected GameObject _targeting = null;
-    protected Rigidbody _rb;
-
-    protected GameObject _punchEffect;
-    protected GameObject _dashEffect;
+    protected GameObject            _punchEffect;
+    protected GameObject            _dashEffect;
     #endregion
 
     #region currentState
@@ -59,6 +62,12 @@ public class PlayerBase : MonoBehaviour
                     break;
                 case Define.PlayerStatus.BackStepping:
                     BackStep();
+                    break;
+                case Define.PlayerStatus.LeftMoving:
+                    _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerLeftSlide]);
+                    break;
+                case Define.PlayerStatus.RightMoving:
+                    _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerRightSlide]);
                     break;
             }
         }
@@ -131,6 +140,7 @@ public class PlayerBase : MonoBehaviour
         _rb = GetComponent<Rigidbody>();
         _punchEffect = Util.FindChild(gameObject, "PunchHitBlue", true);
         _dashEffect = Util.FindChild(gameObject, "DashSmoke");
+        _railPos = Define.PLRailPos.SecondRail;
     }
     #endregion
 

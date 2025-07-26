@@ -41,9 +41,19 @@ public class Define
     {
         LockOning,
         Running,
+        LeftMoving,
+        RightMoving,
         Jumping,
         Attacking,
         BackStepping
+    }
+
+    public enum PLRailPos
+    {
+        FirstRail,
+        SecondRail,
+        ThirdRail,
+        FourthRail
     }
 
     public enum TouchEvent

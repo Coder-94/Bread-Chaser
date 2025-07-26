@@ -13,7 +13,6 @@ public abstract class BaseScene : MonoBehaviour
         BossEncounter,
         BossBattle
     }
-
     protected enum MonsterID
     {
         CityMob = 1,
@@ -25,6 +24,8 @@ public abstract class BaseScene : MonoBehaviour
         SpaceMob = 7,
         SpaceBoss = 8,
     }
+
+    public float[] railLineX = new float[4] { -4.7f, -1.7f, 1.7f, 4.7f };
 
     public Define.Scene             SceneType { get; protected set; } = Define.Scene.Unknown;
     public string                   SceneName { get; private set; }
@@ -73,7 +74,6 @@ public abstract class BaseScene : MonoBehaviour
             Managers.Resource.Instantiate("Prefabs/UI/EventSystem").name = "@EventSystem";
 
         Player = GameObject.FindGameObjectWithTag("Player");
-
     }
     #endregion
 
@@ -94,7 +94,7 @@ public abstract class BaseScene : MonoBehaviour
        {
             if (!spawnedMobChecker[i].spawnedMob)
             {
-                GameObject mob = Managers.Resource.Instantiate($"Entity/{SceneName}Mob", null, 5);
+                GameObject mob = Managers.Resource.Instantiate($"Entity/{SceneName}/{SceneName}Mob", null, 5);
                 mob.transform.position = spawnedMobChecker[i].spawnedPos;
 
                 mob.GetComponent<NormalMobBase>().initPos = spawnedMobChecker[i].spawnedPos;

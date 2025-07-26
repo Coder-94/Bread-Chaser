@@ -38,9 +38,30 @@ public class PlayerController : PlayerBase
             case Define.TouchEvent.UpSwipe:
                 CurrentState = Define.PlayerStatus.Jumping;
                 break;
+            case Define.TouchEvent.LeftSwipe:
+                SideMove(evt);
+                break;
+            case Define.TouchEvent.RightSwipe:
+                SideMove(evt);
+                break;
             case Define.TouchEvent.StartHolding:
                 CurrentState = Define.PlayerStatus.LockOning;
                 break;
+        }
+    }
+
+    //sideMove
+    void SideMove(Define.TouchEvent evt)
+    {
+        if(evt == Define.TouchEvent.LeftSwipe && _railPos != Define.PLRailPos.FirstRail)
+        {
+            _railPos--;
+            CurrentState = Define.PlayerStatus.LeftMoving;
+        }
+        else if(evt == Define.TouchEvent.RightSwipe && _railPos != Define.PLRailPos.FourthRail)
+        {
+            _railPos++;
+            CurrentState = Define.PlayerStatus.RightMoving;
         }
     }
 
@@ -70,8 +91,6 @@ public class PlayerController : PlayerBase
             if (evt == Define.TouchEvent.Tap)
                 Attack();
             ///Attack에 연타기능 추가
-            ///지민이 영상보고 적용
-            ///될수있으면 사이드 이동까지 제작
         }
     }
 
@@ -133,6 +152,12 @@ public class PlayerController : PlayerBase
             case Define.PlayerStatus.BackStepping:
                 BackStepRB();
                 break;
+            case Define.PlayerStatus.LeftMoving:
+                SideMoveRB();
+                break;
+            case Define.PlayerStatus.RightMoving:
+                SideMoveRB();
+                break;
         }
 
         //Mission Delay =====================================================================================
@@ -141,6 +166,28 @@ public class PlayerController : PlayerBase
             Action action = _movementQueue.Dequeue();
             action?.Invoke();
         }
+    }
+
+    //sideMoving ======================================================================================
+    void SideMoveRB()
+    {
+        Vector3 dest = new Vector3(Managers.Scene.CurrentScene.railLineX[(int)_railPos], 0, 0);
+        Vector3 currentPos = _rb.position;
+
+        Vector3 dir = dest - currentPos;
+
+        float dist = dir.magnitude;
+
+        if (Math.Abs(dir.x) > 0.01f)
+        {
+            float moveStep = 15f * Time.fixedDeltaTime;
+            float moveAmount = Mathf.Min(moveStep, dist);
+
+            Vector3 moveDir = dir.normalized * moveAmount;
+            _rb.MovePosition(currentPos + moveDir);
+        }
+        else
+            CurrentState = Define.PlayerStatus.Running;
     }
 
     //rb atk ======================================================================================

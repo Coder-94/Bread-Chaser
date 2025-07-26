@@ -25,12 +25,16 @@ public class CameraController : MonoBehaviour
 
     void CameraControl()
     {
+        if(_status != Define.PlayerStatus.Attacking)
+        {
+            RotFixer(15.83f);
+            PosFixer(_target.transform.position.x,
+                    _target.transform.position.y + 2.17f,
+                    _target.transform.position.z - 2.85f);
+        }
+
         switch (_status)
         {
-            case Define.PlayerStatus.Running:
-                RotFixer(15.83f);
-                PosFixer(-1.7f, 2.445f, -2.85f);
-                break;
             case Define.PlayerStatus.Attacking:
                 _targetNotDead = _target.GetComponent<PlayerController>().TargetNotDead;
                 if(_targetNotDead == true)
@@ -61,8 +65,6 @@ public class CameraController : MonoBehaviour
 
     IEnumerator Shaker(float roughness, float magnitude, float duration)
     {
-        Debug.Log("Shaked!");
-
         float elapsed = 0f;
 
         while (elapsed < duration)
