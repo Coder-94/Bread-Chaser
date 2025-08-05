@@ -50,7 +50,6 @@ public class CameraController : MonoBehaviour
                 break;
         }
         ///애미좆뒤진총알버그
-        ///개씨발좆병신애미씨발뒤진 카메라이동찐빠(백스탭 부분)연구
     }
 
     #region camSetting
