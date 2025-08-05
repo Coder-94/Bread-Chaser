@@ -50,7 +50,7 @@ public class PlayerController : PlayerBase
         }
     }
 
-    //sideMove
+    //sideMove ======================================================================================
     void SideMove(Define.TouchEvent evt)
     {
         if(evt == Define.TouchEvent.LeftSwipe && _railPos != Define.PLRailPos.FirstRail)
@@ -86,11 +86,23 @@ public class PlayerController : PlayerBase
 
     void Attacking(Define.TouchEvent evt)
     {
+        if (evt == Define.TouchEvent.DownSwipe)
+            CurrentState = Define.PlayerStatus.BackStepping;
+
         if (TargetNotDead)
         {
-            if (evt == Define.TouchEvent.Tap)
-                Attack();
-            ///Attack에 연타기능 추가
+            if (!_touchBlock && evt == Define.TouchEvent.Tap)
+            {
+                int rand = UnityEngine.Random.Range(0, 2);
+
+                if(rand == 0)
+                    _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerLeftAtk]);
+                else
+                    _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerRightAtk]);
+
+                //Camera.main.GetComponent<CameraController>().CamShake(10f, 1f, 0.2f);
+                _touchBlock = true;
+            }
         }
     }
 
@@ -107,10 +119,6 @@ public class PlayerController : PlayerBase
         {
             CurrentState = Define.PlayerStatus.BackStepping;
             _target = null;
-        }
-        else 
-        {
-            TargetNotDead = true;
         }
 
     }
@@ -185,6 +193,8 @@ public class PlayerController : PlayerBase
 
             Vector3 moveDir = dir.normalized * moveAmount;
             _rb.MovePosition(currentPos + moveDir);
+
+            Debug.Log($"railX: {Managers.Scene.CurrentScene.railLineX[(int)_railPos]}, rbPos: {_rb.position.x}");
         }
         else
             CurrentState = Define.PlayerStatus.Running;
@@ -253,14 +263,28 @@ public class PlayerController : PlayerBase
 
     public void OnAttack()
     {
-        NormalMobStat targetStat = _target.GetComponent<NormalMobStat>();
-        Managers.Sound.Play($"SE/Hit");
-        Camera.main.GetComponent<CameraController>().CamShake(10f, 1f, 0.4f);
-        targetStat.OnAttacked(0.5f);
-        _punchEffect.GetComponent<ParticleSystem>().Play();
-    }
+        if(_target != null)
+        {
+            NormalMobStat targetStat = _target.GetComponent<NormalMobStat>();
+            Managers.Sound.Play($"SE/Hit");
 
-    
+            bool targetNotDead = TargetNotDead;
+            targetStat.OnAttacked(0.5f, ref targetNotDead);
+            TargetNotDead = targetNotDead;
+
+            Vector3 targetColl = _target.GetComponent<Collider>().transform.position;
+            targetColl.z -= 0.5f;
+            targetColl.y += 0.5f;
+
+            if (_punchEffect == null)
+                _punchEffect = Managers.Resource.Instantiate("Effect/PunchHitOrange");
+            _punchEffect.transform.position = targetColl;
+            _punchEffect.GetComponent<ParticleSystem>().Play();
+        }
+
+        if(_touchBlock)
+            _touchBlock = false;
+    }
     #endregion
 
 }

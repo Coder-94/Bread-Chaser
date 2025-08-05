@@ -1,11 +1,10 @@
 using System.Collections;
+using TreeEditor;
 using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
     GameObject          _target;
-    Define.PlayerStatus _status;
-    bool                _targetNotDead;
     Vector3             _basePose;
     void Start()
     {
@@ -15,33 +14,62 @@ public class CameraController : MonoBehaviour
     void Init()
     {
         _target = Managers.Scene.CurrentScene.Player;
-        _status = _target.GetComponent<PlayerController>().CurrentState;
+        DefaultSetting();
     }
 
-    void Update()
+    void LateUpdate()
     {
         CameraControl();
     }
 
+    private void Update()
+    {
+        SideMoveCamControl();
+    }
+
+    void SideMoveCamControl()
+    {
+        Define.PlayerStatus targetState = _target.GetComponent<PlayerController>().CurrentState;
+        if (targetState == Define.PlayerStatus.LeftMoving || targetState == Define.PlayerStatus.RightMoving)
+            DefaultSetting();
+    }
+
     void CameraControl()
     {
-        if(_status != Define.PlayerStatus.Attacking)
-        {
-            RotFixer(15.83f);
-            PosFixer(_target.transform.position.x,
-                    _target.transform.position.y + 2.17f,
-                    _target.transform.position.z - 2.85f);
-        }
+        Define.PlayerStatus targetState = _target.GetComponent<PlayerController>().CurrentState;
+        bool targetDead = _target.GetComponent<PlayerController>().TargetNotDead;
 
-        switch (_status)
+        switch (targetState)
         {
             case Define.PlayerStatus.Attacking:
-                _targetNotDead = _target.GetComponent<PlayerController>().TargetNotDead;
-                if(_targetNotDead == true)
-                {
-                    //지속 공격용 화면 변환
-                }
+                AtkSetting(targetDead);
                 break;
+            case Define.PlayerStatus.Running:
+            default:
+                DefaultSetting();
+                break;
+        }
+        ///애미좆뒤진총알버그
+        ///개씨발좆병신애미씨발뒤진 카메라이동찐빠(백스탭 부분)연구
+    }
+
+    #region camSetting
+
+    public void DefaultSetting()
+    {
+        RotFixer(15.83f);
+        PosFixer(_target.transform.position.x, 2.74f, -3.76f);
+    }
+
+    public void AtkSetting(bool notDeadCheck)
+    {
+        if (notDeadCheck)
+        {
+            Debug.Log("시점 변경 on");
+            RotFixer(-4.7f, -14.9f);
+            PosFixer(_target.transform.position.x + 0.579f,
+            _target.transform.position.y + 0.85f,
+            _target.transform.position.z - 1.35f);
         }
     }
 
@@ -55,7 +83,9 @@ public class CameraController : MonoBehaviour
     {
         transform.position = new Vector3(x, y, z);
     }
+    #endregion
 
+    #region camShake
     public void CamShake(float roughness, float magnitude, float duration)
     {
         StopAllCoroutines();
@@ -65,6 +95,7 @@ public class CameraController : MonoBehaviour
 
     IEnumerator Shaker(float roughness, float magnitude, float duration)
     {
+        Debug.Log("Shaked!");
         float elapsed = 0f;
 
         while (elapsed < duration)
@@ -83,4 +114,5 @@ public class CameraController : MonoBehaviour
         }
         transform.position = _basePose;
     }
+    #endregion
 }

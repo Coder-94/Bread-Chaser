@@ -13,9 +13,14 @@ public class NormalMobStat : MonoBehaviour
         Init();
     }
 
-    public void OnAttacked(float power)
+    public bool OnAttacked(float power, ref bool targetNotDead)
     {
         Hp -= power;
+
+        if (Hp <= 0)
+            return targetNotDead = false;
+
+        return targetNotDead = true;
     }
 
     void Init()

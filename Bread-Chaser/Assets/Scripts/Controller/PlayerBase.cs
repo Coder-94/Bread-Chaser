@@ -9,6 +9,8 @@ public class PlayerBase : MonoBehaviour
     protected enum AnimParameters
     {
         TriggerAtk,
+        TriggerLeftAtk,
+        TriggerRightAtk,
         TriggerJump,
         TriggerBackStep,
         TriggerLeftSlide,
@@ -25,6 +27,7 @@ public class PlayerBase : MonoBehaviour
     protected PlayerStat            _stat;
     protected Animator              _anim;
 
+    protected bool                  _touchBlock = false;
     protected int[]                 _hashedParams;
     protected Queue<Action>         _movementQueue = new Queue<Action>();
 
@@ -35,8 +38,8 @@ public class PlayerBase : MonoBehaviour
     protected GameObject            _targeting = null;
     protected Rigidbody             _rb;
 
-    protected GameObject            _punchEffect;
     protected GameObject            _dashEffect;
+    protected GameObject            _punchEffect;
     #endregion
 
     #region currentState
@@ -100,6 +103,7 @@ public class PlayerBase : MonoBehaviour
     protected void BackStep()
     {
         TargetNotDead = false;
+        _touchBlock = false;
         _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerBackStep]);
     }
 
@@ -138,7 +142,6 @@ public class PlayerBase : MonoBehaviour
         _anim = GetComponent<Animator>();
         _stat = GetComponent<PlayerStat>();
         _rb = GetComponent<Rigidbody>();
-        _punchEffect = Util.FindChild(gameObject, "PunchHitBlue", true);
         _dashEffect = Util.FindChild(gameObject, "DashSmoke");
         _railPos = Define.PLRailPos.SecondRail;
     }

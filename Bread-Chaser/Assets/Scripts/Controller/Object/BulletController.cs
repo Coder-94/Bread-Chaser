@@ -12,14 +12,27 @@ public class BulletController : MonoBehaviour
     #region Unity Scripts
     private void Start()
     {
+        Init();
+    }
+
+    void Init()
+    {
         _target = Managers.Scene.CurrentScene.Player;
         _spawnTime = 0f;
         gameObject.transform.parent = null;
+
+        if (_target != null)
+        {
+            Vector3 dir = (_target.transform.position - transform.position).normalized;
+            transform.rotation = Quaternion.LookRotation(dir);
+        }
     }
 
     private void Update()
     {
-        transform.Translate(Vector3.forward * _bulletSpeed * Time.deltaTime, Space.Self);
+        Vector3 dir = Vector3.forward * _bulletSpeed * Time.deltaTime;
+
+        transform.Translate(dir, Space.Self);
 
         LifeTimeChecker();  
     }
