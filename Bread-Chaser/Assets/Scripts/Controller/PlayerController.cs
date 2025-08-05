@@ -100,7 +100,7 @@ public class PlayerController : PlayerBase
                 else
                     _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerRightAtk]);
 
-                //Camera.main.GetComponent<CameraController>().CamShake(10f, 1f, 0.2f);
+                Camera.main.GetComponent<CameraController>().CamShake(10f, 1f, 0.2f);
                 _touchBlock = true;
             }
         }
@@ -118,7 +118,6 @@ public class PlayerController : PlayerBase
         if (_target == null || _target.GetComponent<NormalMobStat>().Hp <= 0)
         {
             CurrentState = Define.PlayerStatus.BackStepping;
-            _target = null;
         }
 
     }
@@ -158,6 +157,7 @@ public class PlayerController : PlayerBase
                 AttackRB();
                 break;
             case Define.PlayerStatus.BackStepping:
+                
                 BackStepRB();
                 break;
             case Define.PlayerStatus.LeftMoving:
@@ -229,6 +229,7 @@ public class PlayerController : PlayerBase
     // rb backstep ======================================================================================
     void BackStepRB()
     {
+
         Vector3 currentPos = _rb.position;
         Vector3 dir = _originPos - currentPos;
         dir.y = 0;
@@ -244,7 +245,10 @@ public class PlayerController : PlayerBase
             _rb.MovePosition(currentPos + moveDir);
         }
         else
+        {
             CurrentState = Define.PlayerStatus.Running;
+        }
+            
     }
     #endregion
 
@@ -269,8 +273,10 @@ public class PlayerController : PlayerBase
             Managers.Sound.Play($"SE/Hit");
 
             bool targetNotDead = TargetNotDead;
-            targetStat.OnAttacked(0.5f, ref targetNotDead);
+            targetStat.OnAttacked(_stat.Atk, ref targetNotDead);
             TargetNotDead = targetNotDead;
+            Camera.main.GetComponent<CameraController>().AtkSetting(TargetNotDead);
+            Camera.main.GetComponent<CameraController>().CamShake(10f, 1f, 0.4f);
 
             Vector3 targetColl = _target.GetComponent<Collider>().transform.position;
             targetColl.z -= 0.5f;

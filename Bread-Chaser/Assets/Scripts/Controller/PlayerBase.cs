@@ -102,9 +102,11 @@ public class PlayerBase : MonoBehaviour
 
     protected void BackStep()
     {
+        _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerBackStep]);
+
         TargetNotDead = false;
         _touchBlock = false;
-        _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerBackStep]);
+        _target = null;
     }
 
     protected void StartLockOn()

@@ -17,11 +17,6 @@ public class CameraController : MonoBehaviour
         DefaultSetting();
     }
 
-    void LateUpdate()
-    {
-        CameraControl();
-    }
-
     private void Update()
     {
         SideMoveCamControl();
@@ -34,23 +29,6 @@ public class CameraController : MonoBehaviour
             DefaultSetting();
     }
 
-    void CameraControl()
-    {
-        Define.PlayerStatus targetState = _target.GetComponent<PlayerController>().CurrentState;
-        bool targetDead = _target.GetComponent<PlayerController>().TargetNotDead;
-
-        switch (targetState)
-        {
-            case Define.PlayerStatus.Attacking:
-                AtkSetting(targetDead);
-                break;
-            case Define.PlayerStatus.Running:
-            default:
-                DefaultSetting();
-                break;
-        }
-        ///¾Ö¹ÌÁ¿µÚÁøÃÑ¾Ë¹ö±×
-    }
 
     #region camSetting
 
@@ -70,6 +48,8 @@ public class CameraController : MonoBehaviour
             _target.transform.position.y + 0.85f,
             _target.transform.position.z - 1.35f);
         }
+        else
+            DefaultSetting();
     }
 
     void RotFixer(float x=0, float y=0, float z=0)
