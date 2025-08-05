@@ -27,6 +27,10 @@ public class PlayerController : PlayerBase
             case Define.PlayerStatus.Attacking:
                 Attacking(evt);
                 break;
+            case Define.PlayerStatus.Jumping:
+                if(_isJumping)
+                    return;
+                break;
         }
     }
 
