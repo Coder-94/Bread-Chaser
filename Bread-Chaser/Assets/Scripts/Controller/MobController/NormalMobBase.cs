@@ -97,6 +97,11 @@ public class NormalMobBase : BaseMobController
 
     protected void Idle()
     {
+        
+    }
+
+    protected override void Attack()
+    {
         _attackCooldown += Time.deltaTime;
 
         if (_attackCooldown >= mobStat.AtkSpeed)
@@ -104,6 +109,16 @@ public class NormalMobBase : BaseMobController
             _attackCooldown = 0f;
             _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerAtk]);
         }
+    }
+
+    protected override void LocalAtk()
+    {
+        throw new NotImplementedException();
+    }
+
+    protected override void Death()
+    {
+        throw new NotImplementedException();
     }
 
     #region Clear

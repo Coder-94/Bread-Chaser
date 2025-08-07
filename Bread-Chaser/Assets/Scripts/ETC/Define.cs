@@ -48,6 +48,15 @@ public class Define
         BackStepping
     }
 
+    public enum NormalMobStatus
+    {
+        Spawn,
+        Idle,
+        Attacking,
+        LocalAtacking,
+        Death
+    }
+
     public enum PLRailPos
     {
         FirstRail,

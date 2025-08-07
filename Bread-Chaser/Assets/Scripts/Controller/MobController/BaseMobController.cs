@@ -59,4 +59,7 @@ public abstract class BaseMobController : MonoBehaviour
 
     
     protected abstract void Clear();
+    protected abstract void Attack();
+    protected abstract void LocalAtk();
+    protected abstract void Death();
 }

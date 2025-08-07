@@ -9,7 +9,6 @@ public class BulletController : MonoBehaviour
     GameObject _target;
     public NormalMobStat parentStat;
 
-    //총알버그픽스시작
     #region Unity Scripts
     private void Start()
     {
