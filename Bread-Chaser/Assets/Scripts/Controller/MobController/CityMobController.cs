@@ -6,6 +6,7 @@ public class CityMobController : NormalMobBase
     #region Unity Scripts
     protected void Update()
     {
+        //dd
         if (mobStat.Hp <= 0)
             Clear();
 
