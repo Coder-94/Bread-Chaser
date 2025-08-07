@@ -113,7 +113,7 @@ public class NormalMobBase : BaseMobController
 
     protected override void LocalAtk()
     {
-        throw new NotImplementedException();
+
     }
 
     protected override void Death()
