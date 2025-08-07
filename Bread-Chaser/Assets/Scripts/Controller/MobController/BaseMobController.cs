@@ -57,7 +57,6 @@ public abstract class BaseMobController : MonoBehaviour
 
     #endregion
 
-    
     protected abstract void Clear();
     protected abstract void Attack();
     protected abstract void LocalAtk();

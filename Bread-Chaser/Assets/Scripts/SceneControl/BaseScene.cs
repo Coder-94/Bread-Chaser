@@ -46,12 +46,12 @@ public abstract class BaseScene : MonoBehaviour
 
     public Define.SpawnedMobChecker[] spawnedMobChecker = new Define.SpawnedMobChecker[]
     {
-        new Define.SpawnedMobChecker { spawnedMob = null, spawnedPos = new Vector3(0, 0.38f, 5f) },
-        new Define.SpawnedMobChecker { spawnedMob = null, spawnedPos = new Vector3(-0.82f, 0.38f, 5f) },
-        new Define.SpawnedMobChecker { spawnedMob = null, spawnedPos = new Vector3(0.82f, 0.38f, 5f) },
-        new Define.SpawnedMobChecker { spawnedMob = null, spawnedPos = new Vector3(-1.62f, 0.38f, 5f) },
-        new Define.SpawnedMobChecker { spawnedMob = null, spawnedPos = new Vector3(1.62f, 0.38f, 5f) },
-        new Define.SpawnedMobChecker { spawnedMob = null, spawnedPos = new Vector3(0, 1.65f, 5f) }
+        new Define.SpawnedMobChecker { isSpawned = false, spawnedPos = new Vector3(0, 0.38f, 5f) },
+        new Define.SpawnedMobChecker { isSpawned = false, spawnedPos = new Vector3(-0.82f, 0.38f, 5f) },
+        new Define.SpawnedMobChecker { isSpawned = false, spawnedPos = new Vector3(0.82f, 0.38f, 5f) },
+        new Define.SpawnedMobChecker { isSpawned = false, spawnedPos = new Vector3(-1.62f, 0.38f, 5f) },
+        new Define.SpawnedMobChecker { isSpawned = false, spawnedPos = new Vector3(1.62f, 0.38f, 5f) },
+        new Define.SpawnedMobChecker { isSpawned = false, spawnedPos = new Vector3(0, 1.65f, 5f) }
     };
     #endregion
 
@@ -92,7 +92,7 @@ public abstract class BaseScene : MonoBehaviour
     {
        for(int i=0; i<spawnedMobChecker.Length; i++)
        {
-            if (!spawnedMobChecker[i].spawnedMob)
+            if (!spawnedMobChecker[i].isSpawned)
             {
                 GameObject mob = Managers.Resource.Instantiate($"Entity/{SceneName}/{SceneName}Mob", null, 5);
                 mob.transform.position = spawnedMobChecker[i].spawnedPos;
@@ -101,7 +101,9 @@ public abstract class BaseScene : MonoBehaviour
                 mob.GetComponent<NormalMobStat>().SetID(id);
 
                 //Check init
-                spawnedMobChecker[i].spawnedMob = mob;
+                spawnedMobChecker[i].isSpawned = true;
+                mob.GetComponent<NormalMobBase>().SpawnedRoomNumSet(i);
+
                 MobCountController(true);
                 break;
             }

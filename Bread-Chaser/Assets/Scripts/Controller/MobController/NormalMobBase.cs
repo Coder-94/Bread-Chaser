@@ -15,6 +15,8 @@ public class NormalMobBase : BaseMobController
     }
 
     #region variables
+    protected Define.NormalMobStatus    myState = Define.NormalMobStatus.Idle;
+
     private bool                        _isInitialized = false;
     private float                       _targetValue = 0;
     private float                       _duration = 0.5f;
@@ -28,6 +30,8 @@ public class NormalMobBase : BaseMobController
     protected int[]                     _hashedParams;
     protected Animator                  _anim;
     private float                       _attackCooldown = 0f;
+
+    protected int                       _spawnedRoomNum = 999;
     #endregion
 
     #region Unity Scripts
@@ -95,10 +99,6 @@ public class NormalMobBase : BaseMobController
     }
     #endregion
 
-    protected void Idle()
-    {
-        
-    }
 
     protected override void Attack()
     {
@@ -118,28 +118,37 @@ public class NormalMobBase : BaseMobController
 
     protected override void Death()
     {
-        throw new NotImplementedException();
+        
+    }
+
+
+    public void SpawnedRoomNumSet(int loofedRoomNum)
+    {
+        _spawnedRoomNum = loofedRoomNum;
     }
 
     #region Clear
     protected override void Clear()
     {
-        for(int i=0; i<Managers.Scene.CurrentScene.spawnedMobChecker.Length; i++)
+        if (_spawnedRoomNum == 999)
         {
-            if (gameObject == Managers.Scene.CurrentScene.spawnedMobChecker[i].spawnedMob)
-            { 
-                _targetMaterial.SetFloat("_DissolveHeight", 1);
-                _targetValue = 0;
-                _duration = 0.5f;
-
-                mobStat.Clear();
-                Managers.Scene.CurrentScene.spawnedMobChecker[i].spawnedMob = null;
-                Managers.Scene.CurrentScene.MobCountController(false);
-                Managers.Resource.Destroy(gameObject);
-                break;
-            }
+            Debug.Log("Spawned Room Number Not Initialized!");
+            return;
         }
-            
+
+        //outer variables clear
+        mobStat.Clear();
+        Managers.Scene.CurrentScene.spawnedMobChecker[_spawnedRoomNum].isSpawned = false;
+        Managers.Scene.CurrentScene.MobCountController(false);
+
+        //inner variables clear
+        _targetMaterial.SetFloat("_DissolveHeight", 1);
+        _targetValue = 0;
+        _duration = 0.5f;
+        _spawnedRoomNum = 999;
+
+        //destroy self
+        Managers.Resource.Destroy(gameObject);
     }
     #endregion
 }

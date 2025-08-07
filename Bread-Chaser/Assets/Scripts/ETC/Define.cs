@@ -83,7 +83,7 @@ public class Define
 
     public struct SpawnedMobChecker
     {
-        public GameObject   spawnedMob;
+        public bool         isSpawned;
         public Vector3      spawnedPos;
     }
 

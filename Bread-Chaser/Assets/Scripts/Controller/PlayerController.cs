@@ -13,7 +13,6 @@ public class PlayerController : PlayerBase
     #region player control
 
     //input control ======================================================================================
-
     protected override void PlayerControl(Define.TouchEvent evt)
     {
         switch (CurrentState)
@@ -197,8 +196,6 @@ public class PlayerController : PlayerBase
 
             Vector3 moveDir = dir.normalized * moveAmount;
             _rb.MovePosition(currentPos + moveDir);
-
-            Debug.Log($"railX: {Managers.Scene.CurrentScene.railLineX[(int)_railPos]}, rbPos: {_rb.position.x}");
         }
         else
             CurrentState = Define.PlayerStatus.Running;

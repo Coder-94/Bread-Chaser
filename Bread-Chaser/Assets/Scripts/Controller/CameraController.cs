@@ -48,8 +48,7 @@ public class CameraController : MonoBehaviour
             _target.transform.position.y + 0.85f,
             _target.transform.position.z - 1.35f);
         }
-        else
-            DefaultSetting();
+        
     }
 
     void RotFixer(float x=0, float y=0, float z=0)
