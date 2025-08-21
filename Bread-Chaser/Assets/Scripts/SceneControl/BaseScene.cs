@@ -6,13 +6,13 @@ using UnityEngine.SceneManagement;
 
 public abstract class BaseScene : MonoBehaviour
 {
-    #region variables
-    public enum StageState
+    #region enums
+
+    protected enum WorldBtn
     {
-        Normal,
-        BossEncounter,
-        BossBattle
+        PauseBtn
     }
+
     protected enum MonsterID
     {
         CityMob = 1,
@@ -24,6 +24,9 @@ public abstract class BaseScene : MonoBehaviour
         SpaceMob = 7,
         SpaceBoss = 8,
     }
+    #endregion
+
+    #region variables
 
     public float[] railLineX = new float[4] { -4.7f, -1.7f, 1.7f, 4.7f };
 
@@ -74,6 +77,9 @@ public abstract class BaseScene : MonoBehaviour
             Managers.Resource.Instantiate("Prefabs/UI/EventSystem").name = "@EventSystem";
 
         Player = GameObject.FindGameObjectWithTag("Player");
+
+        Managers.UI.ShowSceneUI<Hp>();
+        Managers.UI.ShowSceneUI<Score>();
     }
     #endregion
 

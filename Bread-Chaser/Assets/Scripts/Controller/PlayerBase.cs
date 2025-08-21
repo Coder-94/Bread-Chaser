@@ -20,6 +20,7 @@ public class PlayerBase : MonoBehaviour
 
 
     public bool TargetNotDead { get; protected set; } = false;
+    public Vector3 OriginPos { get; protected set; } = new Vector3(9999, 9999, 9999);
 
     protected Define.PlayerStatus   _state;
     protected Define.PLRailPos      _railPos;
@@ -33,8 +34,7 @@ public class PlayerBase : MonoBehaviour
 
     protected GameObject            _target = null;
     protected int                   _enemyMask = (1 << (int)Define.Layer.Enemy);
-
-    protected Vector3               _originPos;
+    
     protected GameObject            _targeting = null;
     protected Rigidbody             _rb;
 
@@ -94,8 +94,12 @@ public class PlayerBase : MonoBehaviour
     {
         if (_target != null)
         {
-            _originPos = gameObject.transform.position;
-            _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerAtk]);
+            if (OriginPos == new Vector3(9999, 9999, 9999))
+                OriginPos = gameObject.transform.position;
+            else
+                Debug.Log($"[Error] OriginPos is {OriginPos}");
+
+                _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerAtk]);
             _dashEffect.GetComponent<ParticleSystem>().Play();
         }
     }
@@ -103,7 +107,7 @@ public class PlayerBase : MonoBehaviour
     protected void BackStep()
     {
         _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerBackStep]);
-
+        _target.GetComponent<BaseMobController>().TargetCheck(false);
         TargetNotDead = false;
         _touchBlock = false;
         _target = null;
@@ -164,6 +168,12 @@ public class PlayerBase : MonoBehaviour
         _anim.SetLookAtPosition(_target.transform.position);
     }
 
+    private void OnParticleCollision(GameObject other)
+    {
+        if (other.layer == (int)Define.Layer.EnemyAtk)
+            Debug.Log("Local Attacked!");
+    }
+
     private void OnCollisionEnter(Collision collision)
     {
         if(CurrentState == Define.PlayerStatus.Jumping &&
@@ -178,6 +188,8 @@ public class PlayerBase : MonoBehaviour
     {
         if (other.gameObject.layer == (int)Define.Layer.Obstacle)
             Debug.Log("Obstacle Collisioned");
+        else if (other.gameObject.layer == (int)Define.Layer.EnemyAtk)
+            Debug.Log("Attacked!");
     }
 
     private void FixedUpdate()

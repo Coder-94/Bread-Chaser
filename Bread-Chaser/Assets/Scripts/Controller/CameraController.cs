@@ -22,6 +22,13 @@ public class CameraController : MonoBehaviour
         SideMoveCamControl();
     }
 
+    private void LateUpdate()
+    {
+        Define.PlayerStatus targetState = _target.GetComponent<PlayerController>().CurrentState;
+        if (targetState == Define.PlayerStatus.Running || targetState == Define.PlayerStatus.BackStepping)
+            DefaultSetting();
+    }
+
     void SideMoveCamControl()
     {
         Define.PlayerStatus targetState = _target.GetComponent<PlayerController>().CurrentState;

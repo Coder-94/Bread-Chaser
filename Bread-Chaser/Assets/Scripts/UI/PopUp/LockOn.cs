@@ -95,7 +95,15 @@ public class LockOn: UIPopUp
 
     }
 
-    public GameObject GetTarget() { return _target; }
+    public GameObject GetTarget()
+    {
+        if(_target != null)
+        {
+            _target.GetComponent<BaseMobController>().TargetCheck(true);
+            return _target;
+        }
+        return null;
+    }
 
     public void SetFirstTouch(Vector2 currentTouchPos)
     {

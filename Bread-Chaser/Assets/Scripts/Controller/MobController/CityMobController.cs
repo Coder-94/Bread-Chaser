@@ -3,29 +3,14 @@ using UnityEngine;
 
 public class CityMobController : NormalMobBase
 {
-    #region Unity Scripts
-    protected void Update()
+    protected override void Init()
     {
-        //dd
-        if (mobStat.Hp <= 0)
-            Clear();
-
-        RotFixer(player);
-
-        switch (myState)
-        {
-            case Define.NormalMobStatus.Idle:
-                Attack();
-                break;
-        }
+        base.Init();
+        _spAtkToggle = true;
     }
 
-    private void LateUpdate()
+    protected override void SpecialAtk()
     {
-        PosFixer();
+        
     }
-
-    #endregion
-
-
 }

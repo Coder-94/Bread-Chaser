@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 public class NormalMobAnimMachine : MonoBehaviour
 {
@@ -13,5 +14,17 @@ public class NormalMobAnimMachine : MonoBehaviour
 
         BulletController bulletController = bullet.GetComponent<BulletController>();
         bulletController.parentStat = GetComponent<NormalMobStat>();
+    }
+
+    protected void LocalAtk() 
+    {
+        Vector3 spawnPos = GetComponent<NormalMobBase>().targetedPos.transform.position;
+        GameObject boom = Managers.Resource.Instantiate($"Entity/City/LocalExplosion", null, 1);
+        boom.transform.position = spawnPos;
+    }
+
+    protected void ReturnToIdle()
+    {
+        GetComponent<NormalMobBase>().CurrentState = Define.NormalMobStatus.Idle;
     }
 }

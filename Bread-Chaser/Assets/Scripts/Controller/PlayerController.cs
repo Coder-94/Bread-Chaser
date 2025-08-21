@@ -232,7 +232,7 @@ public class PlayerController : PlayerBase
     {
 
         Vector3 currentPos = _rb.position;
-        Vector3 dir = _originPos - currentPos;
+        Vector3 dir = OriginPos - currentPos;
         dir.y = 0;
 
         float dist = dir.magnitude;
@@ -247,6 +247,9 @@ public class PlayerController : PlayerBase
         }
         else
         {
+            if (OriginPos != new Vector3(9999, 9999, 9999))
+                OriginPos = new Vector3(9999, 9999, 9999);
+
             CurrentState = Define.PlayerStatus.Running;
         }
             
@@ -277,15 +280,14 @@ public class PlayerController : PlayerBase
             targetStat.OnAttacked(_stat.Atk, ref targetNotDead);
             TargetNotDead = targetNotDead;
             Camera.main.GetComponent<CameraController>().AtkSetting(TargetNotDead);
-            Camera.main.GetComponent<CameraController>().CamShake(10f, 1f, 0.4f);
+            Camera.main.GetComponent<CameraController>().CamShake(10f, 1f, 0.2f);
 
-            Vector3 targetColl = _target.GetComponent<Collider>().transform.position;
-            targetColl.z -= 0.5f;
-            targetColl.y += 0.5f;
+            Vector3 targetPos = _target.GetComponent<NormalMobBase>().targetedPos.transform.position;
+            targetPos.z -= 0.5f;
 
             if (_punchEffect == null)
                 _punchEffect = Managers.Resource.Instantiate("Effect/PunchHitOrange");
-            _punchEffect.transform.position = targetColl;
+            _punchEffect.transform.position = targetPos;
             _punchEffect.GetComponent<ParticleSystem>().Play();
         }
 

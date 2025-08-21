@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -12,7 +13,7 @@ public abstract class UIBase : MonoBehaviour
     Dictionary<Type, UnityEngine.Object[]>          _objects = new Dictionary<Type, UnityEngine.Object[]>();
 
     protected   GameObject  GetObject(int index)    { return Get<GameObject>(index); }
-    protected   Text        GetText(int index)      { return Get<Text>(index); }
+    protected   TMP_Text    GetText(int index)      { return Get<TMP_Text>(index); }
     protected   Button      GetButton(int index)    { return Get<Button>(index); }
     protected   Image       GetImage(int index)     { return Get<Image>(index); }
 

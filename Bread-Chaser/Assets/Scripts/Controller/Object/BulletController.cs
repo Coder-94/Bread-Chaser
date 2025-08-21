@@ -21,11 +21,11 @@ public class BulletController : MonoBehaviour
         _spawnTime = 0f;
         gameObject.transform.parent = null;
 
-        if (_target != null)
+        /*if (_target != null)
         {
             Vector3 dir = (_target.transform.position - transform.position).normalized;
             transform.rotation = Quaternion.LookRotation(dir);
-        }
+        }*/
     }
 
     private void Update()
@@ -52,7 +52,6 @@ public class BulletController : MonoBehaviour
                 /* Test targetStat = target.GetComponent<Test>();
                  targetStat.TestDamage(parentStat);*/
 
-                Debug.Log("Attacked!");
                 Managers.Resource.Destroy(gameObject);
             }
         }

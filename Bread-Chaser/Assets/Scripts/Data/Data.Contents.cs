@@ -19,7 +19,7 @@ namespace Data
     public class PlayerStat
     {
         public int          level;
-        public float        hp;
+        public int          hp;
         public int          atk;
         public float        moveSpeed;
         public float        atkSpeed;

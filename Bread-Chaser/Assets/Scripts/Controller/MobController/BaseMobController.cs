@@ -8,6 +8,8 @@ public abstract class BaseMobController : MonoBehaviour
 
     protected GameObject    player;
     public Vector3          initPos;
+    public GameObject       targetedPos;
+    public bool             ImTargeted { get; protected set; } = false;
     #endregion
 
     #region Start & Update
@@ -23,6 +25,7 @@ public abstract class BaseMobController : MonoBehaviour
     protected virtual void Init()
     {
         player =    Managers.Scene.CurrentScene.Player;
+        targetedPos = transform.GetChild(transform.childCount - 1).gameObject;
     }
     #endregion
 
@@ -42,10 +45,10 @@ public abstract class BaseMobController : MonoBehaviour
         transform.rotation = Quaternion.Lerp(transform.rotation, quat, 20 * Time.deltaTime);
     }
 
-    protected void PosFixer()
+    protected virtual void PosFixer()
     {
         Define.PlayerStatus currentStatus = player.GetComponent<PlayerController>().CurrentState;
-        if(currentStatus!= Define.PlayerStatus.Attacking && currentStatus != Define.PlayerStatus.BackStepping) 
+        if (currentStatus!= Define.PlayerStatus.Attacking && currentStatus != Define.PlayerStatus.BackStepping) 
         {
             Vector3 newPosition = transform.position;
 
@@ -57,8 +60,9 @@ public abstract class BaseMobController : MonoBehaviour
 
     #endregion
 
+    public void TargetCheck(bool mystate) { ImTargeted = mystate; }
+
     protected abstract void Clear();
     protected abstract void Attack();
     protected abstract void LocalAtk();
-    protected abstract void Death();
 }

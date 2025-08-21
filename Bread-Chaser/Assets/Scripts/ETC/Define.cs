@@ -16,7 +16,8 @@ public class Define
         Wall = 6,
         Obstacle = 7,
         Player = 8,
-        Enemy = 9
+        Enemy = 9,
+        EnemyAtk = 10
     }
 
     public enum Sound
@@ -37,6 +38,15 @@ public class Define
         Score
     }
 
+    public enum StageState
+    {
+        Init,
+        Normal,
+        BossEncounter,
+        BossBattle,
+        Score
+    }
+
     public enum PlayerStatus
     {
         LockOning,
@@ -53,8 +63,18 @@ public class Define
         Spawn,
         Idle,
         Attacking,
-        LocalAtacking,
+        LocalAttacking,
+        SpecialAttacking,
         Death
+    }
+
+    public enum SceneState
+    {
+        Intro,
+        Talk,
+        DefaultPlay,
+        BossBattle,
+        Ending
     }
 
     public enum PLRailPos
