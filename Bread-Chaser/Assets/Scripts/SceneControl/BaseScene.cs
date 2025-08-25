@@ -80,6 +80,7 @@ public abstract class BaseScene : MonoBehaviour
 
         Managers.UI.ShowSceneUI<Hp>();
         Managers.UI.ShowSceneUI<Score>();
+        Managers.UI.ShowSceneUI<PauseBtn>();
     }
     #endregion
 

@@ -1,16 +1,29 @@
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class PauseBtn : MonoBehaviour
+public class PauseBtn : UIScene
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    Button _btn;
+
+    enum Buttons 
     {
-        
+        Btn
     }
 
-    // Update is called once per frame
-    void Update()
+    public override void Init()
     {
-        
+        base.Init();
+        Bind<Button>(typeof(Buttons));
+
+        _btn = GetButton((int)Buttons.Btn);
+
+        _btn.onClick.AddListener(Pause);
+    }
+
+    void Pause()
+    {
+        Time.timeScale = 0f;
+        Managers.UI.ShowPopUpUI<PausePopUp>("PausePopUp", 1);
     }
 }

@@ -35,8 +35,8 @@ public class InputManager
 
                 //ui touch blocker ====================================================================
                 if (EventSystem.current.IsPointerOverGameObject(touch.fingerId))
-                    return;
-                    
+                { Debug.Log("ff"); return; }
+                //애미뒤진 ui클릭찐빠 하면 끝임. 다하면 바로 씬 ㄱㄱ
 
                 //first touch input check ====================================================================
                 if (!_pressed)
@@ -76,6 +76,7 @@ public class InputManager
                 //result check ====================================================================
                 if (_pressed)
                 {
+
                     //swipe result check ====================================================================
                     if (_swipeDelta.magnitude >= DRAGDISTANCE && !_holded)
                     {

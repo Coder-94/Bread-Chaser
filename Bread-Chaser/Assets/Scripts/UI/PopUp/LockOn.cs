@@ -17,7 +17,6 @@ public class LockOn: UIPopUp
     protected float _cameraRotCorrection = 3f;
     enum GameObjects
     {
-        LockOn,
         TargetCursor,
         OnTargetCursor
     }

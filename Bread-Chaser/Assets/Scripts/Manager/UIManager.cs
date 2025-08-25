@@ -93,12 +93,12 @@ public class UIManager
 
     #region PopUp
 
-    public T ShowPopUpUI<T>(string name = null) where T : UIPopUp
+    public T ShowPopUpUI<T>(string name = null, int count = 3) where T : UIPopUp
     {
         if (string.IsNullOrEmpty(name))
             name = typeof(T).Name;
 
-        GameObject go = Managers.Resource.Instantiate($"UI/PopUp/{name}");
+        GameObject go = Managers.Resource.Instantiate($"UI/PopUp/{name}", null, count);
         T popUp = Util.GetOrAddComponent<T>(go);
         _popUpStack.Push(popUp);
 

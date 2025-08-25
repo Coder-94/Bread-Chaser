@@ -12,20 +12,6 @@ public class Hp : UIScene
 
     Stack<GameObject>   _heartStack = new Stack<GameObject>();
 
-    private void Update()
-    {
-        if (Input.GetMouseButtonDown(0))
-        {
-            _player.GetComponent<PlayerStat>().OnDamaged();
-            Debug.Log($"Btn Down, {_player.GetComponent<PlayerStat>().CurrentHp}");
-        }
-        else if (Input.GetMouseButtonDown(1))
-        {
-            _player.GetComponent<PlayerStat>().Heal();
-            Debug.Log($"Btn RightDown, {_player.GetComponent<PlayerStat>().CurrentHp}");
-        }
-    }
-
     public override void Init()
     {
         base.Init();

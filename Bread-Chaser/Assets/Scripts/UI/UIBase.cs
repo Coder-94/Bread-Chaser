@@ -15,13 +15,14 @@ public abstract class UIBase : MonoBehaviour
     protected   GameObject  GetObject(int index)    { return Get<GameObject>(index); }
     protected   TMP_Text    GetText(int index)      { return Get<TMP_Text>(index); }
     protected   Button      GetButton(int index)    { return Get<Button>(index); }
+    protected   Slider      GetSlider(int index)    { return Get<Slider>(index); }
     protected   Image       GetImage(int index)     { return Get<Image>(index); }
 
     public abstract void Init();
 
     #endregion
 
-    private void Start()
+    private void Awake()
     {
         Init();
     }
@@ -56,22 +57,6 @@ public abstract class UIBase : MonoBehaviour
         return objects[index] as T;
     }
 
-    public static void BindEvent(GameObject go, Action<PointerEventData> action, Define.UIEvent type = Define.UIEvent.Click)
-    {
-        UI_EventHandler evt = Util.GetOrAddComponent<UI_EventHandler>(go);
-
-        switch (type)
-        {
-            case Define.UIEvent.Click:
-                evt.OnClickHandler -= action;
-                evt.OnClickHandler += action;
-                break;
-            case Define.UIEvent.Drag:
-                evt.OnDragHandler -= action;
-                evt.OnDragHandler += action;
-                break;
-        }
-    }
 
     #endregion
 }

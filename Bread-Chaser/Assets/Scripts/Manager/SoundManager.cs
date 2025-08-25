@@ -1,12 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.UI;
+using UnityEngine.UIElements;
+using static Define;
 
 public class SoundManager
 {
-    AudioSource[] _audioSources = new AudioSource[(int)Define.Sound.MaxCount];
-    Dictionary<string, AudioClip> _audioClips = new Dictionary<string, AudioClip>();
-
+    AudioSource[]                   _audioSources = new AudioSource[(int)Define.Sound.MaxCount];
+    Dictionary<string, AudioClip>   _audioClips = new Dictionary<string, AudioClip>();
+    float[]                         _previousVolume = new float[(int)Define.Sound.MaxCount] { 1, 1 };
+    float[]                         _lastVolume = new float[(int)Define.Sound.MaxCount] { 1, 1 };
     public void Init()
     {
         GameObject root = GameObject.Find("@Sound");
@@ -21,8 +26,7 @@ public class SoundManager
                 GameObject go = new GameObject { name = soundNames[i] };
                 _audioSources[i] = go.AddComponent<AudioSource>();
 
-                //강의 내에 없는 추가코드
-                //코드에서 직접적으로 3d사운드효과 수정(강의상에선 수정안됨)
+                //3d SoundEffect Fix
                 /*
                 _audioSources[i].spatialBlend = 1.0f;
                 _audioSources[i].minDistance = 1.0f;
@@ -77,6 +81,34 @@ public class SoundManager
         }
     }
 
+    public void SetVolume(float volumeValue, Define.Sound volume)
+    {
+        _audioSources[(int)volume].volume = volumeValue;
+    }
+
+    public void OnOffVolume(UnityEngine.UI.Slider slider, Define.Sound volume, bool alreadyOn)
+    {
+        if (alreadyOn)
+        {
+            _previousVolume[(int)volume] = slider.value;
+            slider.value = 0;
+        }
+        else if (!alreadyOn)
+        {
+            slider.value = _previousVolume[(int)volume];
+        }
+
+    }
+
+    public void SaveCurrentVolume()
+    {
+        _lastVolume[(int)Define.Sound.Effect] = _audioSources[(int)Define.Sound.Effect].volume;
+        _lastVolume[(int)Define.Sound.Bgm] = _audioSources[(int)Define.Sound.Bgm].volume;
+    }
+
+    public float LoadCurrentVolume(Define.Sound volume) { return _lastVolume[(int)volume]; }
+
+
     AudioClip GetOrAddAudioClip(string path, Define.Sound type = Define.Sound.Effect)
     {
         if (path.Contains("Sounds/") == false)
@@ -91,7 +123,7 @@ public class SoundManager
         }
         else
         {
-            //_audioClips에 해당 벨류값이 없을때 = 처음 호출됐을때, 새 오디오 클립 저장
+            //save initial audio clip
             if (_audioClips.TryGetValue(path, out audioClip) == false)
             {
                 audioClip = Managers.Resource.Load<AudioClip>(path);
