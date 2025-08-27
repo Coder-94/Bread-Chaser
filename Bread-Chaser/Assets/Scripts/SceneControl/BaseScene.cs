@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
+using UnityEngineInternal;
 
 public abstract class BaseScene : MonoBehaviour
 {
@@ -117,7 +118,7 @@ public abstract class BaseScene : MonoBehaviour
     }
     #endregion
 
-    #region sceneState & scoreCheck
+    #region sceneState
     
     public void SetSceneState(Define.SceneState sceneState)
     {
@@ -125,6 +126,7 @@ public abstract class BaseScene : MonoBehaviour
     }
 
     #endregion
+
     public void MobCountController(bool increased )
     {
         if(increased)
