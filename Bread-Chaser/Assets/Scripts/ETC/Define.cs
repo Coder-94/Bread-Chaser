@@ -66,8 +66,8 @@ public class Define
     public enum SceneState
     {
         Intro,
-        Talk,
         DefaultPlay,
+        LevelUp,
         BossBattle,
         Ending
     }

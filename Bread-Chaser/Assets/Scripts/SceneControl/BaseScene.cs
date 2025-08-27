@@ -8,11 +8,6 @@ public abstract class BaseScene : MonoBehaviour
 {
     #region enums
 
-    protected enum WorldBtn
-    {
-        PauseBtn
-    }
-
     protected enum MonsterID
     {
         CityMob = 1,
@@ -31,6 +26,7 @@ public abstract class BaseScene : MonoBehaviour
     public float[] railLineX = new float[4] { -4.7f, -1.7f, 1.7f, 4.7f };
 
     public Define.Scene             SceneType { get; protected set; } = Define.Scene.Unknown;
+    public Define.SceneState        SceneState { get; protected set; }
     public string                   SceneName { get; private set; }
     public GameObject               Player { get; private set; }
     
@@ -71,7 +67,7 @@ public abstract class BaseScene : MonoBehaviour
     {
         MonsterCount = 0;
         SceneName = SceneManager.GetActiveScene().name;
-
+        SceneState = Define.SceneState.Intro;
         UnityEngine.Object obj = GameObject.FindAnyObjectByType(typeof(EventSystem));
         if (obj == null)
             Managers.Resource.Instantiate("Prefabs/UI/EventSystem").name = "@EventSystem";
@@ -81,6 +77,8 @@ public abstract class BaseScene : MonoBehaviour
         Managers.UI.ShowSceneUI<Hp>();
         Managers.UI.ShowSceneUI<Score>();
         Managers.UI.ShowSceneUI<PauseBtn>();
+
+        Managers.UI.ShowPopUpUI<StartTxT>();
     }
     #endregion
 
@@ -120,6 +118,14 @@ public abstract class BaseScene : MonoBehaviour
     }
     #endregion
 
+    #region sceneState & scoreCheck
+    
+    public void SetSceneState(Define.SceneState sceneState)
+    {
+        SceneState = sceneState;
+    }
+
+    #endregion
     public void MobCountController(bool increased )
     {
         if(increased)

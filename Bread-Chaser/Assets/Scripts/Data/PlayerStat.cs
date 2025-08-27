@@ -3,11 +3,11 @@ using UnityEngine;
 
 public class PlayerStat : MonoBehaviour
 {
-    public Action<string> HpCountAction = null;
+    public Action<float> HpCountAction = null;
 
     public int      Level { get; private set; } = 1;
-    public int      Hp { get; private set; }
-    public int      CurrentHp { get; private set; }
+    public float    Hp { get; private set; }
+    public float    CurrentHp { get; private set; }
     public int      Atk { get; private set; }
     public float    AtkSpd { get; private set; }
 
@@ -30,18 +30,18 @@ public class PlayerStat : MonoBehaviour
         AtkSpd = stat.atkSpeed;
     }
 
-    public void OnDamaged()
+    public void OnAttacked(float power)
     {
-        CurrentHp--;
-        HpCountAction.Invoke("-");
+        CurrentHp -= power;
+        HpCountAction.Invoke(CurrentHp);
     }
 
-    public void Heal()
+    public void Heal(float healPower)
     {
         if (CurrentHp >= Hp)
             return;
 
-        CurrentHp++;
-        HpCountAction.Invoke("+");
+        CurrentHp += healPower;
+        HpCountAction.Invoke(CurrentHp);
     }
 }

@@ -8,6 +8,10 @@ public class Area : MonoBehaviour
     public float            AreaSize { get; protected set; }
     private float           _disapperRange = -15f;
     private GameObject      _player;
+
+    private const float     RUNNINGMAGNIFICATION = 15f;
+
+
     private void Awake()
     {
         AreaSize = gameObject.GetComponent<BoxCollider>().size.z * gameObject.transform.localScale.z;
@@ -16,7 +20,7 @@ public class Area : MonoBehaviour
 
     private void Update()
     {
-        float moveSpeed = _player.GetComponent<PlayerStat>().moveSpeed;
+        float moveSpeed = _player.GetComponent<PlayerStat>().moveSpeed * RUNNINGMAGNIFICATION;
 
         transform.Translate(Vector3.back * 20f * Time.deltaTime);
         if (gameObject.transform.position.z + (AreaSize) <= _disapperRange)

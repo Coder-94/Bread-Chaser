@@ -1,0 +1,10 @@
+# ninja log v5
+105	2511	7778296953182942	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	f2f7123ff59be056
+134	2526	7778296953182942	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	4603347d9d8085f4
+50	2542	7778296953576799	GameActivity/CMakeFiles/game.dir/UGAConfiguration.cpp.o	81bac3239b828217
+193	2579	7778296953931749	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	250ebbc850221769
+223	2715	7778296955315095	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	91d5fcb67b89810
+28	2818	7778296956320504	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	5499898b0e10b028
+76	3026	7778296958584501	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	82ce4808440bdbb
+3	3169	7778296959942921	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	a3af966a0fd09e3b
+3170	3434	7778296962583898	D:/Programming/Unity/Unity_Projects/Bread-Chaser/Bread-Chaser/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/6f5v2f4d/obj/arm64-v8a/libgame.so	bb81742e0c3a7c2c

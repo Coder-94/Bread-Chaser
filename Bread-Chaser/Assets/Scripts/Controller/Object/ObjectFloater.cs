@@ -1,5 +1,4 @@
 using UnityEngine;
-using static UnityEditor.Searcher.SearcherWindow.Alignment;
 using UnityEngine.UIElements;
 
 public class ObjectFloater : MonoBehaviour

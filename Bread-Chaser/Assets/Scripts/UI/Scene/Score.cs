@@ -17,12 +17,13 @@ public class Score : UIScene
 
     private void Update()
     {
-        ScoreChecker();
+        if(Managers.Scene.CurrentScene.SceneState != Define.SceneState.Intro)
+            ScoreChecker();
     }
 
     void ScoreChecker()
     {
-        _scoreCounter += 1f * Time.deltaTime * _magnification; // 초당 1 증가
+        //_scoreCounter += 1f * Time.deltaTime * //플레이어꺼무브스피드변경;  moveSpd per sec
         ScorePoint = Mathf.FloorToInt(_scoreCounter);
         _text.text = $"Score: {ScorePoint}";
     }

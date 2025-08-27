@@ -1,0 +1,2 @@
+D:\Programming\Unity\Unity_Projects\Bread-Chaser\Bread-Chaser\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\src\main\cpp\CMakeLists.txt
+D:\Programming\Unity\Unity_Projects\Bread-Chaser\Bread-Chaser\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\src\main\cpp\GameActivity\CMakeLists.txt

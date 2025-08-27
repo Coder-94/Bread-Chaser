@@ -3,7 +3,7 @@ using UnityEngine;
 public class NormalMobStat : MonoBehaviour
 {
     public int      Id { get; private set; }
-    public int      Hp { get; private set; }
+    public float    Hp { get; private set; }
     public int      Atk { get; private set; }
     public int      AtkSpeed { get; private set; }
 
@@ -15,7 +15,7 @@ public class NormalMobStat : MonoBehaviour
 
     public bool OnAttacked(float power, ref bool targetNotDead)
     {
-        Hp -= (int)power;
+        Hp -= power;
 
         if (Hp <= 0)
             return targetNotDead = false;
@@ -27,7 +27,7 @@ public class NormalMobStat : MonoBehaviour
     {
         Data.MobStat stat = Managers.Data.NMStatDict[Id];
 
-        Hp = (int)stat.hp;
+        Hp = stat.hp;
         Atk = stat.atk;
         AtkSpeed = stat.atkSpeed;
     }

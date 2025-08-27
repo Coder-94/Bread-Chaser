@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
-using UnityEditor.DeviceSimulation;
 using UnityEngine;
 using static Define;
 using static UnityEngine.GraphicsBuffer;

@@ -4,7 +4,8 @@ public class CityScene : BaseScene
 {
     private void Update()
     {
-        MobSpawner((int)MonsterID.CityMob, 5, 11);
+        if(SceneState != Define.SceneState.Intro)
+            MobSpawner((int)MonsterID.CityMob, 5, 11);
     }
 
     protected override void Init()

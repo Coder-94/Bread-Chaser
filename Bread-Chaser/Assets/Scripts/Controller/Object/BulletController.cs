@@ -15,10 +15,14 @@ public class BulletController : MonoBehaviour
         Init();
     }
 
+    private void OnEnable()
+    {
+        _spawnTime = 0f;
+    }
+
     void Init()
     {
         _target = Managers.Scene.CurrentScene.Player;
-        _spawnTime = 0f;
         gameObject.transform.parent = null;
 
         /*if (_target != null)
