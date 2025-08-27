@@ -5,10 +5,8 @@ using UnityEngine.UI;
 
 public class Score : UIScene
 {
-    public int  ScorePoint { get; private set; } = 0;
     TMP_Text    _text;
-    float       _scoreCounter = 0f;
-    int         _magnification = 10;
+    
 
     enum Texts 
     { 
@@ -17,15 +15,12 @@ public class Score : UIScene
 
     private void Update()
     {
-        if(Managers.Scene.CurrentScene.SceneState != Define.SceneState.Intro)
-            ScoreChecker();
+        ScoreShower();
     }
 
-    void ScoreChecker()
+    void ScoreShower()
     {
-        //_scoreCounter += 1f * Time.deltaTime * //플레이어꺼무브스피드변경;  moveSpd per sec
-        ScorePoint = Mathf.FloorToInt(_scoreCounter);
-        _text.text = $"Score: {ScorePoint}";
+        _text.text = $"Score: {Managers.Game.ShowScore()}";
     }
 
     public override void Init()
@@ -35,7 +30,7 @@ public class Score : UIScene
 
         _text = GetText((int)Texts.ScorePoint);
 
-        _text.text = $"Score: {ScorePoint}";
+        _text.text = $"Score: {Managers.Game.ShowScore()}";
     }
 
 

@@ -11,14 +11,15 @@ public class Managers : MonoBehaviour
     #endregion
 
     #region Managers
-    ResourceManager     _resource = new ResourceManager();
-    PoolManager         _pool = new PoolManager();
-    InputManager        _input = new InputManager();
-    UIManager           _ui = new UIManager();
-    SceneManagerEX      _scene = new SceneManagerEX();
-    AreaManager         _area = new AreaManager();
-    DataManager         _data = new DataManager();
-    SoundManager        _sound = new SoundManager();
+    ResourceManager     _resource = new();
+    PoolManager         _pool = new();
+    InputManager        _input = new();
+    UIManager           _ui = new();
+    SceneManagerEX      _scene = new();
+    AreaManager         _area = new();
+    DataManager         _data = new();
+    SoundManager        _sound = new();
+    GameManager         _game = new();
 
     public static   ResourceManager     Resource { get { return Instance._resource; } }
     public static   PoolManager         Pool { get { return Instance._pool; } }
@@ -28,6 +29,7 @@ public class Managers : MonoBehaviour
     public static AreaManager           Area { get { return Instance._area; } }
     public static DataManager           Data { get { return Instance._data; } }
     public static SoundManager          Sound { get { return Instance._sound; } }
+    public static GameManager           Game { get { return Instance._game; } }
     #endregion
 
     #region Start & Update
@@ -40,6 +42,8 @@ public class Managers : MonoBehaviour
     void Update()
     {
         _input.OnUpdate();
+
+        _game.ScoreChecker();
     }
     #endregion
 
