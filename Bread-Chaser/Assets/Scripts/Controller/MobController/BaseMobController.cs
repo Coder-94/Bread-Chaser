@@ -24,7 +24,7 @@ public abstract class BaseMobController : MonoBehaviour
     #region Init
     protected virtual void Init()
     {
-        player =    Managers.Scene.CurrentScene.Player;
+        player = Managers.Game.GetPlayer();
         targetedPos = transform.GetChild(transform.childCount - 1).gameObject;
     }
     #endregion

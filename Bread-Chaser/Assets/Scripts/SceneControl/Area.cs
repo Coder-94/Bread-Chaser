@@ -15,7 +15,7 @@ public class Area : MonoBehaviour
     private void Awake()
     {
         AreaSize = gameObject.GetComponent<BoxCollider>().size.z * gameObject.transform.localScale.z;
-        _player = Managers.Scene.CurrentScene.Player;
+        _player = Managers.Game.GetPlayer();
     }
 
     private void Update()

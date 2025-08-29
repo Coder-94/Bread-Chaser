@@ -42,6 +42,10 @@ public class PlayerStat : MonoBehaviour
             return;
 
         CurrentHp += healPower;
+
+        if (CurrentHp > Hp)
+            CurrentHp = Hp;
+
         HpCountAction.Invoke(CurrentHp);
     }
 }

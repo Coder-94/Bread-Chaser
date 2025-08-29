@@ -22,7 +22,7 @@ public class BulletController : MonoBehaviour
 
     void Init()
     {
-        _target = Managers.Scene.CurrentScene.Player;
+        _target = Managers.Game.GetPlayer();
         gameObject.transform.parent = null;
 
         /*if (_target != null)

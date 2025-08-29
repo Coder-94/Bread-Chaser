@@ -17,7 +17,7 @@ public class Hp : UIScene
     {
         base.Init();
 
-        _player = Managers.Scene.CurrentScene.Player;
+        _player = Managers.Game.GetPlayer();
         PlayerStat playerHp = _player.GetComponent<PlayerStat>();
 
         Bind<UnityEngine.UI.Slider>(typeof(Sliders));
@@ -30,4 +30,5 @@ public class Hp : UIScene
     {
         GetSlider((int)Sliders.HpSlider).value = currentHp / _player.GetComponent<PlayerStat>().Hp;
     }
+
 }

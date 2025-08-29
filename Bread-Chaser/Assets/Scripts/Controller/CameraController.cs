@@ -5,6 +5,7 @@ public class CameraController : MonoBehaviour
 {
     GameObject          _target;
     Vector3             _basePose;
+    PlayerController    _targetState;
     void Start()
     {
         Init();
@@ -12,7 +13,8 @@ public class CameraController : MonoBehaviour
 
     void Init()
     {
-        _target = Managers.Scene.CurrentScene.Player;
+        _target = Managers.Game.GetPlayer();
+        _targetState = _target.GetComponent<PlayerController>();
         DefaultSetting();
     }
 
@@ -23,15 +25,13 @@ public class CameraController : MonoBehaviour
 
     private void LateUpdate()
     {
-        Define.PlayerStatus targetState = _target.GetComponent<PlayerController>().CurrentState;
-        if (targetState == Define.PlayerStatus.Running || targetState == Define.PlayerStatus.BackStepping)
+        if (_targetState.CurrentState == Define.PlayerStatus.Running || _targetState.CurrentState == Define.PlayerStatus.BackStepping)
             DefaultSetting();
     }
 
     void SideMoveCamControl()
     {
-        Define.PlayerStatus targetState = _target.GetComponent<PlayerController>().CurrentState;
-        if (targetState == Define.PlayerStatus.LeftMoving || targetState == Define.PlayerStatus.RightMoving)
+        if (_targetState.CurrentState == Define.PlayerStatus.LeftMoving || _targetState.CurrentState == Define.PlayerStatus.RightMoving)
             DefaultSetting();
     }
 

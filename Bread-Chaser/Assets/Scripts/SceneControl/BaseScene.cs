@@ -29,7 +29,6 @@ public abstract class BaseScene : MonoBehaviour
     public Define.Scene             SceneType { get; protected set; } = Define.Scene.Unknown;
     public Define.SceneState        SceneState { get; protected set; }
     public string                   SceneName { get; private set; }
-    public GameObject               Player { get; private set; }
     
     public float                    AreaSize { get; protected set; }
 
@@ -73,7 +72,6 @@ public abstract class BaseScene : MonoBehaviour
         if (obj == null)
             Managers.Resource.Instantiate("Prefabs/UI/EventSystem").name = "@EventSystem";
 
-        Player = GameObject.FindGameObjectWithTag("Player");
 
         Managers.UI.ShowSceneUI<Hp>();
         Managers.UI.ShowSceneUI<Score>();
@@ -82,6 +80,7 @@ public abstract class BaseScene : MonoBehaviour
     }
     #endregion
 
+    //bf fix
     #region Spawn Mob In Scene
     protected void MobSpawner(int id, int lessTIme, int maxTime)
     {
