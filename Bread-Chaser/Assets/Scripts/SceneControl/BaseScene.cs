@@ -80,7 +80,7 @@ public abstract class BaseScene : MonoBehaviour
     }
     #endregion
 
-    //bf fix
+    //wip fix
     #region Spawn Mob In Scene
     protected void MobSpawner(int id, int lessTIme, int maxTime)
     {
