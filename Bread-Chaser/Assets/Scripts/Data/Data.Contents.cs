@@ -11,16 +11,17 @@ namespace Data
     {
         public int          id;
         public float        hp;
-        public int          atk;
+        public float        atk;
         public int          atkSpeed;
     }
 
     [Serializable]
     public class PlayerStat
     {
+        public int          id;
         public int          level;
         public float        hp;
-        public int          atk;
+        public float        atk;
         public float        moveSpeed;
         public float        atkSpeed;
     }

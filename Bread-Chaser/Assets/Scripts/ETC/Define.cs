@@ -5,6 +5,14 @@ using UnityEngine;
 public class Define
 {
 
+    public enum WorldObject
+    {
+        Unknown,
+        Player,
+        Mob,
+        BossMob
+    }
+
     public enum Layer
     {
         Ground = 3,

@@ -1,10 +1,8 @@
 using UnityEngine;
 
-public class NormalMobStat : MonoBehaviour
+public class NormalMobStat : Stat
 {
-    public int      Id { get; private set; }
-    public float    Hp { get; private set; }
-    public int      Atk { get; private set; }
+    
     public int      AtkSpeed { get; private set; }
 
     public void SetID(int id)
@@ -25,6 +23,8 @@ public class NormalMobStat : MonoBehaviour
 
     void Init()
     {
+        objectType = Define.WorldObject.Mob;
+
         Data.MobStat stat = Managers.Data.NMStatDict[Id];
 
         Hp = stat.hp;

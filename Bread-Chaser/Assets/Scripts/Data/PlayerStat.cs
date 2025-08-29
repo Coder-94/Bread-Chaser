@@ -1,14 +1,9 @@
 using System;
 using UnityEngine;
 
-public class PlayerStat : MonoBehaviour
+public class PlayerStat : Stat
 {
-    public Action<float> HpCountAction = null;
-
-    public int      Level { get; private set; } = 1;
-    public float    Hp { get; private set; }
-    public float    CurrentHp { get; private set; }
-    public int      Atk { get; private set; }
+    public int      Level { get; private set; }
     public float    AtkSpd { get; private set; }
 
     public float    moveSpeed;
@@ -20,8 +15,11 @@ public class PlayerStat : MonoBehaviour
 
     void Init()
     {
-        Data.PlayerStat stat = Managers.Data.PLStatDict[Level];
+        objectType = Define.WorldObject.Player;
 
+        Id = 0;
+
+        Data.PlayerStat stat = Managers.Data.PLStatDict[Id];
         Level = stat.level;
         Hp = stat.hp;
         CurrentHp = Hp;
