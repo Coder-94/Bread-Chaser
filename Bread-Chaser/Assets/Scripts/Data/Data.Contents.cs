@@ -72,12 +72,18 @@ namespace Data
     public class OptionData : ILoader<string, GatchaCheck>, ILoader<string, TestCheck>
     {
         public List<GatchaCheck> gatchaCheck = new List<GatchaCheck>();
-        //
+        
         Dictionary<string, GatchaCheck> ILoader<string, GatchaCheck>.MakeDict()
         {
             Dictionary<string, GatchaCheck> dict = new Dictionary<string, GatchaCheck>();
             foreach (GatchaCheck gatcha in gatchaCheck)
-                dict.Add(gatcha.optionName, gatcha);
+            {
+                if(gatcha.optionName == "gatchaCheck")
+                {
+                    dict.Add(gatcha.optionName, gatcha);
+                    break;
+                }
+            }
 
             return dict;
         }
@@ -88,7 +94,13 @@ namespace Data
         {
             Dictionary<string, TestCheck> dict = new Dictionary<string, TestCheck>();
             foreach (TestCheck test in testCheck)
-                dict.Add(test.optionName, test);
+            {
+                if (test.optionName == "testCheck")
+                {
+                    dict.Add(test.optionName, test);
+                    break;
+                }
+            }
 
             return dict;
         }

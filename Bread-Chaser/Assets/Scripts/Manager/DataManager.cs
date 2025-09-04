@@ -34,7 +34,7 @@ public class DataManager
         
         Data.GatchaCheck stat = Managers.Data.GatchaDict["gatchaCheck"];
         Debug.Log(stat.choosingNum);
-        Data.TestCheck stat2 = Managers.Data.TestDict["gatchaCheck"];
+        Data.TestCheck stat2 = Managers.Data.TestDict["testCheck"];
         Debug.Log(stat2.test2);
     }
 
