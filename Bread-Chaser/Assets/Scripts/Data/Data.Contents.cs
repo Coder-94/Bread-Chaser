@@ -67,7 +67,7 @@ namespace Data
             return dict;
         }
     }
-
+    //
     [Serializable]
     public class OptionData : ILoader<string, GatchaCheck>, ILoader<string, TestCheck>
     {
