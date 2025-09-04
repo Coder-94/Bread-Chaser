@@ -27,6 +27,7 @@ public abstract class UIBase : MonoBehaviour
         Init();
     }
 
+    protected void BtnSound() { Managers.Sound.Play("Sounds/SE/Click"); }
     #region Bind & Mapping
 
     protected void Bind<T>(Type type) where T : UnityEngine.Object

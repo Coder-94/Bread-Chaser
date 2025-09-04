@@ -30,6 +30,11 @@ public class Define
         MaxCount
     }
 
+    public enum GameState 
+    { 
+        Play,
+        Paused
+    }
     public enum Scene
     {
         Unknown,

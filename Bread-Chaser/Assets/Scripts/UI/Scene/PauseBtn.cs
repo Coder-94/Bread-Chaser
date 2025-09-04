@@ -26,7 +26,8 @@ public class PauseBtn : UIScene
         if (Managers.Scene.CurrentScene.SceneState == Define.SceneState.Intro)
             return;
 
-        Time.timeScale = 0f;
+        BtnSound();
+        Managers.Game.SetGameState(Define.GameState.Paused);
         Managers.UI.ShowPopUpUI<PausePopUp>("PausePopUp", 1);
     }
 }

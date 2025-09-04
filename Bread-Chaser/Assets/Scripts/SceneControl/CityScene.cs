@@ -4,8 +4,9 @@ public class CityScene : BaseScene
 {
     private void Update()
     {
-        if(SceneState != Define.SceneState.Intro)
-            MobSpawner((int)MonsterID.CityMob, 5, 11);
+        Debug.Log(SceneState);
+        if (SceneState != Define.SceneState.Intro)
+            MobSpawner((int)MonsterID.CityMob, 3, 7);
     }
 
     protected override void Init()
@@ -15,7 +16,7 @@ public class CityScene : BaseScene
 
         //Managers.Sound.Play("BGM/Bagel Street (loop)", Define.Sound.Bgm);
 
-        for(int i=0; i<3; i++)
+        for (int i=0; i<3; i++)
         {
             if(i==0)
                 Managers.Area.SpawnArea(SceneName, ref Managers.Area.totalLength, 0, false, true);

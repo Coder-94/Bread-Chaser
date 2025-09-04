@@ -23,8 +23,6 @@ public class NormalMobStat : Stat
 
     void Init()
     {
-        objectType = Define.WorldObject.Mob;
-
         Data.MobStat stat = Managers.Data.NMStatDict[Id];
 
         Hp = stat.hp;

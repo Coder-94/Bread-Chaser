@@ -15,8 +15,6 @@ public class PlayerStat : Stat
 
     void Init()
     {
-        objectType = Define.WorldObject.Player;
-
         Id = 0;
 
         Data.PlayerStat stat = Managers.Data.PLStatDict[Id];
@@ -27,6 +25,7 @@ public class PlayerStat : Stat
         moveSpeed = stat.moveSpeed;
         AtkSpd = stat.atkSpeed;
     }
+
 
     public void OnAttacked(float power)
     {

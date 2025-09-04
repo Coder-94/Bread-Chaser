@@ -65,6 +65,9 @@ public abstract class BaseScene : MonoBehaviour
     #region Init
     protected virtual void Init()
     {
+        Managers.Game.StateAction -= LevelUp;
+        Managers.Game.StateAction += LevelUp;
+
         MonsterCount = 0;
         SceneName = SceneManager.GetActiveScene().name;
         SceneState = Define.SceneState.Intro;
@@ -80,7 +83,6 @@ public abstract class BaseScene : MonoBehaviour
     }
     #endregion
 
-    //wip fix
     #region Spawn Mob In Scene
     protected void MobSpawner(int id, int lessTIme, int maxTime)
     {
@@ -119,11 +121,15 @@ public abstract class BaseScene : MonoBehaviour
 
     #region sceneState
     
-    public void SetSceneState(Define.SceneState sceneState)
-    {
-        SceneState = sceneState;
-    }
+    public void SetSceneState(Define.SceneState sceneState) { SceneState = sceneState; }
 
+    void LevelUp(Define.SceneState sceneState) 
+    { 
+        if(sceneState == Define.SceneState.LevelUp)
+        {
+            Managers.Game.SetGameState(Define.GameState.Paused);
+        }
+    }
     #endregion
 
     public void MobCountController(bool increased )

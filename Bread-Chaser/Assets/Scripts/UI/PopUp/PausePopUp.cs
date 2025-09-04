@@ -80,7 +80,12 @@ public class PausePopUp : UIPopUp
 
     void Quit()
     {
-        Time.timeScale = 1;
+        BtnSound();
+
+        if(Managers.Scene.CurrentScene.SceneState != Define.SceneState.LevelUp)
+        {
+            Managers.Game.SetGameState(Define.GameState.Play);
+        }
 
         for (int btn = 0; btn < System.Enum.GetValues(typeof(Sliders)).Length + 1; btn++)
         {
@@ -93,11 +98,13 @@ public class PausePopUp : UIPopUp
 
     void End()
     {
+        BtnSound();
         Debug.Log("게임종료");
     }
 
     void BtnVolumeOnOff(int btn)
     {
+        BtnSound();
         Image volumeState = GetButton(btn).image;
         Slider slider = GetSlider(btn);
 

@@ -34,9 +34,8 @@ public class InputManager
                 UnityEngine.Touch touch = UnityEngine.Input.GetTouch(0);
 
                 //ui touch blocker ====================================================================
-                if (EventSystem.current.IsPointerOverGameObject(touch.fingerId))
-                { Debug.Log("ff"); return; }
-                //애미뒤진 ui클릭찐빠 하면 끝임. 다하면 바로 씬 ㄱㄱ
+                if (Managers.Game.GetGameState() == Define.GameState.Paused || EventSystem.current.IsPointerOverGameObject(touch.fingerId))
+                { return; }
 
                 //first touch input check ====================================================================
                 if (!_pressed)
