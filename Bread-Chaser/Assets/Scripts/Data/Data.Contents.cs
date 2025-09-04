@@ -72,7 +72,7 @@ namespace Data
     public class OptionData : ILoader<string, GatchaCheck>, ILoader<string, TestCheck>
     {
         public List<GatchaCheck> gatchaCheck = new List<GatchaCheck>();
-
+        //
         Dictionary<string, GatchaCheck> ILoader<string, GatchaCheck>.MakeDict()
         {
             Dictionary<string, GatchaCheck> dict = new Dictionary<string, GatchaCheck>();
