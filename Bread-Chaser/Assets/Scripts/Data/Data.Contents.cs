@@ -24,7 +24,11 @@ namespace Data
         public float        hp;
         public float        atk;
         public float        moveSpeed;
-        public float        atkSpeed;
+        public float        atkCoefficient;
+        public float        skillCoefficient;
+        public float        barrierCool;
+        public float        firstCap;
+        public float        secondCap;
     }
 
     [Serializable]
@@ -67,51 +71,21 @@ namespace Data
             return dict;
         }
     }
-    //
+
     [Serializable]
-    public class OptionData : ILoader<string, GatchaCheck>, ILoader<string, TestCheck>
+    public class GatchaOptionData : ILoader<string, GatchaCheck>
     {
         public List<GatchaCheck> gatchaCheck = new List<GatchaCheck>();
-        
-        Dictionary<string, GatchaCheck> ILoader<string, GatchaCheck>.MakeDict()
+
+        public Dictionary<string, GatchaCheck> MakeDict()
         {
             Dictionary<string, GatchaCheck> dict = new Dictionary<string, GatchaCheck>();
             foreach (GatchaCheck gatcha in gatchaCheck)
-            {
-                if(gatcha.optionName == "gatchaCheck")
-                {
-                    dict.Add(gatcha.optionName, gatcha);
-                    break;
-                }
-            }
-
-            return dict;
-        }
-
-        public List<TestCheck> testCheck = new List<TestCheck>();
-
-        Dictionary<string, TestCheck> ILoader<string, TestCheck>.MakeDict()
-        {
-            Dictionary<string, TestCheck> dict = new Dictionary<string, TestCheck>();
-            foreach (TestCheck test in testCheck)
-            {
-                if (test.optionName == "testCheck")
-                {
-                    dict.Add(test.optionName, test);
-                    break;
-                }
-            }
+                dict.Add(gatcha.optionName, gatcha);
 
             return dict;
         }
     }
 
-    [Serializable]
-    public class TestCheck
-    {
-        public string optionName;
-        public int test;
-        public int test2;
-    }
     #endregion
 }

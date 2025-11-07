@@ -99,7 +99,7 @@ public class PausePopUp : UIPopUp
     void End()
     {
         BtnSound();
-        Debug.Log("게임종료");
+       Managers.UI.ShowPopUpUI<GameQuitPopUp>("GameQuitPopUp", 1);
     }
 
     void BtnVolumeOnOff(int btn)

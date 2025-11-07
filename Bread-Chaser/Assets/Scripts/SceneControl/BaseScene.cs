@@ -45,12 +45,12 @@ public abstract class BaseScene : MonoBehaviour
 
     public Define.SpawnedMobChecker[] spawnedMobChecker = new Define.SpawnedMobChecker[]
     {
-        new() { isSpawned = false, spawnedPos = new Vector3(0, 0.38f, 5f) },
-        new() { isSpawned = false, spawnedPos = new Vector3(-0.82f, 0.38f, 5f) },
-        new() { isSpawned = false, spawnedPos = new Vector3(0.82f, 0.38f, 5f) },
-        new() { isSpawned = false, spawnedPos = new Vector3(-1.62f, 0.38f, 5f) },
-        new() { isSpawned = false, spawnedPos = new Vector3(1.62f, 0.38f, 5f) },
-        new() { isSpawned = false, spawnedPos = new Vector3(0, 1.65f, 5f) }
+        new() { isSpawned = false, spawnedPos = new Vector3(0, 0.38f, 8f) },
+        new() { isSpawned = false, spawnedPos = new Vector3(-0.82f, 0.38f, 8f) },
+        new() { isSpawned = false, spawnedPos = new Vector3(0.82f, 0.38f, 8f) },
+        new() { isSpawned = false, spawnedPos = new Vector3(-1.62f, 0.38f, 8f) },
+        new() { isSpawned = false, spawnedPos = new Vector3(1.62f, 0.38f, 8f) },
+        new() { isSpawned = false, spawnedPos = new Vector3(0, 1.65f, 8f) }
     };
     #endregion
 
@@ -127,6 +127,8 @@ public abstract class BaseScene : MonoBehaviour
     { 
         if(sceneState == Define.SceneState.LevelUp)
         {
+            Managers.Scene.CurrentScene.SetSceneState(Define.SceneState.LevelUp);
+            Managers.UI.ShowPopUpUI<LevelUp>();
             Managers.Game.SetGameState(Define.GameState.Paused);
         }
     }

@@ -11,6 +11,9 @@ public class GameManager
     float                       _scoreCounter = 0f;
     float                       _magnification = 10f;
 
+    int                         _nextLevelUpScore = 1000;
+    const int                   LEVELUPCUT = 1000;
+
     private GameObject          PLAYER;
     private PlayerStat          _playerStat;
 
@@ -32,13 +35,12 @@ public class GameManager
     {
         if (Managers.Scene.CurrentScene.SceneState == Define.SceneState.DefaultPlay || Managers.Scene.CurrentScene.SceneState == Define.SceneState.BossBattle)
         {
-            _scoreCounter += 1f * Time.deltaTime * (_playerStat.moveSpeed * _magnification);  //moveSpd per sec
+            _scoreCounter += 1f * Time.deltaTime * (Mathf.Sqrt(_playerStat.MoveSpeed) * _magnification);  //moveSpd per sec
             ScorePoint = Mathf.FloorToInt(_scoreCounter);
-
-            if (ScorePoint != 0 && ScorePoint % 100 == 0)
+            if (ScorePoint >= _nextLevelUpScore)
             {
-                Managers.Scene.CurrentScene.SetSceneState(Define.SceneState.LevelUp);
                 StateAction.Invoke(Define.SceneState.LevelUp);
+                _nextLevelUpScore += LEVELUPCUT;
             }
         }
     }

@@ -51,4 +51,12 @@ public class Util
 
         return null;
     }
+
+    public static float RandomCalculate(float min, float max) 
+    {
+        float random = UnityEngine.Random.Range(min, max);
+        float result = Mathf.Round(random * 10f) / 10f;
+        return result;
+    }
+
 }

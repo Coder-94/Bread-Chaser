@@ -41,6 +41,7 @@ public abstract class BaseMobController : MonoBehaviour
         }            
         else
             dir = new Vector3(transform.rotation.x, 180f, transform.rotation.z);
+        dir.y = 0;
         Quaternion quat = Quaternion.LookRotation(dir);
         transform.rotation = Quaternion.Lerp(transform.rotation, quat, 20 * Time.deltaTime);
     }

@@ -66,6 +66,15 @@ public class Define
         BackStepping
     }
 
+    public enum IncreaseAbleStat
+    {
+        Default,
+        Atk,
+        MoveSpd,
+        Hp,
+        SkillDMG
+    }
+
     public enum NormalMobStatus
     {
         Spawn,
@@ -115,4 +124,5 @@ public class Define
         public Vector3      spawnedPos;
     }
 
+    
 }

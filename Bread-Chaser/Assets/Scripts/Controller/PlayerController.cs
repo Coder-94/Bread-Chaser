@@ -1,14 +1,15 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEngine;
 using static Define;
 using static UnityEngine.GraphicsBuffer;
 
 public class PlayerController : PlayerBase
 {
-
     #region player control
 
     //input control ======================================================================================
@@ -95,15 +96,25 @@ public class PlayerController : PlayerBase
         {
             if (!_touchBlock && evt == Define.TouchEvent.Tap)
             {
-                int rand = UnityEngine.Random.Range(0, 2);
-
-                if(rand == 0)
-                    _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerLeftAtk]);
+                if (_stat.EvolutionData[Define.IncreaseAbleStat.SkillDMG].FirstEvolve)
+                {
+                    _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerRoundAtk]);
+                    Camera.main.GetComponent<CameraController>().CamShake(10f, 1f, 0.2f);
+                    _touchBlock = true;
+                }
                 else
-                    _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerRightAtk]);
+                {
+                    int rand = UnityEngine.Random.Range(0, 2);
 
-                Camera.main.GetComponent<CameraController>().CamShake(10f, 1f, 0.2f);
-                _touchBlock = true;
+                    if (rand == 0)
+                        _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerLeftAtk]);
+                    else
+                        _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerRightAtk]);
+
+                    Camera.main.GetComponent<CameraController>().CamShake(10f, 1f, 0.2f);
+                    _touchBlock = true;
+                }
+                    
             }
         }
     }
@@ -146,6 +157,8 @@ public class PlayerController : PlayerBase
                 break;
         }
     }
+
+    
     #endregion
 
     #region rb
@@ -266,17 +279,28 @@ public class PlayerController : PlayerBase
 
     #endregion
 
+    public void PunchEffectNull() 
+    { 
+        if (_punchEffect != null) 
+            _punchEffect = null; 
+    }
+
     #region anim Events
 
     public void OnAttack()
     {
         if(_target != null)
         {
-            NormalMobStat targetStat = _target.GetComponent<NormalMobStat>();
+            Stat targetStat = _target.GetComponent<NormalMobStat>();
             Managers.Sound.Play($"SE/Hit");
 
             bool targetNotDead = TargetNotDead;
-            targetStat.OnAttacked(_stat.Atk, ref targetNotDead);
+
+            if(_state != Define.PlayerStatus.Attacking)
+                targetStat.OnAttacked(_stat.Atk, _stat.AtkCoefficient ,ref targetNotDead);
+            else
+                targetStat.OnAttacked(_stat.Atk * 0.6f, _stat.AtkCoefficient, ref targetNotDead);
+
             TargetNotDead = targetNotDead;
             Camera.main.GetComponent<CameraController>().AtkSetting(TargetNotDead);
             Camera.main.GetComponent<CameraController>().CamShake(10f, 1f, 0.2f);
@@ -284,15 +308,75 @@ public class PlayerController : PlayerBase
             Vector3 targetPos = _target.GetComponent<NormalMobBase>().targetedPos.transform.position;
             targetPos.z -= 0.5f;
 
-            if (_punchEffect == null)
-                _punchEffect = Managers.Resource.Instantiate("Effect/PunchHitOrange");
-            _punchEffect.transform.position = targetPos;
-            _punchEffect.GetComponent<ParticleSystem>().Play();
+            if (_stat.EvolutionData[Define.IncreaseAbleStat.MoveSpd].FirstEvolve)
+            {
+                targetStat.OnPoisoned(_stat.MoveSpeed, _stat.Atk);
+
+                if (_punchEffect == null)
+                    _punchEffect = Managers.Resource.Instantiate("Effect/SlashHitGreen");
+                _punchEffect.transform.position = targetPos;
+                _punchEffect.GetComponent<ParticleSystem>().Play();
+            }
+            else
+            {
+                if (_punchEffect == null)
+                    _punchEffect = Managers.Resource.Instantiate("Effect/PunchHitOrange");
+                _punchEffect.transform.position = targetPos;
+                _punchEffect.GetComponent<ParticleSystem>().Play();
+            }
+
+            if (_stat.EvolutionData[Define.IncreaseAbleStat.Atk].FirstEvolve)
+                CurrentState = Define.PlayerStatus.BackStepping;
         }
 
         if(_touchBlock)
             _touchBlock = false;
     }
+
+    public void OnRoundAttack()
+    {
+        float   attackRange = 3.5f;
+        int     maxTargets = 3;
+        if (_stat.EvolutionData[Define.IncreaseAbleStat.SkillDMG].SecondEvolve)
+            maxTargets = 6;
+
+        Collider[] enemiesInRange = new Collider[maxTargets];
+        
+        Physics.OverlapSphereNonAlloc(transform.position, attackRange, enemiesInRange, _enemyMask);
+
+        if (enemiesInRange.Length == 0)
+            return;
+
+        List<Transform> closestEnemies = enemiesInRange
+            .Where(enemy => enemy != null)
+            .OrderBy(enemy => Vector3.Distance(transform.position, enemy.transform.position))
+            .Take(maxTargets)
+            .Select(enemy => enemy.transform)
+            .ToList();
+
+        if (_punchEffect == null)
+            _punchEffect = Managers.Resource.Instantiate("Effect/PolygonSlash");
+
+        Vector3 pos = gameObject.transform.position;
+        pos.y += 0.5f;
+        _punchEffect.transform.position = pos;
+        _punchEffect.GetComponent<ParticleSystem>().Play();
+
+        foreach (Transform target in closestEnemies)
+        {
+            Stat targetStat = target.GetComponent<NormalMobStat>();
+            bool targetNotDead = TargetNotDead;
+            targetStat.OnAttacked(_stat.Atk, _stat.AtkCoefficient, ref targetNotDead);
+            if (target.gameObject == _target)
+                TargetNotDead = targetNotDead;
+
+            Managers.Sound.Play($"SE/Hit");
+
+            Camera.main.GetComponent<CameraController>().AtkSetting(TargetNotDead);
+            Camera.main.GetComponent<CameraController>().CamShake(10f, 1f, 0.2f);
+        }
+    }
+
     #endregion
 
 }

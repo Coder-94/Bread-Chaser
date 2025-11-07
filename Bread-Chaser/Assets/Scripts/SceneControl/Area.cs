@@ -20,7 +20,7 @@ public class Area : MonoBehaviour
 
     private void Update()
     {
-        float moveSpeed = _player.GetComponent<PlayerStat>().moveSpeed * RUNNINGMAGNIFICATION;
+        float moveSpeed = _player.GetComponent<PlayerStat>().MoveSpeed * RUNNINGMAGNIFICATION;
 
         transform.Translate(Vector3.back * 20f * Time.deltaTime);
         if (gameObject.transform.position.z + (AreaSize) <= _disapperRange)

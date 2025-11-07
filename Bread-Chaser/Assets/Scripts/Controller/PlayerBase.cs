@@ -8,6 +8,7 @@ public class PlayerBase : MonoBehaviour
 
     protected enum AnimParameters
     {
+        TriggerRoundAtk,
         TriggerAtk,
         TriggerLeftAtk,
         TriggerRightAtk,
@@ -40,6 +41,9 @@ public class PlayerBase : MonoBehaviour
 
     protected GameObject            _dashEffect;
     protected GameObject            _punchEffect;
+
+    protected GameObject            _shieldEffect;
+    protected GameObject            _currentShieldHealth;
     #endregion
 
     #region currentState
@@ -77,6 +81,7 @@ public class PlayerBase : MonoBehaviour
     }
 
     #region functionCR
+
     protected void Jump()
     {
         if (!_isJumping)
@@ -99,6 +104,9 @@ public class PlayerBase : MonoBehaviour
             else
                 Debug.Log($"[Error] OriginPos is {OriginPos}");
 
+            if (_stat.EvolutionData[Define.IncreaseAbleStat.SkillDMG].FirstEvolve)
+                _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerRoundAtk]);
+            else
                 _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerAtk]);
             _dashEffect.GetComponent<ParticleSystem>().Play();
         }
