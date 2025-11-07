@@ -60,4 +60,6 @@ public class SkillBtn : UIScene
             rect.anchoredPosition = new Vector2(0f, -600f);
         }
     }
+
+    //.
 }
