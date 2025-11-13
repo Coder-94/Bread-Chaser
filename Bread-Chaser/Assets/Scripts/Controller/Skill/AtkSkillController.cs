@@ -9,6 +9,8 @@ public class AtkSkillController : MonoBehaviour
  
     float _originAtk;
 
+    public bool buff;
+
     void OnEnable()
     {
         _timer = _duration;
@@ -31,7 +33,7 @@ public class AtkSkillController : MonoBehaviour
     {
         Managers.Sound.Play($"SE/Buff");
         gameObject.transform.parent = Managers.Game.GetPlayer().transform;
-
+        buff = true;
         PlayerStat stat = GetComponentInParent<PlayerStat>();
 
         _originAtk = stat.Atk;
@@ -49,7 +51,7 @@ public class AtkSkillController : MonoBehaviour
     {
         PlayerStat stat = GetComponentInParent<PlayerStat>();
         stat.BuffStat(Define.IncreaseAbleStat.Atk, _originAtk);
-
+        buff = false;
         Managers.Resource.Destroy(gameObject);
     }
 }

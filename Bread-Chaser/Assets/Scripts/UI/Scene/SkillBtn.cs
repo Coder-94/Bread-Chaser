@@ -15,15 +15,16 @@ public class SkillBtn : UIScene
         CoolDown
     }
 
+    PlayerController _ctrl;
     PlayerStat _stat;
     public override void Init()
     {
         base.Init();
         Bind<Button>(typeof(Buttons));
         Bind<Image>(typeof(Images));
-        
-        _stat = Managers.Game.GetPlayer().GetComponent<PlayerStat>();
 
+        _ctrl = Managers.Game.GetPlayer().GetComponent<PlayerController>();
+        _stat = Managers.Game.GetPlayer().GetComponent<PlayerStat>();
         if (_stat.LastEvolved)
         {
             SkillInit(_stat.EvolvedType);
@@ -43,7 +44,7 @@ public class SkillBtn : UIScene
         RectTransform rect = image.GetComponent<RectTransform>();
         rect.anchoredPosition = Vector2.zero;
 
-        btn.onClick.AddListener(() => _stat.SkillOpen(type));
+        btn.onClick.AddListener(() => _ctrl.SkillOpen(type));
     }
 
     private void Update()
@@ -51,7 +52,7 @@ public class SkillBtn : UIScene
         Image coolTxT = GetImage((int)Images.CoolDown);
         RectTransform rect = coolTxT.GetComponent<RectTransform>();
 
-        if (_stat.IsSkillCool)
+        if (_ctrl.IsSkillCool)
         {
             rect.anchoredPosition = Vector2.zero;
         }

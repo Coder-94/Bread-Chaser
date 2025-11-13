@@ -44,7 +44,13 @@ public class PlayerBase : MonoBehaviour
 
     protected GameObject            _shieldEffect;
     protected GameObject            _currentShieldHealth;
+
+
+    public bool                     IsSkillCool { get; protected set; } = false;
+    public float                    CoolTime { get; protected set; } = 0;
     #endregion
+
+    public void SetCool(float cool) {  CoolTime = cool; }
 
     #region currentState
     public Define.PlayerStatus CurrentState

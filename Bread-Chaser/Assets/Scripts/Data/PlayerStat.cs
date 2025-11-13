@@ -21,10 +21,9 @@ public class PlayerStat : Stat
     public float SecondCap { get; private set; } = 0;
     public float MoveSpeed { get; private set; } = 0;
     public bool  LastEvolved { get; private set; } = false;
-    public float CoolTime { get; private set; } = 0;
     public Define.IncreaseAbleStat EvolvedType { get; private set; } = Define.IncreaseAbleStat.Default;
 
-    public bool IsSkillCool { get; private set; } = false;
+
     public float        BarrierCool { get; private set; } = 0;
     private float       _currentShieldHealth;
     private GameObject  _shieldEffectInstance;
@@ -121,12 +120,14 @@ public class PlayerStat : Stat
 
             EvolvedType = stat;
 
+            PlayerController player = GetComponent<PlayerController>();
+
             switch (EvolvedType)
             {
-                case Define.IncreaseAbleStat.Atk: CoolTime = 15; break;
-                case Define.IncreaseAbleStat.MoveSpd: CoolTime = 0; break;
-                case Define.IncreaseAbleStat.Hp: CoolTime = 0; break;
-                case Define.IncreaseAbleStat.SkillDMG: CoolTime = 0; break;
+                case Define.IncreaseAbleStat.Atk: player.SetCool(15); break;
+                case Define.IncreaseAbleStat.MoveSpd: player.SetCool(0); break;
+                case Define.IncreaseAbleStat.Hp: player.SetCool(0); break;
+                case Define.IncreaseAbleStat.SkillDMG: player.SetCool(0); break;
             }
 
             GameObject.Find("SkillBtn").GetComponent<SkillBtn>().SkillInit(EvolvedType);
@@ -136,6 +137,7 @@ public class PlayerStat : Stat
 
     public void Test(int a) 
     {
+        PlayerController pl = GetComponent<PlayerController>();
         if (a == 0)
         {
             Debug.Log("1");
@@ -144,8 +146,8 @@ public class PlayerStat : Stat
         else if (a == 1)
         {
             EvolutionData[Define.IncreaseAbleStat.Atk].SecondEvolve = true;
-            CoolTime = 15;
-            Debug.Log(CoolTime);
+            pl.SetCool(15);
+            Debug.Log(pl.CoolTime);
             GameObject.Find("SkillBtn").GetComponent<SkillBtn>().SkillInit(Define.IncreaseAbleStat.Atk);
         }
     }
@@ -199,29 +201,7 @@ public class PlayerStat : Stat
     }
     #endregion
 
-    #region active skill
-    public void SkillOpen(Define.IncreaseAbleStat evolvedStat)
-    {
-        if (!IsSkillCool) 
-        {
-            GameObject skill = Managers.Resource.Instantiate($"Effect/Skill/{evolvedStat}Skill");
-
-            if (CoolTime > 0)
-            {
-                StartCoroutine(CooldownCoroutine(CoolTime));
-            }
-        }
-    }
-
-    private IEnumerator CooldownCoroutine(float duration)
-    {
-        IsSkillCool = true;
-
-        yield return new WaitForSeconds(duration);
-
-        IsSkillCool = false;
-    }
-    #endregion
+    
 
     #endregion
 
@@ -262,3 +242,4 @@ public class PlayerStat : Stat
         HpCountAction.Invoke(CurrentHp);
     }
 }
+//.

@@ -292,7 +292,6 @@ public class PlayerController : PlayerBase
         if(_target != null)
         {
             Stat targetStat = _target.GetComponent<NormalMobStat>();
-            Managers.Sound.Play($"SE/Hit");
 
             bool targetNotDead = TargetNotDead;
 
@@ -313,20 +312,49 @@ public class PlayerController : PlayerBase
                 targetStat.OnPoisoned(_stat.MoveSpeed, _stat.Atk);
 
                 if (_punchEffect == null)
-                    _punchEffect = Managers.Resource.Instantiate("Effect/SlashHitGreen");
-                _punchEffect.transform.position = targetPos;
-                _punchEffect.GetComponent<ParticleSystem>().Play();
+                    _punchEffect = Managers.Resource.Instantiate("Effect/SpdAtk");
+
+                Managers.Sound.Play($"SE/Hit");
+            }
+            else if (_stat.EvolutionData[Define.IncreaseAbleStat.Atk].FirstEvolve) 
+            {
+                if (_punchEffect == null)
+                    _punchEffect = Managers.Resource.Instantiate("Effect/AtkAtk");
+
+                CurrentState = Define.PlayerStatus.BackStepping;
+            }
+            else if (_stat.EvolutionData[Define.IncreaseAbleStat.Hp].FirstEvolve)
+            {
+                if (_punchEffect == null)
+                    _punchEffect = Managers.Resource.Instantiate("Effect/HpAtk");
+
+                Managers.Sound.Play($"SE/Hit");
             }
             else
             {
                 if (_punchEffect == null)
-                    _punchEffect = Managers.Resource.Instantiate("Effect/PunchHitOrange");
+                    _punchEffect = Managers.Resource.Instantiate("Effect/DefaultAtk");
+
+                Managers.Sound.Play($"SE/Hit");
+                
+            }
+
+            AtkSkillController buff = GetComponentInChildren<AtkSkillController>();
+
+            if (buff.buff)
+            {
+                Managers.Sound.Play($"SE/BuffHit");
+
+                GameObject punchEffect = Managers.Resource.Instantiate("Effect/BuffAtk");
+
+                punchEffect.transform.position = targetPos;
+                punchEffect.GetComponent<ParticleSystem>().Play();
+            }
+            else
+            {
                 _punchEffect.transform.position = targetPos;
                 _punchEffect.GetComponent<ParticleSystem>().Play();
             }
-
-            if (_stat.EvolutionData[Define.IncreaseAbleStat.Atk].FirstEvolve)
-                CurrentState = Define.PlayerStatus.BackStepping;
         }
 
         if(_touchBlock)
@@ -355,7 +383,7 @@ public class PlayerController : PlayerBase
             .ToList();
 
         if (_punchEffect == null)
-            _punchEffect = Managers.Resource.Instantiate("Effect/PolygonSlash");
+            _punchEffect = Managers.Resource.Instantiate("Effect/SkillDMGAtk");
 
         Vector3 pos = gameObject.transform.position;
         pos.y += 0.5f;
@@ -376,6 +404,30 @@ public class PlayerController : PlayerBase
             Camera.main.GetComponent<CameraController>().CamShake(10f, 1f, 0.2f);
         }
     }
+
+    #region active skill
+    public void SkillOpen(Define.IncreaseAbleStat evolvedStat)
+    {
+        if (!IsSkillCool)
+        {
+            GameObject skill = Managers.Resource.Instantiate($"Effect/Skill/{evolvedStat}Skill");
+
+            if (CoolTime > 0)
+            {
+                StartCoroutine(CooldownCoroutine(CoolTime));
+            }
+        }
+    }
+
+    private IEnumerator CooldownCoroutine(float duration)
+    {
+        IsSkillCool = true;
+
+        yield return new WaitForSeconds(duration);
+
+        IsSkillCool = false;
+    }
+    #endregion
 
     #endregion
 
