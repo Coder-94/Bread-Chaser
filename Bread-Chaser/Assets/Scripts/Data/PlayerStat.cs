@@ -242,4 +242,4 @@ public class PlayerStat : Stat
         HpCountAction.Invoke(CurrentHp);
     }
 }
-//.
+//..
