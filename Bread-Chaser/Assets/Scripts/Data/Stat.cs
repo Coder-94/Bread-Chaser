@@ -13,7 +13,7 @@ public abstract class Stat : MonoBehaviour
     public float CurrentHp { get; protected set; }
     public float Atk { get; protected set; }
 
-   
+    protected GameObject posionBubble = null;
 
     public float NormalAtkCalcul(float power, float coEfficient)
     {
@@ -22,18 +22,6 @@ public abstract class Stat : MonoBehaviour
         return finalDmg;
     }
 
-    public float SkillCalcul(float power, float coEfficient)
-    {
-        /*
-            Final = ATK × SkillBase × ( 1 + S * PlayerCoeff / (H + PlayerCoeff) )
-
-            SkillBase : 스킬 고유 배수 (예: 2.5, 3.0, 4.0…)
-            PlayerCoeff : 플레이어 스킬 배수(누적 강화량)
-            S : 유저배수의 최대 추가 비율 (예: 1.0 → 최대 +100%)
-            H : 절반 효과가 되는 지점(반감치). PlayerCoeff = H일 때 보너스는 S의 절반.
-         */
-        return power;
-    }
 
     public float ShieldCalcul(float hp, float coEff)
     {
@@ -44,8 +32,15 @@ public abstract class Stat : MonoBehaviour
 
 
     
-    public virtual void OnAttacked(float power) { }
-    public virtual bool OnAttacked(float power, float coEfficient, ref bool targetNotDead) { return targetNotDead; }
-    public virtual void OnPoisoned(float term, float power) { }
+    public virtual void OnPlAttacked(GameObject attacker) { }
+
+    public virtual bool OnEnemAttacked(GameObject attacker, float damageMultiplier = 1.0f) { return true; }
+
+    public virtual bool OnSkillAttacked(GameObject attacker, float finalDamage) { return true; }
+
+    public virtual void OnPoisoned(GameObject player) { }
+
+    public virtual void OnSkillPoisoned(GameObject player) { }
+
     public virtual void Shield() { }
 }

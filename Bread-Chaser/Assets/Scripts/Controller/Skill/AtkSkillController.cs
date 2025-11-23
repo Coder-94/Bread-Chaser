@@ -1,40 +1,18 @@
 using UnityEngine;
 
-public class AtkSkillController : MonoBehaviour
+public class AtkSkillController : BaseSkillController
 {
-    float _duration = 10f;
-    float _timer;
-
     float _defaultBuffRange = 0.25f;
  
     float _originAtk;
-
-    public bool buff;
-
-    void OnEnable()
+    private void Awake()
     {
-        _timer = _duration;
+        duration = 10f;
     }
 
-    void Update()
+    protected override void Init()
     {
-        if (_timer > 0)
-        {
-            _timer -= Time.deltaTime;
-
-            if (_timer <= 0)
-            {
-                SelfDestroy();
-            }
-        }
-    }
-
-    void Start()
-    {
-        Managers.Sound.Play($"SE/Buff");
-        gameObject.transform.parent = Managers.Game.GetPlayer().transform;
-        buff = true;
-        PlayerStat stat = GetComponentInParent<PlayerStat>();
+        base.Init();
 
         _originAtk = stat.Atk;
 
@@ -42,16 +20,27 @@ public class AtkSkillController : MonoBehaviour
 
         float buffResult = _originAtk * (1f + buffPercent);
 
-        stat.BuffStat(Define.IncreaseAbleStat.Atk, buffResult);
+        stat.BuffStat(Define.IncreaseAbleStat.Atk, buffResult, true);
 
         Debug.Log($"Atk {_originAtk}, CurrentAtk {stat.Atk}");
     }
 
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+        gameObject.transform.parent = Managers.Game.GetPlayer().transform;
+        Managers.Sound.Play($"SE/Buff");
+    }
+
     public void SelfDestroy()
     {
-        PlayerStat stat = GetComponentInParent<PlayerStat>();
-        stat.BuffStat(Define.IncreaseAbleStat.Atk, _originAtk);
-        buff = false;
+        if (stat != null)
+        {
+            stat.BuffStat(Define.IncreaseAbleStat.Atk, _originAtk, false);
+        }
         Managers.Resource.Destroy(gameObject);
     }
+
+    protected override float CalculateDamage(){ return 0; }
+
 }

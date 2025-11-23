@@ -7,9 +7,9 @@ using static UnityEngine.Rendering.DebugUI;
 
 public class StatEvolutionData
 {
-    public float IncreasedValue { get; set; } = 0; // 누적 성장치
-    public bool FirstEvolve { get; set; } = false;  // 1차 진화 여부
-    public bool SecondEvolve { get; set; } = false; // 2차 진화 여부
+    public float IncreasedValue { get; set; } = 0;
+    public bool FirstEvolve { get; set; } = false; 
+    public bool SecondEvolve { get; set; } = false;
 }
 
 public class PlayerStat : Stat
@@ -21,12 +21,17 @@ public class PlayerStat : Stat
     public float SecondCap { get; private set; } = 0;
     public float MoveSpeed { get; private set; } = 0;
     public bool  LastEvolved { get; private set; } = false;
+    public bool IsAtkBuffed { get; private set; } = false;
     public Define.IncreaseAbleStat EvolvedType { get; private set; } = Define.IncreaseAbleStat.Default;
 
+    public event Action<Define.IncreaseAbleStat> OnFirstEvolved;
+    public event Action<Define.IncreaseAbleStat, float> OnSecondEvolved;
 
     public float        BarrierCool { get; private set; } = 0;
     private float       _currentShieldHealth;
     private GameObject  _shieldEffectInstance;
+    public float        CurrentShield => _currentShieldHealth;
+    public float        MaxShield { get; private set; } = 0.001f;
 
     public Dictionary<Define.IncreaseAbleStat, StatEvolutionData> EvolutionData { get; private set; }
 
@@ -79,6 +84,15 @@ public class PlayerStat : Stat
         Evolving(stat);
     }
 
+    public void BuffStat(Define.IncreaseAbleStat stat, float value, bool isBuffActive)
+    {
+        if (stat == Define.IncreaseAbleStat.Atk)
+        {
+            Atk = value;
+            IsAtkBuffed = isBuffActive;
+        }
+    }
+
     public void BuffStat(Define.IncreaseAbleStat stat, float value)
     {
         switch (stat)
@@ -95,42 +109,34 @@ public class PlayerStat : Stat
     {
         StatEvolutionData data = EvolutionData[stat];
 
-        if (!data.FirstEvolve)
+        if (!data.FirstEvolve && data.IncreasedValue >= FirstCap)
         {
-            if (data.IncreasedValue >= FirstCap)
-            {
-                data.FirstEvolve = true;
+            data.FirstEvolve = true;
 
-                if (EvolutionData[Define.IncreaseAbleStat.Atk].FirstEvolve)
-                    AtkCoefficient = 0.8f;
+            if (stat == Define.IncreaseAbleStat.Atk)
+                AtkCoefficient = 0.8f;
 
-                if (EvolutionData[Define.IncreaseAbleStat.Hp].FirstEvolve)
-                    Shield();
-            }
+            if (stat == Define.IncreaseAbleStat.Hp)
+                Shield();
 
-            if (EvolutionData[Define.IncreaseAbleStat.SkillDMG].FirstEvolve)
-                gameObject.GetComponent<PlayerController>().PunchEffectNull();
+            OnFirstEvolved?.Invoke(stat);
         }
-        else if (!LastEvolved && !data.SecondEvolve)
+        else if (data.FirstEvolve && !LastEvolved && !data.SecondEvolve && data.IncreasedValue >= SecondCap)
         {
-            if (data.IncreasedValue >= SecondCap)
-                data.SecondEvolve = true;
-
+            data.SecondEvolve = true;
             LastEvolved = true;
-
             EvolvedType = stat;
 
-            PlayerController player = GetComponent<PlayerController>();
-
+            float coolTime = 0;
             switch (EvolvedType)
             {
-                case Define.IncreaseAbleStat.Atk: player.SetCool(15); break;
-                case Define.IncreaseAbleStat.MoveSpd: player.SetCool(0); break;
-                case Define.IncreaseAbleStat.Hp: player.SetCool(0); break;
-                case Define.IncreaseAbleStat.SkillDMG: player.SetCool(0); break;
+                case Define.IncreaseAbleStat.Atk: coolTime = 12; break;
+                case Define.IncreaseAbleStat.MoveSpd: coolTime = 10; break;
+                case Define.IncreaseAbleStat.Hp: coolTime = 16; break;
+                case Define.IncreaseAbleStat.SkillDMG: coolTime = 14; break;
             }
 
-            GameObject.Find("SkillBtn").GetComponent<SkillBtn>().SkillInit(EvolvedType);
+            OnSecondEvolved?.Invoke(EvolvedType, coolTime);
         }
     }
 
@@ -141,14 +147,15 @@ public class PlayerStat : Stat
         if (a == 0)
         {
             Debug.Log("1");
-            EvolutionData[Define.IncreaseAbleStat.Atk].FirstEvolve = true;
+            EvolutionData[Define.IncreaseAbleStat.SkillDMG].FirstEvolve = true;
         }
         else if (a == 1)
         {
-            EvolutionData[Define.IncreaseAbleStat.Atk].SecondEvolve = true;
-            pl.SetCool(15);
+            EvolutionData[Define.IncreaseAbleStat.SkillDMG].SecondEvolve = true;
+            pl.EvolvedType = Define.IncreaseAbleStat.SkillDMG;
+            pl.SetCool(1);
             Debug.Log(pl.CoolTime);
-            GameObject.Find("SkillBtn").GetComponent<SkillBtn>().SkillInit(Define.IncreaseAbleStat.Atk);
+            GameObject.Find("SkillBtn").GetComponent<SkillBtn>().SkillInit(pl.EvolvedType);
         }
     }
 
@@ -192,11 +199,12 @@ public class PlayerStat : Stat
             shieldSize = ShieldCalcul(Hp, 0.18f);
         }
 
+        MaxShield = shieldSize;
         _currentShieldHealth = shieldSize;
 
         if (_shieldEffectInstance == null)
         {
-            _shieldEffectInstance = Managers.Resource.Instantiate("Effect/BluePolygonShield", gameObject.transform);
+            _shieldEffectInstance = Managers.Resource.Instantiate("Effect/GoldPolygonShield", gameObject.transform);
         }
     }
     #endregion
@@ -205,8 +213,11 @@ public class PlayerStat : Stat
 
     #endregion
 
-    public override void OnAttacked(float power)
+    public override void OnPlAttacked(GameObject enemy)
     {
+        Stat enemyStat = enemy.GetComponent<Stat>();
+        float power = enemyStat.Atk;
+
         if (_currentShieldHealth > 0)
         {
             float damageToShield = Mathf.Min(power, _currentShieldHealth);
@@ -217,6 +228,7 @@ public class PlayerStat : Stat
             {
                 if (_shieldEffectInstance != null)
                 {
+                    _currentShieldHealth = 0;
                     Managers.Resource.Destroy(_shieldEffectInstance);
                     _shieldEffectInstance = null;
                 }

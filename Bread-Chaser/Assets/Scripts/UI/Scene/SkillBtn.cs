@@ -44,7 +44,7 @@ public class SkillBtn : UIScene
         RectTransform rect = image.GetComponent<RectTransform>();
         rect.anchoredPosition = Vector2.zero;
 
-        btn.onClick.AddListener(() => _ctrl.SkillOpen(type));
+        btn.onClick.AddListener(() => _ctrl.SkillOpen());
     }
 
     private void Update()

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.Mathematics;
 using Unity.VisualScripting;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using static Define;
 using static UnityEngine.GraphicsBuffer;
@@ -99,7 +100,6 @@ public class PlayerController : PlayerBase
                 if (_stat.EvolutionData[Define.IncreaseAbleStat.SkillDMG].FirstEvolve)
                 {
                     _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerRoundAtk]);
-                    Camera.main.GetComponent<CameraController>().CamShake(10f, 1f, 0.2f);
                     _touchBlock = true;
                 }
                 else
@@ -111,7 +111,6 @@ public class PlayerController : PlayerBase
                     else
                         _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerRightAtk]);
 
-                    Camera.main.GetComponent<CameraController>().CamShake(10f, 1f, 0.2f);
                     _touchBlock = true;
                 }
                     
@@ -279,7 +278,7 @@ public class PlayerController : PlayerBase
 
     #endregion
 
-    public void PunchEffectNull() 
+    protected override void PunchEffectNull() 
     { 
         if (_punchEffect != null) 
             _punchEffect = null; 
@@ -293,68 +292,18 @@ public class PlayerController : PlayerBase
         {
             Stat targetStat = _target.GetComponent<NormalMobStat>();
 
-            bool targetNotDead = TargetNotDead;
+            float multiplier = (_state == Define.PlayerStatus.Attacking) ? 0.6f : 1.0f;
+            bool isTargetAlive = targetStat.OnEnemAttacked(gameObject, multiplier);
 
-            if(_state != Define.PlayerStatus.Attacking)
-                targetStat.OnAttacked(_stat.Atk, _stat.AtkCoefficient ,ref targetNotDead);
-            else
-                targetStat.OnAttacked(_stat.Atk * 0.6f, _stat.AtkCoefficient, ref targetNotDead);
+            TargetNotDead = isTargetAlive;
 
-            TargetNotDead = targetNotDead;
-            Camera.main.GetComponent<CameraController>().AtkSetting(TargetNotDead);
-            Camera.main.GetComponent<CameraController>().CamShake(10f, 1f, 0.2f);
+            _camController.AtkSetting(TargetNotDead);
+            _camController.CamShake(10f, 5f, 0.2f);
 
             Vector3 targetPos = _target.GetComponent<NormalMobBase>().targetedPos.transform.position;
             targetPos.z -= 0.5f;
 
-            if (_stat.EvolutionData[Define.IncreaseAbleStat.MoveSpd].FirstEvolve)
-            {
-                targetStat.OnPoisoned(_stat.MoveSpeed, _stat.Atk);
-
-                if (_punchEffect == null)
-                    _punchEffect = Managers.Resource.Instantiate("Effect/SpdAtk");
-
-                Managers.Sound.Play($"SE/Hit");
-            }
-            else if (_stat.EvolutionData[Define.IncreaseAbleStat.Atk].FirstEvolve) 
-            {
-                if (_punchEffect == null)
-                    _punchEffect = Managers.Resource.Instantiate("Effect/AtkAtk");
-
-                CurrentState = Define.PlayerStatus.BackStepping;
-            }
-            else if (_stat.EvolutionData[Define.IncreaseAbleStat.Hp].FirstEvolve)
-            {
-                if (_punchEffect == null)
-                    _punchEffect = Managers.Resource.Instantiate("Effect/HpAtk");
-
-                Managers.Sound.Play($"SE/Hit");
-            }
-            else
-            {
-                if (_punchEffect == null)
-                    _punchEffect = Managers.Resource.Instantiate("Effect/DefaultAtk");
-
-                Managers.Sound.Play($"SE/Hit");
-                
-            }
-
-            AtkSkillController buff = GetComponentInChildren<AtkSkillController>();
-
-            if (buff.buff)
-            {
-                Managers.Sound.Play($"SE/BuffHit");
-
-                GameObject punchEffect = Managers.Resource.Instantiate("Effect/BuffAtk");
-
-                punchEffect.transform.position = targetPos;
-                punchEffect.GetComponent<ParticleSystem>().Play();
-            }
-            else
-            {
-                _punchEffect.transform.position = targetPos;
-                _punchEffect.GetComponent<ParticleSystem>().Play();
-            }
+            HandleAttackEffects(targetStat);
         }
 
         if(_touchBlock)
@@ -369,10 +318,10 @@ public class PlayerController : PlayerBase
             maxTargets = 6;
 
         Collider[] enemiesInRange = new Collider[maxTargets];
-        
-        Physics.OverlapSphereNonAlloc(transform.position, attackRange, enemiesInRange, _enemyMask);
 
-        if (enemiesInRange.Length == 0)
+        int hitCount = Physics.OverlapSphereNonAlloc(transform.position, attackRange, enemiesInRange, _enemyMask);
+
+        if (hitCount == 0)
             return;
 
         List<Transform> closestEnemies = enemiesInRange
@@ -392,25 +341,95 @@ public class PlayerController : PlayerBase
 
         foreach (Transform target in closestEnemies)
         {
-            Stat targetStat = target.GetComponent<NormalMobStat>();
-            bool targetNotDead = TargetNotDead;
-            targetStat.OnAttacked(_stat.Atk, _stat.AtkCoefficient, ref targetNotDead);
-            if (target.gameObject == _target)
-                TargetNotDead = targetNotDead;
+            Stat targetStat = target.GetComponent<Stat>();
 
-            Managers.Sound.Play($"SE/Hit");
+            if (targetStat != null)
+            {
+                bool isAlive = targetStat.OnEnemAttacked(gameObject);
 
-            Camera.main.GetComponent<CameraController>().AtkSetting(TargetNotDead);
-            Camera.main.GetComponent<CameraController>().CamShake(10f, 1f, 0.2f);
+                if (_target != null && target.gameObject == _target)
+                {
+                    TargetNotDead = isAlive;
+                    _camController.AtkSetting(TargetNotDead);
+                }
+
+                Managers.Sound.Play($"SE/Hit");
+                _camController.CamShake(10f, 5f, 0.2f);
+            }
         }
     }
 
-    #region active skill
-    public void SkillOpen(Define.IncreaseAbleStat evolvedStat)
+    #region effect
+
+    void HandleAttackEffects(Stat targetStat)
     {
-        if (!IsSkillCool)
+        Vector3 targetPos = _target.GetComponent<NormalMobBase>().targetedPos.transform.position;
+        targetPos.z -= 0.5f;
+
+        if (_stat.EvolutionData[Define.IncreaseAbleStat.MoveSpd].FirstEvolve)
         {
-            GameObject skill = Managers.Resource.Instantiate($"Effect/Skill/{evolvedStat}Skill");
+            targetStat.OnPoisoned(gameObject);
+            SpawnEffect("Effect/SpdAtk", targetPos);
+        }
+        else if (_stat.EvolutionData[Define.IncreaseAbleStat.Atk].FirstEvolve)
+        {
+            SpawnEffect("Effect/AtkAtk", targetPos);
+            CurrentState = Define.PlayerStatus.BackStepping;
+        }
+        else if (_stat.EvolutionData[Define.IncreaseAbleStat.Hp].FirstEvolve)
+        {
+            SpawnEffect("Effect/HpAtk", targetPos);
+        }
+        else
+        {
+            SpawnEffect("Effect/DefaultAtk", targetPos);
+        }
+
+        if (_stat.IsAtkBuffed)
+        {
+            Managers.Sound.Play($"SE/HardHit");
+            GameObject punchEffect = Managers.Resource.Instantiate("Effect/BuffAtk");
+            punchEffect.transform.position = targetPos;
+            punchEffect.GetComponent<ParticleSystem>().Play();
+        }
+        else
+        {
+            if (_punchEffect != null)
+            {
+                _punchEffect.transform.position = targetPos;
+                _punchEffect.GetComponent<ParticleSystem>().Play();
+            }
+        }
+
+        Managers.Sound.Play($"SE/Hit");
+    }
+
+    private void SpawnEffect(string path, Vector3 pos)
+    {
+        if (_punchEffect == null)
+            _punchEffect = Managers.Resource.Instantiate(path);
+    }
+
+    #endregion
+
+    #region active skill
+
+    public void ActiveSkill()
+    { 
+        Managers.Resource.Instantiate($"Effect/Skill/{EvolvedType}Skill", null, 1); 
+
+        if(EvolvedType != Define.IncreaseAbleStat.Atk)
+            _camController.CamShake(10f, 20f, 0.2f);
+    }
+
+    public void SkillOpen()
+    {
+        if (!IsSkillCool && CurrentState == Define.PlayerStatus.Running)
+        {
+            if(EvolvedType == Define.IncreaseAbleStat.Atk)
+                _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerPassive]);
+            else
+                _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerSkill]);
 
             if (CoolTime > 0)
             {

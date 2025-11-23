@@ -3,10 +3,20 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    GameObject          _target;
-    Vector3             _basePose;
-    PlayerController    _targetState;
-    
+    [Header("Targets")]
+    [SerializeField] private GameObject _target;
+    private PlayerController _targetState;
+
+    [Header("Settings")]
+    [SerializeField] private Vector3 _defaultOffset = new Vector3(0, 2.74f, -3.76f);
+    [SerializeField] private Vector3 _defaultRotation = new Vector3(15.83f, 0, 0);
+
+    [SerializeField] private Vector3 _atkOffset = new Vector3(0.579f, 0.85f, -1.35f);
+    [SerializeField] private Vector3 _atkRotation = new Vector3(-4.7f, -14.9f, 0);
+
+    private float _shakeTilt = 0f;
+    private bool _isAtkMode = false;
+
     void Start()
     {
         Init();
@@ -38,67 +48,61 @@ public class CameraController : MonoBehaviour
             cam.rect = rect;
         }
 
-        _target = Managers.Game.GetPlayer();
-        _targetState = _target.GetComponent<PlayerController>();
-        DefaultSetting();
-    }
+        if (_target == null)
+            _target = Managers.Game.GetPlayer();
 
-    private void Update()
-    {
-        SideMoveCamControl();
+        _targetState = _target.GetComponent<PlayerController>();
     }
 
     private void LateUpdate()
     {
-        if (_targetState.CurrentState == Define.PlayerStatus.Running || _targetState.CurrentState == Define.PlayerStatus.BackStepping)
-            DefaultSetting();
-    }
+        if (_target == null) return;
 
-    void SideMoveCamControl()
-    {
-        if (_targetState.CurrentState == Define.PlayerStatus.LeftMoving || _targetState.CurrentState == Define.PlayerStatus.RightMoving)
-            DefaultSetting();
-    }
+        if (_targetState.CurrentState == Define.PlayerStatus.Running ||
+            _targetState.CurrentState == Define.PlayerStatus.BackStepping)
+        {
+            _isAtkMode = false;
+        }
 
+        Vector3 finalPos = Vector3.zero;
+        Quaternion finalRot = Quaternion.identity;
 
-    #region camSetting
+        if (_isAtkMode)
+        {
+            finalPos = _target.transform.position + _atkOffset;
+            finalRot = Quaternion.Euler(_atkRotation);
+        }
+        else
+        {
+            finalPos = new Vector3(_target.transform.position.x, _defaultOffset.y, _defaultOffset.z);
+            finalRot = Quaternion.Euler(_defaultRotation);
+        }
 
-    public void DefaultSetting()
-    {
-        RotFixer(15.83f);
-        PosFixer(_target.transform.position.x, 2.74f, -3.76f);
+        transform.position = finalPos;
+
+        Vector3 currentEuler = finalRot.eulerAngles;
+        currentEuler.z += _shakeTilt;
+
+        transform.rotation = Quaternion.Euler(currentEuler);
     }
 
     public void AtkSetting(bool notDeadCheck)
     {
         if (notDeadCheck)
         {
-            Debug.Log("시점 변경 on");
-            RotFixer(-4.7f, -14.9f);
-            PosFixer(_target.transform.position.x + 0.579f,
-            _target.transform.position.y + 0.85f,
-            _target.transform.position.z - 1.35f);
+            _isAtkMode = true;
+            Debug.Log("시점 변경 ON");
         }
-        
+        else
+        {
+            _isAtkMode = false;
+        }
     }
-
-    void RotFixer(float x=0, float y=0, float z=0)
-    {
-        transform.rotation = Quaternion.identity;
-        transform.rotation = Quaternion.Euler(x, y, z);
-    }
-
-    void PosFixer(float x, float y, float z)
-    {
-        transform.position = new Vector3(x, y, z);
-    }
-    #endregion
 
     #region camShake
     public void CamShake(float roughness, float magnitude, float duration)
     {
         StopAllCoroutines();
-        _basePose = transform.position;
         StartCoroutine(Shaker(roughness, magnitude, duration));
     }
 
@@ -110,18 +114,14 @@ public class CameraController : MonoBehaviour
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
-
             float tick = Time.time * roughness;
-            Vector3 offset = new Vector3(
-                Mathf.PerlinNoise(tick, 0f) - 0.5f,
-                Mathf.PerlinNoise(0f, tick) - 0.5f,
-                0f) * magnitude;
 
-            transform.position = _basePose + offset;
+            _shakeTilt = (Mathf.PerlinNoise(tick, 0f) - 0.5f) * magnitude;
 
             yield return null;
         }
-        transform.position = _basePose;
+
+        _shakeTilt = 0f;
     }
     #endregion
 }

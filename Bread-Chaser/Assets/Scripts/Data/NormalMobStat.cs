@@ -7,6 +7,11 @@ public class NormalMobStat : Stat
     public int          AtkSpeed { get; private set; }
 
     private Coroutine   _poisonCoroutine;
+    private Coroutine   _skillPoisonCoroutine;
+    private void OnEnable()
+    {
+        
+    }
 
     public void SetID(int id)
     {
@@ -14,41 +19,64 @@ public class NormalMobStat : Stat
         Init();
     }
 
-    public override bool OnAttacked(float power, float coEfficient, ref bool targetNotDead)
+
+    public override bool OnEnemAttacked(GameObject attacker, float damageMultiplier = 1.0f)
     {
-        Hp -= NormalAtkCalcul(power, coEfficient); ;
+        PlayerStat attackerStat = attacker.GetComponent<PlayerStat>();
 
-        if (Hp <= 0)
-            return targetNotDead = false;
+        float damage = NormalAtkCalcul(attackerStat.Atk, attackerStat.AtkCoefficient);
 
-        return targetNotDead = true;
+        float finalDamage = damage * damageMultiplier;
+
+        Hp -= finalDamage;
+
+        if (Hp <= 0) return false;
+
+        return true;
     }
 
-    public override void OnPoisoned(float term, float power)
+    public override bool OnSkillAttacked(GameObject attacker, float finalDamage)
+    {
+        Hp -= finalDamage;
+
+        Managers.Sound.Play("SE/HardHit");
+
+        if (Hp <= 0) return false;
+        return true;
+    }
+
+    public override void OnPoisoned(GameObject player)
     {
         if (_poisonCoroutine != null)
         {
             StopCoroutine(_poisonCoroutine);
         }
 
-        _poisonCoroutine = StartCoroutine(PoisonProcessCoroutine(term, power));
+        _poisonCoroutine = StartCoroutine(PoisonProcessCoroutine(player));
     }
 
-    private IEnumerator PoisonProcessCoroutine(float term, float power)
+    private IEnumerator PoisonProcessCoroutine(GameObject player)
     {
-        float duration = 3f;
+        PlayerStat plStat = player.GetComponent<PlayerStat>();
+        float duration = 2.5f;
         float elapsedTime = 0f;
-        float tickDMG = 0.3f;
+        float tickDMG = plStat.Atk * 0.3f;
 
-        GameObject effect = Managers.Resource.Instantiate("Effect/Bubbles", gameObject.transform);
-        effect.GetComponent<ParticleSystem>().Play();
+        SkinnedMeshRenderer renderer = gameObject.GetComponentInChildren<SkinnedMeshRenderer>();
+        Vector3 spawnPosition = renderer.bounds.center;
+
+        posionBubble = Managers.Resource.Instantiate("Effect/Bubbles");
+        posionBubble.transform.position = spawnPosition;
+        posionBubble.transform.SetParent(gameObject.transform);
+
+        posionBubble.GetComponent<ParticleSystem>().Play();
         try
         {
             while (elapsedTime < duration)
             {
-                Hp -= power * tickDMG;
+                Hp -= tickDMG;
 
-                float tickInterval = 1f / (1f + term * 0.2f);
+                float tickInterval = 1f / (1f + plStat.MoveSpeed * 0.2f);
 
                 yield return new WaitForSeconds(tickInterval);
 
@@ -57,8 +85,54 @@ public class NormalMobStat : Stat
         }
         finally
         {
-            if (effect != null)
-                Managers.Resource.Destroy(effect);
+            if (posionBubble != null)
+                Managers.Resource.Destroy(posionBubble);
+
+            _poisonCoroutine = null;
+        }
+    }
+
+    public override void OnSkillPoisoned(GameObject player)
+    {
+        if (_skillPoisonCoroutine != null)
+        {
+            StopCoroutine(_skillPoisonCoroutine);
+        }
+        _skillPoisonCoroutine = StartCoroutine(SkillPoisonCoroutine(player));
+    }
+
+    private IEnumerator SkillPoisonCoroutine(GameObject player)
+    {
+        PlayerStat plStat = player.GetComponent<PlayerStat>();
+        float duration = 1.5f;
+        float elapsedTime = 0f;
+        float tickDMG = plStat.SkillCoefficient * 0.8f;
+
+        SkinnedMeshRenderer renderer = gameObject.GetComponentInChildren<SkinnedMeshRenderer>();
+        Vector3 spawnPosition = renderer.bounds.center;
+
+        posionBubble = Managers.Resource.Instantiate("Effect/Bubbles");
+        posionBubble.transform.position = spawnPosition;
+        posionBubble.transform.SetParent(gameObject.transform);
+
+        posionBubble.GetComponent<ParticleSystem>().Play();
+        try
+        {
+            while (elapsedTime < duration)
+            {
+                Hp -= tickDMG;
+
+                float tickInterval = 1f / (1f + plStat.MoveSpeed * 0.35f);
+
+                yield return new WaitForSeconds(tickInterval);
+
+                elapsedTime += tickInterval;
+            }
+        }
+        finally
+        {
+            if (posionBubble != null)
+                Managers.Resource.Destroy(posionBubble);
 
             _poisonCoroutine = null;
         }
@@ -77,5 +151,10 @@ public class NormalMobStat : Stat
     {
         Data.MobStat stat = Managers.Data.NMStatDict[Id];
         Hp = (int)stat.hp;
+
+        Managers.Resource.Destroy(posionBubble);
+        posionBubble = null;
+        _poisonCoroutine = null;
+
     }
 }

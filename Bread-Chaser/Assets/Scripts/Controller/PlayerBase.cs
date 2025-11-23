@@ -16,6 +16,8 @@ public class PlayerBase : MonoBehaviour
         TriggerBackStep,
         TriggerLeftSlide,
         TriggerRightSlide,
+        TriggerSkill,
+        TriggerPassive,
         IsAtk
     }
 
@@ -32,6 +34,7 @@ public class PlayerBase : MonoBehaviour
     protected bool                  _touchBlock = false;
     protected int[]                 _hashedParams;
     protected Queue<Action>         _movementQueue = new Queue<Action>();
+    protected CameraController      _camController;
 
     protected GameObject            _target = null;
     protected int                   _enemyMask = (1 << (int)Define.Layer.Enemy);
@@ -45,7 +48,7 @@ public class PlayerBase : MonoBehaviour
     protected GameObject            _shieldEffect;
     protected GameObject            _currentShieldHealth;
 
-
+    public Define.IncreaseAbleStat EvolvedType; /*{ get; protected set; }*/
     public bool                     IsSkillCool { get; protected set; } = false;
     public float                    CoolTime { get; protected set; } = 0;
     #endregion
@@ -58,6 +61,8 @@ public class PlayerBase : MonoBehaviour
         get { return _state; }
         set
         {
+            if (_state == value) return;
+
             _state = value;
 
             switch (_state)
@@ -164,6 +169,29 @@ public class PlayerBase : MonoBehaviour
         _rb = GetComponent<Rigidbody>();
         _dashEffect = Util.FindChild(gameObject, "DashSmoke");
         _railPos = Define.PLRailPos.SecondRail;
+
+        _camController = Camera.main.GetComponent<CameraController>();
+
+        if (_stat != null)
+        {
+            _stat.OnFirstEvolved += HandleFirstEvolution;
+            _stat.OnSecondEvolved += HandleSecondEvolution;
+        }
+    }
+
+    private void HandleFirstEvolution(Define.IncreaseAbleStat stat)
+    {
+        if (stat == Define.IncreaseAbleStat.SkillDMG)
+        {
+            PunchEffectNull();
+        }
+    }
+
+    private void HandleSecondEvolution(Define.IncreaseAbleStat stat, float coolTime)
+    {
+        SetCool(coolTime);
+        EvolvedType = stat;
+        GameObject.Find("SkillBtn").GetComponent<SkillBtn>().SkillInit(EvolvedType);
     }
     #endregion
 
@@ -176,7 +204,11 @@ public class PlayerBase : MonoBehaviour
 
     private void OnAnimatorIK(int layerIndex)
     {
-        if (_target == null) return;
+        if (_target == null)
+        {
+            _anim.SetLookAtWeight(0f);
+            return;
+        }
 
         _anim.SetLookAtWeight(1.0f);
         _anim.SetLookAtPosition(_target.transform.position);
@@ -218,6 +250,7 @@ public class PlayerBase : MonoBehaviour
     }
     #endregion
 
+    protected virtual void PunchEffectNull() { }
     protected virtual void JumpRB() { }
     protected virtual void RbControl() { }
     protected virtual void PlayerControl(Define.TouchEvent evt) { }
