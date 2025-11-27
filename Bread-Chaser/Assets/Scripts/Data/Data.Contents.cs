@@ -14,6 +14,7 @@ namespace Data
         public float        hp;
         public float        atk;
         public int          atkSpeed;
+        public float        exp;
     }
 
     [Serializable]

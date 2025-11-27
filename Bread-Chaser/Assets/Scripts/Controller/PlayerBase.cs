@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -18,6 +19,7 @@ public class PlayerBase : MonoBehaviour
         TriggerRightSlide,
         TriggerSkill,
         TriggerPassive,
+        TriggerDMG,
         IsAtk
     }
 
@@ -25,6 +27,7 @@ public class PlayerBase : MonoBehaviour
     public bool TargetNotDead { get; protected set; } = false;
     public Vector3 OriginPos { get; protected set; } = new Vector3(9999, 9999, 9999);
 
+    protected Renderer[]            _renderers;
     protected Define.PlayerStatus   _state;
     protected Define.PLRailPos      _railPos;
     protected bool                  _isJumping = false;
@@ -79,7 +82,10 @@ public class PlayerBase : MonoBehaviour
                     Attack();
                     break;
                 case Define.PlayerStatus.BackStepping:
-                    BackStep();
+                    {
+                        _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerBackStep]);
+                        BackStep();
+                    }
                     break;
                 case Define.PlayerStatus.LeftMoving:
                     _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerLeftSlide]);
@@ -87,11 +93,40 @@ public class PlayerBase : MonoBehaviour
                 case Define.PlayerStatus.RightMoving:
                     _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerRightSlide]);
                     break;
+                case Define.PlayerStatus.Damaged:
+                    Damaged();
+                    break;
+                case Define.PlayerStatus.Channeling:
+                    _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerSkill]);
+                    break;
             }
         }
     }
 
     #region functionCR
+
+    protected void Damaged()
+    {
+
+        _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerDMG]);
+        Managers.Sound.Play("SE/Hit");
+
+        if (OriginPos != new Vector3(9999, 9999, 9999))
+        {
+            BackStep();
+        }
+        else
+        {
+            _touchBlock = false;
+            StartCoroutine(RecoverFromDamage());
+        }
+    }
+
+    private IEnumerator RecoverFromDamage()
+    {
+        yield return new WaitForSeconds(0.2f);
+        CurrentState = Define.PlayerStatus.Running;
+    }
 
     protected void Jump()
     {
@@ -125,7 +160,6 @@ public class PlayerBase : MonoBehaviour
 
     protected void BackStep()
     {
-        _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerBackStep]);
         _target.GetComponent<BaseMobController>().TargetCheck(false);
         TargetNotDead = false;
         _touchBlock = false;
@@ -177,6 +211,7 @@ public class PlayerBase : MonoBehaviour
             _stat.OnFirstEvolved += HandleFirstEvolution;
             _stat.OnSecondEvolved += HandleSecondEvolution;
         }
+        _renderers = GetComponentsInChildren<Renderer>();
     }
 
     private void HandleFirstEvolution(Define.IncreaseAbleStat stat)
@@ -192,6 +227,38 @@ public class PlayerBase : MonoBehaviour
         SetCool(coolTime);
         EvolvedType = stat;
         GameObject.Find("SkillBtn").GetComponent<SkillBtn>().SkillInit(EvolvedType);
+    }
+
+
+    public void StartBlinkEffect(float duration)
+    {
+        if (_renderers == null || _renderers.Length == 0) return;
+
+        StartCoroutine(BlinkCoroutine(duration));
+    }
+
+    protected IEnumerator BlinkCoroutine(float duration)
+    {
+        float timer = 0f;
+        float blinkSpeed = 0.1f;
+
+        while (timer < duration)
+        {
+            foreach (Renderer renderer in _renderers)
+            {
+                if (renderer != null)
+                    renderer.enabled = !renderer.enabled;
+            }
+
+            yield return new WaitForSeconds(blinkSpeed);
+            timer += blinkSpeed;
+        }
+
+        foreach (Renderer renderer in _renderers)
+        {
+            if (renderer != null)
+                renderer.enabled = true;
+        }
     }
     #endregion
 
@@ -214,11 +281,6 @@ public class PlayerBase : MonoBehaviour
         _anim.SetLookAtPosition(_target.transform.position);
     }
 
-    private void OnParticleCollision(GameObject other)
-    {
-        if (other.layer == (int)Define.Layer.EnemyAtk)
-            Debug.Log("Local Attacked!");
-    }
 
     private void OnCollisionEnter(Collision collision)
     {
@@ -228,14 +290,6 @@ public class PlayerBase : MonoBehaviour
             _isJumping = false;
             CurrentState = Define.PlayerStatus.Running;
         }
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.gameObject.layer == (int)Define.Layer.Obstacle)
-            Debug.Log("Obstacle Collisioned");
-        else if (other.gameObject.layer == (int)Define.Layer.EnemyAtk)
-            Debug.Log("Attacked!");
     }
 
     private void FixedUpdate()

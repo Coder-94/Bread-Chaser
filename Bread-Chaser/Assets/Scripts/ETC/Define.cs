@@ -46,15 +46,6 @@ public class Define
         Score
     }
 
-    public enum StageState
-    {
-        Init,
-        Normal,
-        BossEncounter,
-        BossBattle,
-        Score
-    }
-
     public enum PlayerStatus
     {
         LockOning,
@@ -63,7 +54,10 @@ public class Define
         RightMoving,
         Jumping,
         Attacking,
-        BackStepping
+        Attack,
+        BackStepping,
+        Damaged,
+        Channeling
     }
 
     public enum IncreaseAbleStat

@@ -15,6 +15,8 @@ public class LockOn: UIPopUp
     protected int _enemyMask = (1 << (int)Define.Layer.Enemy);
 
     protected float _cameraRotCorrection = 3f;
+    private float _detectRadius = 1.0f;
+
     enum GameObjects
     {
         TargetCursor,
@@ -48,13 +50,18 @@ public class LockOn: UIPopUp
             Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(null, rt.position);
             Ray ray = Camera.main.ScreenPointToRay(screenPos);
 
-            if (Physics.Raycast(ray, out RaycastHit hit, 100f, _enemyMask))
+
+
+            if (Physics.SphereCast(ray, _detectRadius, out RaycastHit hit, 100f, _enemyMask))
             {
                 _target = hit.collider.gameObject;
             }
 
             if (_target != null)
             {
+                if (!_onTargetcursor.activeSelf)
+                    _onTargetcursor.SetActive(true);
+
                 RectTransform onTargetRect = _onTargetcursor.GetComponent<RectTransform>();
                 Vector3 targetPos = _target.GetComponent<Collider>().bounds.center;
 

@@ -3,7 +3,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public abstract class NormalMobBase : BaseMobController
+public class MobController : BaseMobController
 {
     protected enum AnimParameters
     {
@@ -20,7 +20,7 @@ public abstract class NormalMobBase : BaseMobController
     
     protected Define.NormalMobStatus    myState = Define.NormalMobStatus.Idle;
 
-    protected bool                      _spAtkToggle = false;
+    [SerializeField] protected bool     _spAtkToggle = false;
 
     private bool                        _isInitialized = false;
     private float                       _targetValue = 0;
@@ -135,7 +135,7 @@ public abstract class NormalMobBase : BaseMobController
                 LocalAtk();
                 break;
             case Define.NormalMobStatus.SpecialAttacking:
-                SpecialAtk();
+                //SpecialAtk();
                 break;
         }
     }
@@ -156,15 +156,15 @@ public abstract class NormalMobBase : BaseMobController
         if (_attackCooldown >= mobStat.AtkSpeed)
         {
             _attackCooldown = 0f;
-            int random = 0;
 
-            if (!_spAtkToggle)
-                random = UnityEngine.Random.Range(0, 2);
-
-            if (random == 0)
-                CurrentState = Define.NormalMobStatus.Attacking;
-            else
+            if (_spAtkToggle && UnityEngine.Random.Range(0, 2) == 1)
+            {
                 CurrentState = Define.NormalMobStatus.SpecialAttacking;
+            }
+            else
+            {
+                CurrentState = Define.NormalMobStatus.Attacking;
+            }
         }
     }
 
@@ -260,6 +260,12 @@ public abstract class NormalMobBase : BaseMobController
         _spawnedRoomNum = 999;
         ImTargeted = false;
 
+        //heal player
+        plStat.Heal(2f);
+
+        //player exp
+        Managers.Game.AddScore(mobStat.Exp);
+
         //destroy self
         Managers.Resource.Destroy(gameObject);
     }
@@ -284,5 +290,4 @@ public abstract class NormalMobBase : BaseMobController
         base.PosFixer();
         
     }
-    protected abstract void SpecialAtk();
 }

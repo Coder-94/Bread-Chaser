@@ -17,6 +17,9 @@ public class GameManager
     private GameObject          PLAYER;
     private PlayerStat          _playerStat;
 
+    public int                  BossBattleScoreCut { get; private set; } = 150;
+    private int                 _pendingLevelUps = 0;
+
     public GameObject GetPlayer() { return PLAYER; }
 
     public void Init()
@@ -37,12 +40,41 @@ public class GameManager
         {
             _scoreCounter += 1f * Time.deltaTime * (Mathf.Sqrt(_playerStat.MoveSpeed) * _magnification);  //moveSpd per sec
             ScorePoint = Mathf.FloorToInt(_scoreCounter);
-            if (ScorePoint >= _nextLevelUpScore)
+            while (ScorePoint >= _nextLevelUpScore)
             {
-                StateAction.Invoke(Define.SceneState.LevelUp);
+                _pendingLevelUps++;
+                TryOpenLevelUpPopup();
                 _nextLevelUpScore += LEVELUPCUT;
             }
+
+            if (Managers.Scene.CurrentScene.SceneState == Define.SceneState.DefaultPlay && ScorePoint >= BossBattleScoreCut)
+            {
+                StateAction?.Invoke(Define.SceneState.BossBattle);
+                Managers.Scene.CurrentScene.SetSceneState(Define.SceneState.BossBattle);
+                Debug.Log("Boss Battle Started!");
+            }
         }
+    }
+
+    public void TryOpenLevelUpPopup()
+    {
+        if (_pendingLevelUps > 0 && gameState == Define.GameState.Play)
+        {
+            _pendingLevelUps--;
+
+            StateAction?.Invoke(Define.SceneState.LevelUp);
+        }
+    }
+
+    public void AddScore(float amount) 
+    {
+        _scoreCounter += amount;
+        ScorePoint = Mathf.FloorToInt(_scoreCounter);
+    }
+
+    public void AddScoreForEnding(int amount)
+    {
+        AddScore(amount);
     }
 
     public void SetGameState(Define.GameState currentState) 

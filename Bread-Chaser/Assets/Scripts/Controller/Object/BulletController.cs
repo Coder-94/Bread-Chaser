@@ -3,20 +3,16 @@ using static UnityEngine.GraphicsBuffer;
 
 public class BulletController : MonoBehaviour
 {
-    float _bulletSpeed = 15f;
+    float _bulletSpeed = 20f;
     float _spawnTime;
 
     GameObject _target;
-    public NormalMobStat parentStat;
+    GameObject _shooter;
 
     #region Unity Scripts
-    private void Start()
-    {
-        Init();
-    }
-
     private void OnEnable()
     {
+        Init();
         _spawnTime = 0f;
     }
 
@@ -25,11 +21,6 @@ public class BulletController : MonoBehaviour
         _target = Managers.Game.GetPlayer();
         gameObject.transform.parent = null;
 
-        /*if (_target != null)
-        {
-            Vector3 dir = (_target.transform.position - transform.position).normalized;
-            transform.rotation = Quaternion.LookRotation(dir);
-        }*/
     }
 
     private void Update()
@@ -53,14 +44,26 @@ public class BulletController : MonoBehaviour
         {
             if (_target != null)
             {
-                /* Test targetStat = target.GetComponent<Test>();
-                 targetStat.TestDamage(parentStat);*/
+                PlayerStat targetStat = _target.GetComponent<PlayerStat>();
+                PlayerController control = _target.GetComponent<PlayerController>();
+
+                if(control.CurrentState != Define.PlayerStatus.Attack)
+                    targetStat.OnPlAttacked(_shooter);
 
                 Managers.Resource.Destroy(gameObject);
             }
         }
     }
     #endregion
+
+    public void SetShooter(GameObject shooter)
+    {
+        _shooter = shooter;
+        if (transform.parent != null)
+        {
+            transform.parent = null;
+        }
+    }
 
     #region LifeTime Controller
     private void LifeTimeChecker()

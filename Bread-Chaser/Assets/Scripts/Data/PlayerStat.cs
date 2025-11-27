@@ -27,14 +27,18 @@ public class PlayerStat : Stat
     public event Action<Define.IncreaseAbleStat> OnFirstEvolved;
     public event Action<Define.IncreaseAbleStat, float> OnSecondEvolved;
 
-    public float        BarrierCool { get; private set; } = 0;
-    private float       _currentShieldHealth;
-    private GameObject  _shieldEffectInstance;
-    public float        CurrentShield => _currentShieldHealth;
-    public float        MaxShield { get; private set; } = 0.001f;
+    public float                BarrierCool { get; private set; } = 0;
+    private float               _currentShieldHealth;
+    private GameObject          _shieldEffectInstance;
+    public float                CurrentShield => _currentShieldHealth;
+    public float                MaxShield { get; private set; } = 0.001f;
 
+    public bool                 IsInvincible { get; private set; } = false;
+    private float               _hpDecayAmount = 0.1f;
+    private float               _invincibleTime = 2f;
+    private PlayerController    _controller;
     public Dictionary<Define.IncreaseAbleStat, StatEvolutionData> EvolutionData { get; private set; }
-
+    
     private void Start()
     {
         Init();
@@ -42,6 +46,7 @@ public class PlayerStat : Stat
 
     void Init()
     {
+        
         DontDestroyOnLoad(gameObject);
         Id = 0;
 
@@ -64,6 +69,9 @@ public class PlayerStat : Stat
             { Define.IncreaseAbleStat.Hp,       new StatEvolutionData() },
             { Define.IncreaseAbleStat.SkillDMG, new StatEvolutionData() }
         };
+
+        _controller = GetComponent<PlayerController>();
+        StartCoroutine(HpDecayCoroutine());
     }
 
     public void SetStat(Define.IncreaseAbleStat stat)
@@ -148,6 +156,7 @@ public class PlayerStat : Stat
         {
             Debug.Log("1");
             EvolutionData[Define.IncreaseAbleStat.SkillDMG].FirstEvolve = true;
+            Managers.Game.AddScore(5000);
         }
         else if (a == 1)
         {
@@ -215,8 +224,25 @@ public class PlayerStat : Stat
 
     public override void OnPlAttacked(GameObject enemy)
     {
+        if (IsInvincible) return;
+
+        if (_controller != null)
+        {
+            Define.PlayerStatus state = _controller.CurrentState;
+
+            if (state == Define.PlayerStatus.Channeling ||  state == Define.PlayerStatus.Attacking)
+            {
+                return;
+            }
+        }
+
         Stat enemyStat = enemy.GetComponent<Stat>();
-        float power = enemyStat.Atk;
+        float power = 0; 
+        
+        if(enemyStat != null)
+            power = enemyStat.Atk;
+        else
+            power = 1f;
 
         if (_currentShieldHealth > 0)
         {
@@ -236,9 +262,20 @@ public class PlayerStat : Stat
         }
 
         if (power > 0)
+        {
             CurrentHp -= power;
+            HpCountAction?.Invoke(CurrentHp);
 
-        HpCountAction.Invoke(CurrentHp);
+            if (CurrentHp > 0)
+            {
+                StartCoroutine(InvincibleProcess());
+
+                if (_controller != null)
+                {
+                    _controller.CurrentState = Define.PlayerStatus.Damaged;
+                }
+            }
+        }
     }
 
     public void Heal(float healPower)
@@ -252,6 +289,36 @@ public class PlayerStat : Stat
             CurrentHp = Hp;
 
         HpCountAction.Invoke(CurrentHp);
+    }
+
+
+    private IEnumerator HpDecayCoroutine()
+    {
+        WaitForSeconds wait = new WaitForSeconds(1f);
+
+        while (true)
+        {
+            if (CurrentHp > 0)
+            {
+                CurrentHp -= _hpDecayAmount;
+                if (CurrentHp < 0) CurrentHp = 0;
+
+                HpCountAction?.Invoke(CurrentHp);
+            }
+            yield return wait;
+        }
+    }
+
+    private IEnumerator InvincibleProcess()
+    {
+        IsInvincible = true;
+
+        PlayerController pc = GetComponent<PlayerController>();
+        if (pc != null) pc.StartBlinkEffect(_invincibleTime);
+
+        yield return new WaitForSeconds(_invincibleTime);
+
+        IsInvincible = false;
     }
 }
 //..

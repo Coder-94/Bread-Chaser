@@ -5,13 +5,10 @@ public class NormalMobStat : Stat
 {
     
     public int          AtkSpeed { get; private set; }
-
+    public float        Exp { get; private set; }
     private Coroutine   _poisonCoroutine;
     private Coroutine   _skillPoisonCoroutine;
-    private void OnEnable()
-    {
-        
-    }
+
 
     public void SetID(int id)
     {
@@ -145,6 +142,7 @@ public class NormalMobStat : Stat
         Hp = stat.hp;
         Atk = stat.atk;
         AtkSpeed = stat.atkSpeed;
+        Exp = stat.exp;
     }
 
     public void Clear()

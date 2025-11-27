@@ -13,7 +13,7 @@ public class CityScene : BaseScene
     {
         base.Init();
         SceneType = Define.Scene.City;
-
+        _bossId = (int)MonsterID.CityBoss;
         //Managers.Sound.Play("BGM/Bagel Street (loop)", Define.Sound.Bgm);
 
         for (int i=0; i<3; i++)

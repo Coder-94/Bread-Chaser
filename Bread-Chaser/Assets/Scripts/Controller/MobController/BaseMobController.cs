@@ -9,6 +9,7 @@ public abstract class BaseMobController : MonoBehaviour
     protected GameObject    player;
     public Vector3          initPos;
     public GameObject       targetedPos;
+    protected PlayerStat    plStat;
     public bool             ImTargeted { get; protected set; } = false;
     #endregion
 
@@ -26,6 +27,7 @@ public abstract class BaseMobController : MonoBehaviour
     {
         player = Managers.Game.GetPlayer();
         targetedPos = transform.GetChild(transform.childCount - 1).gameObject;
+        plStat = player.GetComponent<PlayerStat>();
     }
     #endregion
 

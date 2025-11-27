@@ -12,12 +12,12 @@ public abstract class BaseScene : MonoBehaviour
     protected enum MonsterID
     {
         CityMob = 1,
-        CityBoss = 2,
+        IcycleMob = 2,
         ForestMob = 3,
-        ForestBoss = 4,
-        IcycleMob = 5,
+        SpaceMob = 4,
+        CityBoss = 5,
         IcycleBoss = 6,
-        SpaceMob = 7,
+        ForestBoss = 7,
         SpaceBoss = 8,
     }
     #endregion
@@ -29,11 +29,10 @@ public abstract class BaseScene : MonoBehaviour
     public Define.Scene             SceneType { get; protected set; } = Define.Scene.Unknown;
     public Define.SceneState        SceneState { get; protected set; }
     public string                   SceneName { get; private set; }
-    
     public float                    AreaSize { get; protected set; }
-
     public int                      MonsterCount { get; protected set; } = 0;
 
+    protected int                   _bossId;
     protected Define.PlayerStatus   playerStatus;
     protected Coroutine             _coroutineIsActive = null;
     protected const int             _MAXMONSTERCOUNT = 5;
@@ -67,6 +66,8 @@ public abstract class BaseScene : MonoBehaviour
     {
         Managers.Game.StateAction -= LevelUp;
         Managers.Game.StateAction += LevelUp;
+        Managers.Game.StateAction -= BossStage;
+        Managers.Game.StateAction += BossStage;
 
         MonsterCount = 0;
         SceneName = SceneManager.GetActiveScene().name;
@@ -79,6 +80,7 @@ public abstract class BaseScene : MonoBehaviour
         Managers.UI.ShowSceneUI<Hp>();
         Managers.UI.ShowSceneUI<Score>();
         Managers.UI.ShowSceneUI<PauseBtn>();
+        Managers.UI.ShowSceneUI<SkillBtn>();
         Managers.UI.ShowPopUpUI<StartTxT>();
     }
     #endregion
@@ -103,12 +105,12 @@ public abstract class BaseScene : MonoBehaviour
                 GameObject mob = Managers.Resource.Instantiate($"Entity/{SceneName}/{SceneName}Mob", null, 5);
                 mob.transform.position = spawnedMobChecker[i].spawnedPos;
 
-                mob.GetComponent<NormalMobBase>().initPos = spawnedMobChecker[i].spawnedPos;
+                mob.GetComponent<MobController>().initPos = spawnedMobChecker[i].spawnedPos;
                 mob.GetComponent<NormalMobStat>().SetID(id);
 
                 //Check init
                 spawnedMobChecker[i].isSpawned = true;
-                mob.GetComponent<NormalMobBase>().SpawnedRoomNumSet(i);
+                mob.GetComponent<MobController>().SpawnedRoomNumSet(i);
 
                 MobCountController(true);
                 break;
@@ -117,6 +119,25 @@ public abstract class BaseScene : MonoBehaviour
         yield return new WaitForSeconds(time);
         _coroutineIsActive = null;
     }
+    
+    protected virtual void BossStage(Define.SceneState sceneState) 
+    {
+        if (sceneState == Define.SceneState.BossBattle)
+        {
+            SceneState = Define.SceneState.BossBattle;
+
+            GameObject bossMob = Managers.Resource.Instantiate($"Entity/{SceneName}/{SceneName}Boss", null, 1);
+            bossMob.transform.position = spawnedMobChecker[5].spawnedPos;
+
+            bossMob.GetComponent<MobController>().initPos = spawnedMobChecker[5].spawnedPos;
+            bossMob.GetComponent<NormalMobStat>().SetID(_bossId);
+
+            spawnedMobChecker[5].isSpawned = true;
+            bossMob.GetComponent<MobController>().SpawnedRoomNumSet(5);
+        }
+
+    }
+
     #endregion
 
     #region sceneState

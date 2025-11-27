@@ -51,9 +51,10 @@ public class ChoicePanel : UIBase, IPointerClickHandler
 
             player.GetComponent<PlayerStat>().SetStat((Define.IncreaseAbleStat)_chosenStat);
 
+            Managers.UI.ClosePopUpUIAll();
             Managers.Game.SetGameState(Define.GameState.Play);
             Managers.Scene.CurrentScene.SetSceneState(Define.SceneState.DefaultPlay);
-            Managers.UI.ClosePopUpUIAll();
+            Managers.Game.TryOpenLevelUpPopup();
         }
     }
 }

@@ -24,7 +24,7 @@ public class PlayerController : PlayerBase
             case Define.PlayerStatus.LockOning:
                 LockOn(evt);
                 break;
-            case Define.PlayerStatus.Attacking:
+            case Define.PlayerStatus.Attack:
                 Attacking(evt);
                 break;
             case Define.PlayerStatus.Jumping:
@@ -145,7 +145,7 @@ public class PlayerController : PlayerBase
         {
             case Define.PlayerStatus.Running:
                 break;
-            case Define.PlayerStatus.Attacking:
+            case Define.PlayerStatus.Attack:
                 Atk();
                 break;
             case Define.PlayerStatus.BackStepping:
@@ -171,7 +171,6 @@ public class PlayerController : PlayerBase
                 AttackRB();
                 break;
             case Define.PlayerStatus.BackStepping:
-                
                 BackStepRB();
                 break;
             case Define.PlayerStatus.LeftMoving:
@@ -179,6 +178,9 @@ public class PlayerController : PlayerBase
                 break;
             case Define.PlayerStatus.RightMoving:
                 SideMoveRB();
+                break;
+            case Define.PlayerStatus.Damaged:
+                BackStepRB();
                 break;
         }
 
@@ -241,6 +243,8 @@ public class PlayerController : PlayerBase
     // rb backstep ======================================================================================
     void BackStepRB()
     {
+        if (OriginPos == new Vector3(9999, 9999, 9999))
+            return;
 
         Vector3 currentPos = _rb.position;
         Vector3 dir = OriginPos - currentPos;
@@ -292,7 +296,7 @@ public class PlayerController : PlayerBase
         {
             Stat targetStat = _target.GetComponent<NormalMobStat>();
 
-            float multiplier = (_state == Define.PlayerStatus.Attacking) ? 0.6f : 1.0f;
+            float multiplier = (_state == Define.PlayerStatus.Attack) ? 0.7f : 1.0f;
             bool isTargetAlive = targetStat.OnEnemAttacked(gameObject, multiplier);
 
             TargetNotDead = isTargetAlive;
@@ -300,7 +304,7 @@ public class PlayerController : PlayerBase
             _camController.AtkSetting(TargetNotDead);
             _camController.CamShake(10f, 5f, 0.2f);
 
-            Vector3 targetPos = _target.GetComponent<NormalMobBase>().targetedPos.transform.position;
+            Vector3 targetPos = _target.GetComponent<MobController>().targetedPos.transform.position;
             targetPos.z -= 0.5f;
 
             HandleAttackEffects(targetStat);
@@ -308,6 +312,7 @@ public class PlayerController : PlayerBase
 
         if(_touchBlock)
             _touchBlock = false;
+        CurrentState = Define.PlayerStatus.Attack;
     }
 
     public void OnRoundAttack()
@@ -345,7 +350,8 @@ public class PlayerController : PlayerBase
 
             if (targetStat != null)
             {
-                bool isAlive = targetStat.OnEnemAttacked(gameObject);
+                float multiplier = (_state == Define.PlayerStatus.Attack) ? 0.7f : 1.0f;
+                bool isAlive = targetStat.OnEnemAttacked(gameObject, multiplier);
 
                 if (_target != null && target.gameObject == _target)
                 {
@@ -363,7 +369,7 @@ public class PlayerController : PlayerBase
 
     void HandleAttackEffects(Stat targetStat)
     {
-        Vector3 targetPos = _target.GetComponent<NormalMobBase>().targetedPos.transform.position;
+        Vector3 targetPos = _target.GetComponent<MobController>().targetedPos.transform.position;
         targetPos.z -= 0.5f;
 
         if (_stat.EvolutionData[Define.IncreaseAbleStat.MoveSpd].FirstEvolve)
@@ -419,17 +425,21 @@ public class PlayerController : PlayerBase
         Managers.Resource.Instantiate($"Effect/Skill/{EvolvedType}Skill", null, 1); 
 
         if(EvolvedType != Define.IncreaseAbleStat.Atk)
+        {
             _camController.CamShake(10f, 20f, 0.2f);
+            CurrentState = Define.PlayerStatus.Running;
+        }
+            
     }
 
     public void SkillOpen()
     {
         if (!IsSkillCool && CurrentState == Define.PlayerStatus.Running)
         {
-            if(EvolvedType == Define.IncreaseAbleStat.Atk)
+            if (EvolvedType == Define.IncreaseAbleStat.Atk)
                 _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerPassive]);
             else
-                _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerSkill]);
+                CurrentState = Define.PlayerStatus.Channeling;
 
             if (CoolTime > 0)
             {
