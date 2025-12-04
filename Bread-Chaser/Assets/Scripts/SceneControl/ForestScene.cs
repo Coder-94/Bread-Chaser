@@ -1,23 +1,25 @@
 using UnityEngine;
 
-public class CityScene : BaseScene
+public class ForestScene : BaseScene
 {
-
     protected override void Init()
     {
         base.Init();
-        SceneType = Define.Scene.City;
-        _bossId = (int)MonsterID.CityBoss;
-        _mobid = (int)MonsterID.CityMob;
+        SceneType = Define.Scene.Forest;
+        _bossId = (int)MonsterID.ForestBoss;
+        _mobid = (int)MonsterID.ForestMob;
 
-        //Managers.Sound.Play("BGM/Bagel Street (loop)", Define.Sound.Bgm);
-
-        for (int i=0; i<3; i++)
+        for (int i = 0; i < 3; i++)
         {
-            if(i==0)
+            if (i == 0)
                 Managers.Area.SpawnArea(SceneName, ref Managers.Area.totalLength, 0, false, true);
             else
                 Managers.Area.SpawnArea(SceneName, ref Managers.Area.totalLength, 0, true, true);
         }
+    }
+
+    public override void ForestGimmick()
+    {
+
     }
 }

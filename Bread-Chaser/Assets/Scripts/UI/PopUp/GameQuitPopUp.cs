@@ -24,13 +24,12 @@ public class GameQuitPopUp : UIPopUp
     void QuitYes()
     {
         BtnSound();
-        Debug.Log("게임종료");
-        //Managers.UI.ClosePopUpUIAll();
+        Application.Quit();
     }
 
     void QuitNo()
     {
         BtnSound();
-        Managers.UI.ClosePopUpUI();
+        ClosePopUpUI();
     }
 }

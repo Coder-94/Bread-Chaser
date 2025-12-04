@@ -30,11 +30,15 @@ public abstract class Stat : MonoBehaviour
         return shield;
     }
 
+    public void RightKill() { Destroy(gameObject); }
 
-    
+    public void TestKill() { CurrentHp = 0; }
+
     public virtual void OnPlAttacked(GameObject attacker) { }
 
     public virtual bool OnEnemAttacked(GameObject attacker, float damageMultiplier = 1.0f) { return true; }
+
+    public virtual bool OnBossAttacked() { return true; }
 
     public virtual bool OnSkillAttacked(GameObject attacker, float finalDamage) { return true; }
 

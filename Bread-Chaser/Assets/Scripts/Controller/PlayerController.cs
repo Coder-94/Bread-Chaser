@@ -1,11 +1,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.InputSystem.XR;
 using static Define;
 using static UnityEngine.GraphicsBuffer;
 
@@ -127,7 +129,7 @@ public class PlayerController : PlayerBase
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir), 10 * Time.deltaTime);
         }
 
-        if (_target == null || _target.GetComponent<NormalMobStat>().Hp <= 0)
+        if (_target == null || _target.GetComponent<MobStat>().CurrentHp <= 0)
         {
             CurrentState = Define.PlayerStatus.BackStepping;
         }
@@ -141,6 +143,12 @@ public class PlayerController : PlayerBase
     //state control ======================================================================================
     protected override void PlayerActor() 
     {
+        if(_stat.CurrentHp <= 0)
+        {
+            CurrentState = Define.PlayerStatus.Die;
+            return;
+        }
+
         switch (CurrentState)
         {
             case Define.PlayerStatus.Running:
@@ -153,6 +161,8 @@ public class PlayerController : PlayerBase
             case Define.PlayerStatus.LockOning:
                 break;
             case Define.PlayerStatus.Jumping:
+                break;
+            case Define.PlayerStatus.BossAtk:
                 break;
         }
     }
@@ -181,6 +191,9 @@ public class PlayerController : PlayerBase
                 break;
             case Define.PlayerStatus.Damaged:
                 BackStepRB();
+                break;
+            case Define.PlayerStatus.BossAtk:
+                AttackRB();
                 break;
         }
 
@@ -211,31 +224,59 @@ public class PlayerController : PlayerBase
             _rb.MovePosition(currentPos + moveDir);
         }
         else
+        {
             CurrentState = Define.PlayerStatus.Running;
+            _stat.InvincibleProcess(false, 0.5f);
+        }
+            
     }
 
     //rb atk ======================================================================================
     void AttackRB()
     {
+        GameObject currentBoss = Managers.Scene.CurrentScene.CurrentBoss;
+
         if (_target != null)
         {
             Vector3 targetPos = _target.transform.position;
             Vector3 currentPos = _rb.position;
 
             targetPos.y = currentPos.y;
+
+            Vector3 direction = (targetPos - currentPos).normalized;
+
+            float dist = Vector3.Distance(currentPos, targetPos);
+
+            if (dist > 1.0f)
+            {
+                float moveStep = 15f * Time.fixedDeltaTime;
+                float moveAmount = Mathf.Min(moveStep, dist - 1.0f);
+
+                Vector3 move = direction * moveAmount;
+                _rb.MovePosition(currentPos + move);
+            }
+        }
+        //bossmob Atk
+        else if (_target == null && currentBoss != null)
+        {
+            Vector3 targetPos = currentBoss.transform.position;
+            Vector3 currentPos = _rb.position;
             targetPos.z -= 1f;
 
             Vector3 direction = (targetPos - currentPos).normalized;
 
             float dist = Vector3.Distance(currentPos, targetPos);
 
-            if (dist > 0.01f)
+            if (dist > 1.0f)
             {
                 float moveStep = 15f * Time.fixedDeltaTime;
-                float moveAmount = Mathf.Min(moveStep, dist);
+                float moveAmount = Mathf.Min(moveStep, dist - 1.0f);
 
                 Vector3 move = direction * moveAmount;
                 _rb.MovePosition(currentPos + move);
+
+                _rb.useGravity = false;
+                _camController.AtkSetting(true);
             }
         }
     }
@@ -248,7 +289,8 @@ public class PlayerController : PlayerBase
 
         Vector3 currentPos = _rb.position;
         Vector3 dir = OriginPos - currentPos;
-        dir.y = 0;
+        if(_rb.useGravity)
+            dir.y = 0;
 
         float dist = dir.magnitude;
 
@@ -265,6 +307,10 @@ public class PlayerController : PlayerBase
             if (OriginPos != new Vector3(9999, 9999, 9999))
                 OriginPos = new Vector3(9999, 9999, 9999);
 
+            if(!_rb.useGravity)
+                _rb.useGravity = true;
+
+            StartCoroutine(_stat.InvincibleProcess(false, 0.5f));
             CurrentState = Define.PlayerStatus.Running;
         }
             
@@ -282,11 +328,6 @@ public class PlayerController : PlayerBase
 
     #endregion
 
-    protected override void PunchEffectNull() 
-    { 
-        if (_punchEffect != null) 
-            _punchEffect = null; 
-    }
 
     #region anim Events
 
@@ -294,7 +335,7 @@ public class PlayerController : PlayerBase
     {
         if(_target != null)
         {
-            Stat targetStat = _target.GetComponent<NormalMobStat>();
+            Stat targetStat = _target.GetComponent<MobStat>();
 
             float multiplier = (_state == Define.PlayerStatus.Attack) ? 0.7f : 1.0f;
             bool isTargetAlive = targetStat.OnEnemAttacked(gameObject, multiplier);
@@ -312,108 +353,178 @@ public class PlayerController : PlayerBase
 
         if(_touchBlock)
             _touchBlock = false;
-        CurrentState = Define.PlayerStatus.Attack;
+        if (CurrentState != Define.PlayerStatus.BackStepping)
+            CurrentState = Define.PlayerStatus.Attack;
     }
 
     public void OnRoundAttack()
     {
         float   attackRange = 3.5f;
-        int     maxTargets = 3;
-        if (_stat.EvolutionData[Define.IncreaseAbleStat.SkillDMG].SecondEvolve)
-            maxTargets = 6;
+        int maxTargets = _stat.EvolutionData[Define.IncreaseAbleStat.SkillDMG].SecondEvolve ? 6 : 3;
 
         Collider[] enemiesInRange = new Collider[maxTargets];
 
         int hitCount = Physics.OverlapSphereNonAlloc(transform.position, attackRange, enemiesInRange, _enemyMask);
 
-        if (hitCount == 0)
-            return;
-
-        List<Transform> closestEnemies = enemiesInRange
-            .Where(enemy => enemy != null)
-            .OrderBy(enemy => Vector3.Distance(transform.position, enemy.transform.position))
-            .Take(maxTargets)
-            .Select(enemy => enemy.transform)
-            .ToList();
-
-        if (_punchEffect == null)
-            _punchEffect = Managers.Resource.Instantiate("Effect/SkillDMGAtk");
-
-        Vector3 pos = gameObject.transform.position;
-        pos.y += 0.5f;
-        _punchEffect.transform.position = pos;
-        _punchEffect.GetComponent<ParticleSystem>().Play();
-
-        foreach (Transform target in closestEnemies)
+        if (hitCount > 0)
         {
-            Stat targetStat = target.GetComponent<Stat>();
+            List<Transform> closestEnemies = enemiesInRange
+                .Where(enemy => enemy != null)
+                .OrderBy(enemy => Vector3.Distance(transform.position, enemy.transform.position))
+                .Take(maxTargets)
+                .Select(enemy => enemy.transform)
+                .ToList();
 
-            if (targetStat != null)
+            if (_punchEffect == null)
+                _punchEffect = Managers.Resource.Instantiate("Effect/SkillDMGAtk");
+
+            Vector3 pos = gameObject.transform.position;
+            pos.y += 0.5f;
+            _punchEffect.transform.position = pos;
+            _punchEffect.GetComponent<ParticleSystem>().Play();
+
+            foreach (Transform target in closestEnemies)
             {
-                float multiplier = (_state == Define.PlayerStatus.Attack) ? 0.7f : 1.0f;
-                bool isAlive = targetStat.OnEnemAttacked(gameObject, multiplier);
+                Stat targetStat = target.GetComponent<Stat>();
 
-                if (_target != null && target.gameObject == _target)
+                if (targetStat != null)
                 {
-                    TargetNotDead = isAlive;
-                    _camController.AtkSetting(TargetNotDead);
-                }
+                    bool isAlive = targetStat.OnEnemAttacked(gameObject);
 
+                    if (_target != null && target.gameObject == _target)
+                    {
+                        TargetNotDead = isAlive;
+                        _camController.AtkSetting(TargetNotDead);
+                    }
+
+                    ApplyHitLogic(targetStat);
+                }
+            }
+
+            if (_stat.EvolutionData[Define.IncreaseAbleStat.Atk].FirstEvolve)
+                CurrentState = Define.PlayerStatus.BackStepping;
+
+            if (_stat.IsAtkBuffed)
+            {
+                Managers.Sound.Play($"SE/HardHit");
+                _camController.CamShake(10f, 10f, 0.2f);
+            }
+            else
+            {
                 Managers.Sound.Play($"SE/Hit");
                 _camController.CamShake(10f, 5f, 0.2f);
             }
         }
+
+        if (_touchBlock)
+            _touchBlock = false;
+        if (CurrentState != Define.PlayerStatus.BackStepping)
+            CurrentState = Define.PlayerStatus.Attack;
+    }
+
+    public void OnBossAtk()
+    {
+        GameObject currentBoss = Managers.Scene.CurrentScene.CurrentBoss;
+        if (currentBoss != null)
+        {
+            Stat targetStat = currentBoss.GetComponent<MobStat>();
+            
+            targetStat.OnBossAttacked();
+
+            _camController.CamShake(10f, 20f, 0.2f);
+
+            Vector3 targetPos = currentBoss.GetComponent<MobController>().targetedPos.transform.position;
+            targetPos.z -= 0.5f;
+
+            HandleAttackEffects(targetStat, true);
+        }
+
+        if (_touchBlock)
+            _touchBlock = false;
+
+        _camController.AtkSetting(false);
+        CurrentState = Define.PlayerStatus.BackStepping;
     }
 
     #region effect
 
-    void HandleAttackEffects(Stat targetStat)
+    void HandleAttackEffects(Stat targetStat, bool isBossAtk = false)
     {
+        if (isBossAtk)
+        {
+            GameObject currentBoss = Managers.Scene.CurrentScene.CurrentBoss;
+
+            if (currentBoss != null)
+            {
+                Vector3 bossTargetPos = currentBoss.GetComponent<MobController>().targetedPos.transform.position;
+
+                if (_bossHitEffect == null)
+                    _bossHitEffect = Managers.Resource.Instantiate("Effect/BossHit");
+
+                _bossHitEffect.transform.position = bossTargetPos;
+                _bossHitEffect.GetComponent<ParticleSystem>().Play();
+
+                Managers.Sound.Play($"SE/HardHit");
+            }
+            return;
+        }
+
+        // ====================================================
+        // _target Logic
+        // ====================================================
+
         Vector3 targetPos = _target.GetComponent<MobController>().targetedPos.transform.position;
         targetPos.z -= 0.5f;
 
-        if (_stat.EvolutionData[Define.IncreaseAbleStat.MoveSpd].FirstEvolve)
-        {
-            targetStat.OnPoisoned(gameObject);
-            SpawnEffect("Effect/SpdAtk", targetPos);
-        }
-        else if (_stat.EvolutionData[Define.IncreaseAbleStat.Atk].FirstEvolve)
-        {
-            SpawnEffect("Effect/AtkAtk", targetPos);
+        ApplyHitLogic(targetStat);
+
+        if (_stat.EvolutionData[Define.IncreaseAbleStat.Atk].FirstEvolve)
             CurrentState = Define.PlayerStatus.BackStepping;
-        }
-        else if (_stat.EvolutionData[Define.IncreaseAbleStat.Hp].FirstEvolve)
-        {
-            SpawnEffect("Effect/HpAtk", targetPos);
-        }
-        else
-        {
-            SpawnEffect("Effect/DefaultAtk", targetPos);
-        }
+
+        string effectPath = "Effect/DefaultAtk";
+
+        if (_stat.EvolutionData[Define.IncreaseAbleStat.Atk].FirstEvolve)
+            effectPath = "Effect/AtkAtk";
+
+        if (_stat.EvolutionData[Define.IncreaseAbleStat.Hp].FirstEvolve)
+            effectPath = "Effect/HpAtk";
+
+        if (_stat.EvolutionData[Define.IncreaseAbleStat.MoveSpd].FirstEvolve)
+            effectPath = "Effect/SpdAtk";
 
         if (_stat.IsAtkBuffed)
         {
             Managers.Sound.Play($"SE/HardHit");
+
             GameObject punchEffect = Managers.Resource.Instantiate("Effect/BuffAtk");
             punchEffect.transform.position = targetPos;
             punchEffect.GetComponent<ParticleSystem>().Play();
+
+            return;
         }
         else
         {
-            if (_punchEffect != null)
-            {
-                _punchEffect.transform.position = targetPos;
-                _punchEffect.GetComponent<ParticleSystem>().Play();
-            }
-        }
+            Managers.Sound.Play($"SE/Hit");
 
-        Managers.Sound.Play($"SE/Hit");
+            GameObject punchEffect = Managers.Resource.Instantiate(effectPath);
+            punchEffect.transform.position = targetPos;
+            punchEffect.GetComponent<ParticleSystem>().Play();
+
+            return;
+        }
     }
 
-    private void SpawnEffect(string path, Vector3 pos)
+    void ApplyHitLogic(Stat targetStat)
     {
-        if (_punchEffect == null)
-            _punchEffect = Managers.Resource.Instantiate(path);
+        if (_stat.EvolutionData[Define.IncreaseAbleStat.MoveSpd].FirstEvolve)
+        {
+            targetStat.OnPoisoned(gameObject);
+        }
+
+        if (_stat.EvolutionData[Define.IncreaseAbleStat.Hp].FirstEvolve)
+        {
+            // 체력 관련 스킬 로직
+        }
     }
 
     #endregion
@@ -447,6 +558,8 @@ public class PlayerController : PlayerBase
             }
         }
     }
+
+    public void BossAtkTrigger() { CurrentState = Define.PlayerStatus.BossAtk; }
 
     private IEnumerator CooldownCoroutine(float duration)
     {

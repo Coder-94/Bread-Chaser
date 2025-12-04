@@ -101,12 +101,12 @@ public class PlayerStat : Stat
         }
     }
 
-    public void BuffStat(Define.IncreaseAbleStat stat, float value)
+    public void SetStat(Define.IncreaseAbleStat stat, float value)
     {
         switch (stat)
         {
             case Define.IncreaseAbleStat.Atk: Atk = value; break;
-            case Define.IncreaseAbleStat.MoveSpd: MoveSpeed += value; break;
+            case Define.IncreaseAbleStat.MoveSpd: MoveSpeed = value; break;
             case Define.IncreaseAbleStat.Hp: Hp += value; break;
             case Define.IncreaseAbleStat.SkillDMG: SkillCoefficient += value; break;
         }
@@ -145,26 +145,6 @@ public class PlayerStat : Stat
             }
 
             OnSecondEvolved?.Invoke(EvolvedType, coolTime);
-        }
-    }
-
-
-    public void Test(int a) 
-    {
-        PlayerController pl = GetComponent<PlayerController>();
-        if (a == 0)
-        {
-            Debug.Log("1");
-            EvolutionData[Define.IncreaseAbleStat.SkillDMG].FirstEvolve = true;
-            Managers.Game.AddScore(5000);
-        }
-        else if (a == 1)
-        {
-            EvolutionData[Define.IncreaseAbleStat.SkillDMG].SecondEvolve = true;
-            pl.EvolvedType = Define.IncreaseAbleStat.SkillDMG;
-            pl.SetCool(1);
-            Debug.Log(pl.CoolTime);
-            GameObject.Find("SkillBtn").GetComponent<SkillBtn>().SkillInit(pl.EvolvedType);
         }
     }
 
@@ -226,6 +206,9 @@ public class PlayerStat : Stat
     {
         if (IsInvincible) return;
 
+        if (GetComponent<PlayerController>().CurrentState == Define.PlayerStatus.BossAtk)
+            return;
+
         if (_controller != null)
         {
             Define.PlayerStatus state = _controller.CurrentState;
@@ -268,11 +251,14 @@ public class PlayerStat : Stat
 
             if (CurrentHp > 0)
             {
-                StartCoroutine(InvincibleProcess());
+                StartCoroutine(InvincibleProcess(true, _invincibleTime));
 
                 if (_controller != null)
                 {
-                    _controller.CurrentState = Define.PlayerStatus.Damaged;
+                    if(_controller.CurrentState == Define.PlayerStatus.Running || _controller.CurrentState == Define.PlayerStatus.Attack || _controller.CurrentState == Define.PlayerStatus.Attacking)
+                        _controller.CurrentState = Define.PlayerStatus.Damaged;
+                    else
+                        Managers.Sound.Play("SE/Hit");
                 }
             }
         }
@@ -295,10 +281,11 @@ public class PlayerStat : Stat
     private IEnumerator HpDecayCoroutine()
     {
         WaitForSeconds wait = new WaitForSeconds(1f);
-
+        
         while (true)
         {
-            if (CurrentHp > 0)
+            Define.SceneState sceneState = Managers.Scene.CurrentScene.SceneState;
+            if (CurrentHp > 0 && sceneState != Define.SceneState.Intro && sceneState != Define.SceneState.Ending)
             {
                 CurrentHp -= _hpDecayAmount;
                 if (CurrentHp < 0) CurrentHp = 0;
@@ -309,14 +296,14 @@ public class PlayerStat : Stat
         }
     }
 
-    private IEnumerator InvincibleProcess()
+    public IEnumerator InvincibleProcess(bool blinkToggle, float invincibleTime)
     {
         IsInvincible = true;
 
         PlayerController pc = GetComponent<PlayerController>();
-        if (pc != null) pc.StartBlinkEffect(_invincibleTime);
+        if (pc != null && blinkToggle) pc.StartBlinkEffect(invincibleTime);
 
-        yield return new WaitForSeconds(_invincibleTime);
+        yield return new WaitForSeconds(invincibleTime);
 
         IsInvincible = false;
     }

@@ -43,7 +43,7 @@ public class Managers : MonoBehaviour
     {
         _input.OnUpdate();
 
-        _game.ScoreChecker();
+        _game.OnUpdate();
     }
     #endregion
 
@@ -72,10 +72,12 @@ public class Managers : MonoBehaviour
 
     public static void Clear()
     {
+        Area.Clear();
         Sound.Clear();
         Input.Clear();
         Scene.Clear();
         UI.Clear();
+        Game.Clear();
         Pool.Clear();
     }
     #endregion

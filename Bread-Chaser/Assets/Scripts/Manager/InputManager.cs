@@ -44,6 +44,7 @@ public class InputManager
                     _holded = false;
                     _pressedTime = Time.time;
                     _touchStartPos = touch.position;
+                    _swipeDelta = Vector2.zero;
 
                     TouchAction.Invoke(Define.TouchEvent.FingerPressed);
                 }
@@ -75,10 +76,12 @@ public class InputManager
                 //result check ====================================================================
                 if (_pressed)
                 {
+                    bool isSwipe = false;
 
                     //swipe result check ====================================================================
                     if (_swipeDelta.magnitude >= DRAGDISTANCE && !_holded)
                     {
+                        isSwipe = true;
                         if (Mathf.Abs(_swipeDelta.x) > Mathf.Abs(_swipeDelta.y))
                         {
                             if (_swipeDelta.x > 0)
@@ -102,7 +105,7 @@ public class InputManager
                     }
 
                     //tapped result check ====================================================================
-                    else
+                    else if(!isSwipe)
                     {
                         if (_touchStartPos.x - (Screen.width / 2) < 0)
                             TouchAction.Invoke(Define.TouchEvent.LeftTap);
@@ -118,6 +121,7 @@ public class InputManager
                 _pressed = false;
                 _holded = false;
                 _pressedTime = 0;
+                _swipeDelta = Vector2.zero;
             }
         }
     }

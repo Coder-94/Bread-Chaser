@@ -16,14 +16,12 @@ public class ChoicePanel : UIBase, IPointerClickHandler
     {
         Bind<TMP_Text>(typeof(Texts));
         ReRoll();
-        
     }
 
     public void ReRoll() 
     {
         Debug.Log("리롤작동");
-        _chosenStat = UnityEngine.Random.Range(0, 4);
-        _chosenStat = 1;
+        _chosenStat = UnityEngine.Random.Range(1, 5);
         switch (_chosenStat)
         {
             case (int)Define.IncreaseAbleStat.Atk:
@@ -48,12 +46,26 @@ public class ChoicePanel : UIBase, IPointerClickHandler
         {
             BtnSound();
             GameObject player = Managers.Game.GetPlayer();
+            PlayerController plCon = player.GetComponent<PlayerController>();
+            PlayerStat plStat = player.GetComponent<PlayerStat>();
 
-            player.GetComponent<PlayerStat>().SetStat((Define.IncreaseAbleStat)_chosenStat);
-
-            Managers.UI.ClosePopUpUIAll();
+            plStat.SetStat((Define.IncreaseAbleStat)_chosenStat);
+            
             Managers.Game.SetGameState(Define.GameState.Play);
-            Managers.Scene.CurrentScene.SetSceneState(Define.SceneState.DefaultPlay);
+            if (plCon.BrakeForEnd)
+                Managers.Scene.CurrentScene.SetSceneState(Define.SceneState.Ending);
+            else
+            {
+                if (Managers.Game.IsBossBattleStarted)
+                    Managers.Scene.CurrentScene.SetSceneState(Define.SceneState.BossBattle);
+                else
+                    Managers.Scene.CurrentScene.SetSceneState(Define.SceneState.DefaultPlay);
+            }
+                
+
+
+            Managers.UI.ClosePopUpUI(GetComponentInParent<LevelUp>());
+
             Managers.Game.TryOpenLevelUpPopup();
         }
     }

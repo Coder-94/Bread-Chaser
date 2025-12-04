@@ -37,6 +37,7 @@ public class LevelUp : UIPopUp
             go.transform.SetAsFirstSibling();
         }
         _reRollChance = 1;
+
         Bind<Button>(typeof(Buttons));
         Bind<TMP_Text>(typeof(Texts));
 
@@ -48,6 +49,7 @@ public class LevelUp : UIPopUp
 
         TMP_Text rerollText = GetText((int)Texts.ReRollText);
         rerollText.text = $"Reroll Count : {_reRollChance}";
+
     }
 
     void ReRoll()
@@ -79,5 +81,9 @@ public class LevelUp : UIPopUp
         
     }
 
-    void Quit() { Managers.UI.ShowPopUpUI<LvUpQuitPopUp>("LvUpQuitPopUp", 1); }
+    void Quit() 
+    { 
+        LvUpQuitPopUp quitPopUp = Managers.UI.ShowPopUpUI<LvUpQuitPopUp>("LvUpQuitPopUp", 1);
+        quitPopUp.ParrentInit(this.gameObject);
+    }
 }

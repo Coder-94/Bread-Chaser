@@ -25,28 +25,19 @@ public class CameraController : MonoBehaviour
     void Init()
     {
         Camera cam = GetComponent<Camera>();
+
         float targetAspect = 9f / 16f;
-        float windowAspect = (float)Screen.width / (float)Screen.height;
-        float scaleHeight = windowAspect / targetAspect;
-        if (scaleHeight < 1.0f)
+        float currentAspect = (float)Screen.width / (float)Screen.height;
+        float aspectRatio = targetAspect / currentAspect;
+
+        if (currentAspect < targetAspect)
         {
-            Rect rect = cam.rect;
-            rect.width = 1.0f;
-            rect.height = scaleHeight;
-            rect.x = 0;
-            rect.y = (1.0f - scaleHeight) / 2.0f;
-            cam.rect = rect;
+            float hFOVInRads = cam.fieldOfView * Mathf.Deg2Rad;
+            float vFOVInRads = 2 * Mathf.Atan(Mathf.Tan(hFOVInRads / 2) / aspectRatio);
+
+            cam.fieldOfView = vFOVInRads* Mathf.Rad2Deg;
         }
-        else
-        {
-            float scaleWidth = 1.0f / scaleHeight;
-            Rect rect = cam.rect;
-            rect.width = scaleWidth;
-            rect.height = 1.0f;
-            rect.x = (1.0f - scaleWidth) / 2.0f;
-            rect.y = 0;
-            cam.rect = rect;
-        }
+        cam.rect = new Rect(0, 0, 1, 1);
 
         if (_target == null)
             _target = Managers.Game.GetPlayer();
@@ -98,6 +89,7 @@ public class CameraController : MonoBehaviour
             _isAtkMode = false;
         }
     }
+
 
     #region camShake
     public void CamShake(float roughness, float magnitude, float duration)

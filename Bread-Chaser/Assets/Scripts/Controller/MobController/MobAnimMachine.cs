@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
 
-public class NormalMobAnimMachine : MonoBehaviour
+public class MobAnimMachine : MonoBehaviour
 {
 
     protected void Attack()
@@ -31,6 +31,38 @@ public class NormalMobAnimMachine : MonoBehaviour
         {
             localAtk.SetOwner(gameObject);
         }
+    }
+
+    //CityMob doesn't have any skills
+
+    public void ForestMobSkill()
+    {
+
+    }
+
+    public void ForestBossSkill()
+    {
+
+    }
+
+    public void IcycleMobSkill()
+    {
+
+    }
+
+    public void IcycleBossSkill()
+    {
+
+    }
+
+    public void SpaceMobSkill()
+    {
+
+    }
+
+    public void SpaceBossSkill()
+    {
+
     }
 
     protected void ReturnToIdle()

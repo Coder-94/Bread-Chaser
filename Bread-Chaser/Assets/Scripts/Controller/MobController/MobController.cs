@@ -5,16 +5,7 @@ using UnityEngine;
 
 public class MobController : BaseMobController
 {
-    protected enum AnimParameters
-    {
-        IsDead,
-        IsStunned,
-        IsCasting,
-        TriggerAtk,
-        TriggerSpAtk,
-        TriggerEncountLocalAtk,
-        TriggerLocalAtk
-    }
+    
 
     #region variables
     
@@ -29,11 +20,12 @@ public class MobController : BaseMobController
     private Material                    _targetMaterial;
     private Coroutine                   _lerpCoroutine;
 
-    protected NormalMobStat             mobStat;
+    protected MobStat                   mobStat;
 
     protected int[]                     _hashedParams;
     protected Animator                  _anim;
-    private float                       _attackCooldown = 0f;
+    private float                       _localAtkTimer = 0f;
+    private Coroutine                   _attackTempoCoroutine;
 
     protected int                       _spawnedRoomNum = 999;
     #endregion
@@ -58,6 +50,9 @@ public class MobController : BaseMobController
                 case Define.NormalMobStatus.Attacking:
                     _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerAtk]);
                     break;
+                case Define.NormalMobStatus.SpecialAttacking:
+                    _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerSpAtk]);
+                    break;
                 case Define.NormalMobStatus.Death:
                     Clear();
                     break;
@@ -73,6 +68,9 @@ public class MobController : BaseMobController
         {
             StartLerp();
             CurrentState = Define.NormalMobStatus.Spawn;
+
+            if (_attackTempoCoroutine != null) StopCoroutine(_attackTempoCoroutine);
+            _attackTempoCoroutine = StartCoroutine(AttackTempo());
         }
     }
 
@@ -102,16 +100,15 @@ public class MobController : BaseMobController
             _hashedParams[i]        = Animator.StringToHash(key);
         }
 
-        mobStat     = gameObject.GetOrAddComponent<NormalMobStat>();
+        mobStat     = gameObject.GetOrAddComponent<MobStat>();
         _smr        = GetComponentInChildren<SkinnedMeshRenderer>();
         _anim       = GetComponent<Animator>();
         if (_smr != null && _smr.materials.Length > 1)
             _targetMaterial = _smr.materials[1];
-
         CurrentState = Define.NormalMobStatus.Spawn;
 
         _isInitialized = true;
-        StartLerp();
+        OnEnable();
     }
     #endregion
 
@@ -119,7 +116,7 @@ public class MobController : BaseMobController
 
     protected void StateChecker()
     {
-        if (mobStat.Hp <= 0)
+        if (mobStat.CurrentHp <= 0)
             CurrentState = Define.NormalMobStatus.Death;
 
 
@@ -135,7 +132,7 @@ public class MobController : BaseMobController
                 LocalAtk();
                 break;
             case Define.NormalMobStatus.SpecialAttacking:
-                //SpecialAtk();
+                SPAtk();
                 break;
         }
     }
@@ -143,40 +140,67 @@ public class MobController : BaseMobController
     //Idle ============================================================================================================
     protected void Idle()
     {
-        if (ImTargeted && player.GetComponent<PlayerController>().TargetNotDead)
-        {
-            _attackCooldown = 0f;
-            CurrentState = Define.NormalMobStatus.LocalAttacking;
-        }
-        else if (!ImTargeted && player.GetComponent<PlayerController>().TargetNotDead)
+        if (plController.CurrentState == Define.PlayerStatus.BossAtk)
             return;
 
-            _attackCooldown += Time.deltaTime;
-
-        if (_attackCooldown >= mobStat.AtkSpeed)
+        if (ImTargeted && plController.TargetNotDead)
         {
-            _attackCooldown = 0f;
-
-            if (_spAtkToggle && UnityEngine.Random.Range(0, 2) == 1)
-            {
-                CurrentState = Define.NormalMobStatus.SpecialAttacking;
-            }
-            else
-            {
-                CurrentState = Define.NormalMobStatus.Attacking;
-            }
+            _localAtkTimer = 0f;
+            CurrentState = Define.NormalMobStatus.LocalAttacking;
         }
+    }
+
+    //Atk Tempo Ctrl ================================================================================================
+    IEnumerator AttackTempo()
+    {
+        yield return new WaitForSeconds(mobStat.AtkSpeed);
+
+        while (true)
+        {
+            TryTriggerAttack();
+
+            yield return new WaitForSeconds(mobStat.AtkSpeed);
+        }
+    }
+
+    void TryTriggerAttack()
+    {
+        if (mobStat.CurrentHp <= 0)
+            return;
+
+        if (CurrentState != Define.NormalMobStatus.Idle)
+            return;
+
+        if (!ImTargeted && plController.TargetNotDead) return;
+
+        if (_spAtkToggle && UnityEngine.Random.Range(0, 2) == 1)
+            CurrentState = Define.NormalMobStatus.SpecialAttacking;
+        else
+            CurrentState = Define.NormalMobStatus.Attacking;
     }
 
     //Atk ============================================================================================================
     protected override void Attack()
     {
-        if (ImTargeted && player.GetComponent<PlayerController>().TargetNotDead)
+        if(plController.CurrentState == Define.PlayerStatus.BossAtk)
         {
-            _attackCooldown = 0;
-            CurrentState = Define.NormalMobStatus.LocalAttacking;
+            CurrentState = Define.NormalMobStatus.Idle;
+            return;
         }
-        else if (!ImTargeted && player.GetComponent<PlayerController>().TargetNotDead)
+
+        if (ImTargeted && plController.TargetNotDead)
+            CurrentState = Define.NormalMobStatus.LocalAttacking;
+        else
+            CurrentState = Define.NormalMobStatus.Idle;
+    }
+
+    //SpAtk For Boss
+    protected override void SPAtk()
+    {
+        if (plController.CurrentState == Define.PlayerStatus.BossAtk)
+            CurrentState = Define.NormalMobStatus.Idle;
+        
+        if (!ImTargeted && plController.TargetNotDead)
             CurrentState = Define.NormalMobStatus.Idle;
     }
 
@@ -184,15 +208,18 @@ public class MobController : BaseMobController
     protected override void LocalAtk()
     {
         if (!ImTargeted)
+        {
             CurrentState = Define.NormalMobStatus.Idle;
+            return;
+        }
 
-        _attackCooldown += Time.deltaTime;
+        _localAtkTimer += Time.deltaTime;
 
         float boomCount = 3f;
 
-        if(_attackCooldown >= boomCount)
+        if(_localAtkTimer >= boomCount)
         {
-            _attackCooldown = 0f;
+            _localAtkTimer = 0f;
             _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerLocalAtk]);
         }
     }
@@ -242,6 +269,8 @@ public class MobController : BaseMobController
     //Clear ============================================================================================================
     protected override void Clear()
     {
+        Define.SceneState state = Managers.Scene.CurrentScene.SceneState;
+
         if (_spawnedRoomNum == 999)
         {
             Debug.Log("Spawned Room Number Not Initialized!");
@@ -260,12 +289,28 @@ public class MobController : BaseMobController
         _spawnedRoomNum = 999;
         ImTargeted = false;
 
+
         //heal player
         plStat.Heal(2f);
 
-        //player exp
-        Managers.Game.AddScore(mobStat.Exp);
+        //self bossMob Check && player exp
+        if(GetComponent<Poolable>() == null)
+        {
+            Managers.Game.SetBossExp((int)mobStat.Exp);
+            Managers.Game.ClearMob();
+            plController.StartBrake(true);
 
+        }
+        else
+        {
+            if (state == Define.SceneState.BossBattle)
+                Managers.Scene.CurrentScene.BossStaMobKillCount();
+
+            Debug.Log("코인");
+            Managers.Game.AddScore(mobStat.Exp);
+        }
+
+        Debug.Log("삭제");
         //destroy self
         Managers.Resource.Destroy(gameObject);
     }
@@ -276,7 +321,7 @@ public class MobController : BaseMobController
         if(CurrentState == Define.NormalMobStatus.Spawn)
         {
             Vector3 newPosition = transform.position;
-            Vector3 playerPos = player.GetComponent<PlayerController>().OriginPos;
+            Vector3 playerPos = plController.OriginPos;
 
             if (playerPos == new Vector3(9999, 9999, 9999))
                 playerPos = player.transform.position;

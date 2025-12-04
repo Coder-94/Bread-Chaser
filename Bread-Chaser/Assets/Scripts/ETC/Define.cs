@@ -20,7 +20,8 @@ public class Define
         Obstacle = 7,
         Player = 8,
         Enemy = 9,
-        EnemyAtk = 10
+        EnemyAtk = 10,
+        Boss = 11
     }
 
     public enum Sound
@@ -38,7 +39,7 @@ public class Define
     public enum Scene
     {
         Unknown,
-        Main,
+        Title,
         City,
         Forest,
         IceLand,
@@ -57,7 +58,10 @@ public class Define
         Attack,
         BackStepping,
         Damaged,
-        Channeling
+        Channeling,
+        BossAtk,
+        BossKeepAtk,
+        Die
     }
 
     public enum IncreaseAbleStat

@@ -42,7 +42,7 @@ public abstract class BaseSkillController : MonoBehaviour
 
     protected virtual void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.layer == (int)Define.Layer.Enemy)
+        if (other.gameObject.layer == (int)Define.Layer.Enemy || other.gameObject.layer == (int)Define.Layer.Boss)
         {
             Stat enemyStat = other.GetComponent<Stat>();
 

@@ -96,6 +96,7 @@ public class LockOn: UIPopUp
         else if(evt == Define.TouchEvent.HoldedFingerReleased)
         {
             _isTouching = false;
+            Managers.Input.TouchAction -= LockOnMoving;
             ClosePopUpUI();
         }
 

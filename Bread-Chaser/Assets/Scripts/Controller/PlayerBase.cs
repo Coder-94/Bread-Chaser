@@ -9,6 +9,7 @@ public class PlayerBase : MonoBehaviour
 
     protected enum AnimParameters
     {
+        TriggerDash,
         TriggerRoundAtk,
         TriggerAtk,
         TriggerLeftAtk,
@@ -20,7 +21,10 @@ public class PlayerBase : MonoBehaviour
         TriggerSkill,
         TriggerPassive,
         TriggerDMG,
-        IsAtk
+        TriggerBrake,
+        IsAtk,
+        TriggerBossAtk,
+        TriggerDeath
     }
 
 
@@ -47,13 +51,17 @@ public class PlayerBase : MonoBehaviour
 
     protected GameObject            _dashEffect;
     protected GameObject            _punchEffect;
-
+    protected GameObject            _bossHitEffect;
     protected GameObject            _shieldEffect;
     protected GameObject            _currentShieldHealth;
 
-    public Define.IncreaseAbleStat EvolvedType; /*{ get; protected set; }*/
+    public Define.IncreaseAbleStat EvolvedType { get; protected set; }
     public bool                     IsSkillCool { get; protected set; } = false;
     public float                    CoolTime { get; protected set; } = 0;
+
+    public float                    SpeedMultiplier { get; private set; } = 1f;
+    public bool                     BrakeForEnd { get; protected set; } = false;
+    public bool                    IsBraking { get; protected set; } = false;
     #endregion
 
     public void SetCool(float cool) {  CoolTime = cool; }
@@ -79,7 +87,7 @@ public class PlayerBase : MonoBehaviour
                     StartLockOn();
                     break;
                 case Define.PlayerStatus.Attacking:
-                    Attack();
+                    Attacking();
                     break;
                 case Define.PlayerStatus.BackStepping:
                     {
@@ -99,18 +107,31 @@ public class PlayerBase : MonoBehaviour
                 case Define.PlayerStatus.Channeling:
                     _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerSkill]);
                     break;
+                case Define.PlayerStatus.BossAtk:
+                    BossAtk();
+                    break;
+                case Define.PlayerStatus.Die:
+                    Death();
+                    break;
             }
         }
     }
 
     #region functionCR
 
+    protected void Death()
+    {
+        Managers.Input.TouchAction -= PlayerControl;
+        _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerDeath]);
+        _touchBlock = true;
+        StartBrake(true);
+    }
+
     protected void Damaged()
     {
-
         _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerDMG]);
         Managers.Sound.Play("SE/Hit");
-
+        Managers.Sound.Play("SE/Hurt");
         if (OriginPos != new Vector3(9999, 9999, 9999))
         {
             BackStep();
@@ -138,16 +159,18 @@ public class PlayerBase : MonoBehaviour
             int random = UnityEngine.Random.Range(1, 4);
 
             Managers.Sound.Play($"SE/JumpVoice{random}");
+            _stat.InvincibleProcess(false, 0.6f);
             _movementQueue.Enqueue(JumpRB);
         }
     }
-    protected void Attack()
+
+    protected void Attacking()
     {
         if (_target != null)
         {
-            if (OriginPos == new Vector3(9999, 9999, 9999))
+            if (OriginPos == new Vector3(9999, 9999, 9999) && CurrentState != Define.PlayerStatus.Attack)
                 OriginPos = gameObject.transform.position;
-            else
+            else if (OriginPos != new Vector3(9999, 9999, 9999))
                 Debug.Log($"[Error] OriginPos is {OriginPos}");
 
             if (_stat.EvolutionData[Define.IncreaseAbleStat.SkillDMG].FirstEvolve)
@@ -158,12 +181,31 @@ public class PlayerBase : MonoBehaviour
         }
     }
 
+    protected void BossAtk()
+    {
+        if (OriginPos == new Vector3(9999, 9999, 9999))
+            OriginPos = gameObject.transform.position;
+        else
+            Debug.Log($"[Error] OriginPos is {OriginPos}");
+
+        _dashEffect.GetComponent<ParticleSystem>().Play();
+
+        _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerBossAtk]);
+    }
+
     protected void BackStep()
     {
-        _target.GetComponent<BaseMobController>().TargetCheck(false);
-        TargetNotDead = false;
-        _touchBlock = false;
-        _target = null;
+        if (gameObject.transform.rotation != Quaternion.Euler(Vector3.zero))
+                gameObject.transform.rotation = Quaternion.Euler(Vector3.zero);
+
+        if (_target != null)
+        {
+            _target.GetComponent<BaseMobController>().TargetCheck(false);
+            TargetNotDead = false;
+            _touchBlock = false;
+            _target = null;
+        }
+        
     }
 
     protected void StartLockOn()
@@ -288,6 +330,7 @@ public class PlayerBase : MonoBehaviour
             collision.collider.gameObject.layer == (int)Define.Layer.Ground)
         {
             _isJumping = false;
+            _stat.InvincibleProcess(false, 1f);
             CurrentState = Define.PlayerStatus.Running;
         }
     }
@@ -303,6 +346,71 @@ public class PlayerBase : MonoBehaviour
         PlayerActor();
     }
     #endregion
+    
+
+    public void StartBrake(bool brakeForEnd = false)
+    {
+        if (IsBraking) return;
+
+        _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerBrake]);
+        StartCoroutine(BrakeRoutine(brakeForEnd));
+    }
+
+    IEnumerator BrakeRoutine(bool brakeForEnd = false)
+    {
+        IsBraking = true;
+
+        if(brakeForEnd)
+            BrakeForEnd = true;
+
+        float duration = 0.3f;          
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+
+            float t = elapsed / duration;
+            float easeOutT = Mathf.Sqrt(t);
+
+            SpeedMultiplier = Mathf.Lerp(1f, 0f, easeOutT);
+
+            yield return null;
+        }
+
+        SpeedMultiplier = 0;
+
+        if (brakeForEnd)
+        {
+            if (CurrentState == Define.PlayerStatus.Die)
+                Managers.UI.ShowPopUpUI<GameOverPopUp>();
+            else
+            {
+                Managers.Scene.CurrentScene.SetSceneState(Define.SceneState.Ending);
+                Managers.Game.StateAction.Invoke(Define.SceneState.Ending);
+            }
+                
+        }
+    }
+
+    public void Clear()
+    {
+        StopAllCoroutines();
+        
+        if(CurrentState == Define.PlayerStatus.Die)
+            Destroy(gameObject);
+
+        IsBraking = false;
+        BrakeForEnd = false;
+
+        if (_stat != null)
+        {
+            if (SpeedMultiplier != 1)
+                SpeedMultiplier = 1;
+            CurrentState = Define.PlayerStatus.Running;
+            _anim.SetTrigger(_hashedParams[(int)AnimParameters.TriggerDash]);
+        }
+    }
 
     protected virtual void PunchEffectNull() { }
     protected virtual void JumpRB() { }

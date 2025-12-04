@@ -10,6 +10,7 @@ public class StartTextEVT : MonoBehaviour
     public void ClosePopUp()
     {
         Managers.Scene.CurrentScene.SetSceneState(Define.SceneState.DefaultPlay);
+        Managers.Game.StateAction.Invoke(Define.SceneState.DefaultPlay);
         GetComponentInParent<StartTxT>().ClosePopUpUI();
     }
 }

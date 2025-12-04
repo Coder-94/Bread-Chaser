@@ -3,7 +3,6 @@ using UnityEngine;
 public class AreaManager
 {
     public float        totalLength;
-
     public void SpawnArea(string name, ref float totalLength, float movedRange = 0, bool isRandom = true, bool isInit = false)
     {
         GameObject go = null;
@@ -20,6 +19,18 @@ public class AreaManager
         go.transform.position = new Vector3(0, 0, totalLength - movedRange);
         if (isInit == true)
             totalLength += go.GetComponent<Area>().AreaSize;
+    }
+
+    public void Clear()
+    {
+        totalLength = 0;
+
+        GameObject[] areas = GameObject.FindGameObjectsWithTag("Floor");
+        foreach (GameObject area in areas)
+            if (area != null && area.gameObject != null)
+            {
+                area.GetComponent<Area>().Clear();
+            }
     }
 
 }

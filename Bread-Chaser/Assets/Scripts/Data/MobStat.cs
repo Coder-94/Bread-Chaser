@@ -1,14 +1,14 @@
 using System.Collections;
 using UnityEngine;
 
-public class NormalMobStat : Stat
+public class MobStat : Stat
 {
     
     public int          AtkSpeed { get; private set; }
     public float        Exp { get; private set; }
     private Coroutine   _poisonCoroutine;
     private Coroutine   _skillPoisonCoroutine;
-
+    MobController       _control;
 
     public void SetID(int id)
     {
@@ -25,20 +25,36 @@ public class NormalMobStat : Stat
 
         float finalDamage = damage * damageMultiplier;
 
-        Hp -= finalDamage;
+        CurrentHp -= finalDamage;
 
-        if (Hp <= 0) return false;
+        HpCountAction?.Invoke(CurrentHp);
+
+        if (CurrentHp <= 0) return false;
+
+        return true;
+    }
+
+    public override bool OnBossAttacked()
+    {
+        int hitsToKill = 7;
+
+        float damage = Hp / (float)hitsToKill;
+        CurrentHp -= damage;
+
+        HpCountAction?.Invoke(CurrentHp);
+        if (CurrentHp <= 0) return false;
 
         return true;
     }
 
     public override bool OnSkillAttacked(GameObject attacker, float finalDamage)
     {
-        Hp -= finalDamage;
+        CurrentHp -= finalDamage;
 
         Managers.Sound.Play("SE/HardHit");
 
-        if (Hp <= 0) return false;
+        HpCountAction?.Invoke(CurrentHp);
+        if (CurrentHp <= 0) return false;
         return true;
     }
 
@@ -71,8 +87,8 @@ public class NormalMobStat : Stat
         {
             while (elapsedTime < duration)
             {
-                Hp -= tickDMG;
-
+                CurrentHp -= tickDMG;
+                HpCountAction?.Invoke(CurrentHp);
                 float tickInterval = 1f / (1f + plStat.MoveSpeed * 0.2f);
 
                 yield return new WaitForSeconds(tickInterval);
@@ -117,8 +133,8 @@ public class NormalMobStat : Stat
         {
             while (elapsedTime < duration)
             {
-                Hp -= tickDMG;
-
+                CurrentHp -= tickDMG;
+                HpCountAction?.Invoke(CurrentHp);
                 float tickInterval = 1f / (1f + plStat.MoveSpeed * 0.35f);
 
                 yield return new WaitForSeconds(tickInterval);
@@ -140,15 +156,29 @@ public class NormalMobStat : Stat
         Data.MobStat stat = Managers.Data.NMStatDict[Id];
 
         Hp = stat.hp;
+        CurrentHp = Hp;
         Atk = stat.atk;
         AtkSpeed = stat.atkSpeed;
         Exp = stat.exp;
+
+        _control = GetComponent<MobController>();
     }
 
     public void Clear()
     {
+        if (_poisonCoroutine != null) StopCoroutine(_poisonCoroutine);
+        if (_skillPoisonCoroutine != null) StopCoroutine(_skillPoisonCoroutine);
+        _poisonCoroutine = null;
+        _skillPoisonCoroutine = null;
+
+        if (posionBubble != null)
+        {
+            Managers.Resource.Destroy(posionBubble);
+            posionBubble = null;
+        }
+
         Data.MobStat stat = Managers.Data.NMStatDict[Id];
-        Hp = (int)stat.hp;
+        CurrentHp = Hp;
 
         Managers.Resource.Destroy(posionBubble);
         posionBubble = null;

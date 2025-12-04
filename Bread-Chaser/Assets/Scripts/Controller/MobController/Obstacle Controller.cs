@@ -12,7 +12,9 @@ public class ObstacleController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.layer == (int)Define.Layer.Player) 
+        Define.SceneState sceneState = Managers.Scene.CurrentScene.SceneState;
+
+        if (other.gameObject.layer == (int)Define.Layer.Player && sceneState != Define.SceneState.Ending && sceneState != Define.SceneState.Intro) 
         {
             player.GetComponent<PlayerStat>().OnPlAttacked(gameObject);
         }

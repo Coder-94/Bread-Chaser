@@ -3,6 +3,9 @@ using UnityEngine.UI;
 
 public class LvUpQuitPopUp : UIPopUp
 {
+
+    GameObject parent = null;
+    PlayerStat playerStat = null;
     enum Buttons
     {
         YesBtn,
@@ -13,6 +16,8 @@ public class LvUpQuitPopUp : UIPopUp
     {
         base.Init();
 
+        playerStat = Managers.Game.GetPlayer().GetComponent<PlayerStat>();
+
         Bind<Button>(typeof(Buttons));
         Button yesBtn = GetButton((int)Buttons.YesBtn);
         yesBtn.onClick.AddListener(LvUpStopYes);
@@ -21,17 +26,38 @@ public class LvUpQuitPopUp : UIPopUp
         noBtn.onClick.AddListener(LvUpStopNo);
     }
 
+    public void ParrentInit(GameObject go) { parent = go; }
+
     void LvUpStopYes()
     {
         BtnSound();
-        Managers.UI.ClosePopUpUIAll();
+        GameObject player = Managers.Game.GetPlayer();
+        PlayerController plCon = player.GetComponent<PlayerController>();
+        
         Managers.Game.SetGameState(Define.GameState.Play);
-        Managers.Scene.CurrentScene.SetSceneState(Define.SceneState.DefaultPlay);
+        if (plCon.BrakeForEnd)
+            Managers.Scene.CurrentScene.SetSceneState(Define.SceneState.Ending);
+        else
+        {
+            if (Managers.Game.IsBossBattleStarted)
+                Managers.Scene.CurrentScene.SetSceneState(Define.SceneState.BossBattle);
+            else
+                Managers.Scene.CurrentScene.SetSceneState(Define.SceneState.DefaultPlay);
+        }
+
+        Managers.UI.ClosePopUpUI();
+        if (parent != null)
+            Managers.UI.ClosePopUpUI(parent.GetComponent<LevelUp>());
+
+        Managers.Game.TryOpenLevelUpPopup();
     }
 
     void LvUpStopNo()
     {
         BtnSound();
+
         Managers.UI.ClosePopUpUI();
+
+        //Managers.Game.TryOpenLevelUpPopup();
     }
 }
