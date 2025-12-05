@@ -34,6 +34,20 @@ public class MobStat : Stat
         return true;
     }
 
+    public bool VelveFailure()
+    {
+        int hitsToKill = 7;
+
+        float damage = (Hp / (float)hitsToKill) * 1.5f;
+        CurrentHp -= damage;
+
+        HpCountAction?.Invoke(CurrentHp);
+
+        if (CurrentHp <= 0) return false;
+
+        return true;
+    }
+
     public override bool OnBossAttacked()
     {
         int hitsToKill = 7;
@@ -42,6 +56,13 @@ public class MobStat : Stat
         CurrentHp -= damage;
 
         HpCountAction?.Invoke(CurrentHp);
+
+        MobAnimMachine anim = GetComponent<MobAnimMachine>();
+        if (anim != null && anim.LastBossSkillUsing)
+        {
+            anim.BreakSpaceBossSkill();
+        }
+
         if (CurrentHp <= 0) return false;
 
         return true;

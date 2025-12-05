@@ -197,6 +197,26 @@ public class MobController : BaseMobController
     //SpAtk For Boss
     protected override void SPAtk()
     {
+        if (GetComponent<MobAnimMachine>().LastBossSkillUsing)
+        {
+            if (GetComponent<MobAnimMachine>().SkillUsing)
+            {
+                CurrentState = Define.NormalMobStatus.Idle;
+                return;
+            }
+            else
+            {
+                CurrentState = Define.NormalMobStatus.Attacking;
+                return;
+            }
+        }
+
+        if (GetComponent<MobAnimMachine>().SkillUsing)
+        {
+            CurrentState = Define.NormalMobStatus.Attacking;
+            return;
+        }
+
         if (plController.CurrentState == Define.PlayerStatus.BossAtk)
             CurrentState = Define.NormalMobStatus.Idle;
         
@@ -231,10 +251,13 @@ public class MobController : BaseMobController
     //Lerp ============================================================================================================
     void StartLerp()
     {
-        if (_lerpCoroutine != null)
-            StopCoroutine(_lerpCoroutine);
+        if (_targetMaterial != null)
+        {
+            if (_lerpCoroutine != null)
+                StopCoroutine(_lerpCoroutine);
 
-        _lerpCoroutine = StartCoroutine(LerpFloat());
+            _lerpCoroutine = StartCoroutine(LerpFloat());
+        }
     }
 
     IEnumerator LerpFloat()
@@ -283,7 +306,8 @@ public class MobController : BaseMobController
         Managers.Scene.CurrentScene.MobCountController(false);
 
         //inner variables clear
-        _targetMaterial.SetFloat("_DissolveHeight", 1);
+        if(_targetMaterial != null)
+            _targetMaterial.SetFloat("_DissolveHeight", 1);
         _targetValue = 0;
         _duration = 0.5f;
         _spawnedRoomNum = 999;
@@ -306,11 +330,9 @@ public class MobController : BaseMobController
             if (state == Define.SceneState.BossBattle)
                 Managers.Scene.CurrentScene.BossStaMobKillCount();
 
-            Debug.Log("코인");
             Managers.Game.AddScore(mobStat.Exp);
         }
 
-        Debug.Log("삭제");
         //destroy self
         Managers.Resource.Destroy(gameObject);
     }

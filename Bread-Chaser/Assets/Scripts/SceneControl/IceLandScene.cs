@@ -1,13 +1,13 @@
 using UnityEngine;
 
-public class ForestScene : BaseScene
+public class IceLandScene : BaseScene
 {
     protected override void Init()
     {
         base.Init();
         SceneType = Define.Scene.Forest;
-        _bossId = (int)MonsterID.ForestBoss;
-        _mobid = (int)MonsterID.ForestMob;
+        _bossId = (int)MonsterID.IcycleBoss;
+        _mobid = (int)MonsterID.IcycleMob;
 
         for (int i = 0; i < 3; i++)
         {

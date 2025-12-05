@@ -34,7 +34,7 @@ public abstract class Stat : MonoBehaviour
 
     public void TestKill() { CurrentHp = 0; }
 
-    public virtual void OnPlAttacked(GameObject attacker) { }
+    public virtual void OnPlAttacked(GameObject attacker, float duration = 1.0f) { }
 
     public virtual bool OnEnemAttacked(GameObject attacker, float damageMultiplier = 1.0f) { return true; }
 

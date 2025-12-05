@@ -5,7 +5,8 @@ using UnityEngine.UI;
 
 public class EndingScene : UIScene
 {
-    float duration = 5;
+    float duration = 8;
+    float finalResult = 0;
     Define.Scene scene;
 
     enum Texts
@@ -24,7 +25,9 @@ public class EndingScene : UIScene
 
     private void Update()
     {
-        GetText((int)Texts.Timer).text = $"Next Stage Apears in {duration} Seconds..";
+        if (scene != Define.Scene.Universe)
+            GetText((int)Texts.Timer).text = $"Next Stage Apears in {duration} Seconds..";
+            
     }
     
     public void PanelInit(float playTime, float cookieNum, float exp)
@@ -40,7 +43,7 @@ public class EndingScene : UIScene
         else
             timeBonus = 1.3f;
 
-        float finalBonus = exp * cookieScore * timeBonus + 4000;
+        float finalBonus = exp * cookieScore * timeBonus;
 
         Bind<TMP_Text>(typeof(Texts));
         Bind<Button>(typeof(Btns));
@@ -51,8 +54,17 @@ public class EndingScene : UIScene
         GetText((int)Texts.BossKill).text = $"BossKillPoint : {exp}";
         GetText((int)Texts.Result).text = $"Stage Clear Point\n{finalBonus}";
 
-        StartCoroutine(LastScore(finalBonus));
+        if (scene == Define.Scene.Universe)
+        {
+            GetButton((int)Btns.PassBtn).gameObject.SetActive(false);
+            duration = 3.5f;
+            LastScoreForUni(finalBonus);
+        }
+        else
+            StartCoroutine(LastScore(finalBonus));
+
         StartCoroutine(SceneMove());
+        
     }
 
     void PassBtn()
@@ -71,14 +83,22 @@ public class EndingScene : UIScene
 
     IEnumerator SceneMove() 
     {
-        while (duration > 0) 
+        if(scene == Define.Scene.Universe)
         {
-            yield return new WaitForSeconds(1f);
-            duration -= 1f;
-            yield return null;
+            yield return new WaitForSeconds(duration);
+            Managers.UI.ShowPopUpUI<CakePopUp>();
         }
+        else
+        {
+            while (duration > 0)
+            {
+                yield return new WaitForSeconds(1f);
+                duration -= 1f;
+                yield return null;
+            }
 
-        SceneCheck();
+            SceneCheck();
+        }
     }
 
     IEnumerator LastScore(float finalBonus)
@@ -86,5 +106,16 @@ public class EndingScene : UIScene
         yield return new WaitForSeconds(1.5f);
 
         Managers.Game.AddScore(finalBonus);
+    }
+
+    void LastScoreForUni(float finalBonus)
+    {
+        if (scene == Define.Scene.Universe)
+        {
+            Managers.Game.AddScore(finalBonus);
+            finalResult = Managers.Game.ScorePoint;
+            GetText((int)Texts.Timer).text = $"Final Score : {finalResult}";
+            return;
+        }
     }
 }

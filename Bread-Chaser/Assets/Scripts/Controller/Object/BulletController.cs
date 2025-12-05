@@ -47,7 +47,7 @@ public class BulletController : MonoBehaviour
                 PlayerStat targetStat = _target.GetComponent<PlayerStat>();
                 PlayerController control = _target.GetComponent<PlayerController>();
 
-                if(control.CurrentState != Define.PlayerStatus.Attack)
+                if(control.CurrentState != Define.PlayerStatus.Attack || control.CurrentState != Define.PlayerStatus.BossAtk)
                     targetStat.OnPlAttacked(_shooter);
 
                 Managers.Resource.Destroy(gameObject);

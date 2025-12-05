@@ -343,7 +343,7 @@ public class PlayerController : PlayerBase
             TargetNotDead = isTargetAlive;
 
             _camController.AtkSetting(TargetNotDead);
-            _camController.CamShake(10f, 5f, 0.2f);
+            _camController.CamShake(10f, 25f, 0.2f);
 
             Vector3 targetPos = _target.GetComponent<MobController>().targetedPos.transform.position;
             targetPos.z -= 0.5f;
@@ -407,12 +407,12 @@ public class PlayerController : PlayerBase
             if (_stat.IsAtkBuffed)
             {
                 Managers.Sound.Play($"SE/HardHit");
-                _camController.CamShake(10f, 10f, 0.2f);
+                _camController.CamShake(10f, 25f, 0.2f);
             }
             else
             {
                 Managers.Sound.Play($"SE/Hit");
-                _camController.CamShake(10f, 5f, 0.2f);
+                _camController.CamShake(10f, 20f, 0.2f);
             }
         }
 

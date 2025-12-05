@@ -396,8 +396,8 @@ public class PlayerBase : MonoBehaviour
     public void Clear()
     {
         StopAllCoroutines();
-        
-        if(CurrentState == Define.PlayerStatus.Die)
+
+        if (CurrentState == Define.PlayerStatus.Die || Managers.Scene.CurrentScene.SceneType == Define.Scene.Universe)
             Destroy(gameObject);
 
         IsBraking = false;

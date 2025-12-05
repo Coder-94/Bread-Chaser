@@ -13,6 +13,7 @@ public class ForestGimmickObJ : MonoBehaviour
 
     public void Init(GameObject mob, Action onDespawn) 
     {
+        Managers.Sound.Play("SE/ForestGimmickPopUp");
         _linkedMob = mob;
         _onDespawn = onDespawn;
 
@@ -33,7 +34,7 @@ public class ForestGimmickObJ : MonoBehaviour
         {
             if (Mathf.Abs(_playerTransform.position.x - transform.position.x) <= hitWidth)
             {
-                _playerTransform.GetComponent<PlayerStat>()?.OnPlAttacked(gameObject);
+                _playerTransform.GetComponent<PlayerStat>()?.OnPlAttacked(gameObject, 3f);
             }
         }
     }

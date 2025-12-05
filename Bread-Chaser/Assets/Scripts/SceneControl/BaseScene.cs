@@ -15,11 +15,11 @@ public class BaseScene : MonoBehaviour
         CityMob = 1,
         IcycleMob = 2,
         ForestMob = 3,
-        SpaceMob = 4,
+        UniverseMob = 4,
         CityBoss = 5,
         IcycleBoss = 6,
         ForestBoss = 7,
-        SpaceBoss = 8,
+        Velve = 8,
     }
     #endregion
 
@@ -32,7 +32,7 @@ public class BaseScene : MonoBehaviour
     public float                    AreaSize { get; protected set; }
     public int                      MonsterCount { get; protected set; } = 0;
 
-    public int                      MobKillCount; //{ get; protected set; }
+    public int                      MobKillCount { get; protected set; } = 0;
     public GameObject               CurrentBoss { get; protected set; }
     protected Define.SceneState     _sceneState;
     protected int                   _bossId;
@@ -78,7 +78,7 @@ public class BaseScene : MonoBehaviour
         new() { isSpawned = false, spawnedPos = new Vector3(0.82f, 0.38f, 8f) },
         new() { isSpawned = false, spawnedPos = new Vector3(-1.62f, 0.38f, 8f) },
         new() { isSpawned = false, spawnedPos = new Vector3(1.62f, 0.38f, 8f) },
-        new() { isSpawned = false, spawnedPos = new Vector3(0, 1.65f, 8f) }
+        new() { isSpawned = false, spawnedPos = new Vector3(0, 2.08f, 11.25f) }
     };
     #endregion
 
@@ -251,8 +251,4 @@ public class BaseScene : MonoBehaviour
         Managers.Game.StateAction -= LevelUp;
         Managers.Game.StateAction -= BossStage;
     }
-
-    public virtual void ForestGimmick() { }
-    public virtual void IceLandGimmick() { }
-    public virtual void UniverseGimmick() { }
 }

@@ -7,6 +7,7 @@ public abstract class BaseGimmick : MonoBehaviour
     protected float minTime;
     protected float maxTime;
     protected Warning warning;
+    protected bool _isGimmickActive = false;
 
     private void Start()
     {
@@ -31,7 +32,10 @@ public abstract class BaseGimmick : MonoBehaviour
 
             yield return new WaitForSeconds(waitTime);
 
-            ActivetGimmick();
+            if (!_isGimmickActive)
+            {
+                ActivetGimmick();
+            }
         }
     }
 

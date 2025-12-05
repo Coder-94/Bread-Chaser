@@ -6,8 +6,8 @@ public class Warning : MonoBehaviour
 {
     public Action WarnEnded;
 
-    SpriteRenderer      _sprite;
-    float               duration = 3f;
+    SpriteRenderer[] _sprites;
+    public float        warningDuration = 3f;
     public float        blinkInterval = 0.3f;
     void Start()
     {
@@ -16,41 +16,63 @@ public class Warning : MonoBehaviour
 
     void Init()
     {
-        _sprite = GetComponent<SpriteRenderer>();
+        _sprites = GetComponentsInChildren<SpriteRenderer>(true);
         ToggleVisibility(false);
     }
 
-    public void WarningInit()
+    public void WarningInit(bool isKeepVisible = false)
     {
-        StartCoroutine(Blinker());
+        if (_sprites == null || _sprites.Length == 0)
+            _sprites = GetComponentsInChildren<SpriteRenderer>(true);
+
+        StopAllCoroutines();
+        StartCoroutine(Blinker(isKeepVisible));
     }
 
-    IEnumerator Blinker()
+    IEnumerator Blinker(bool isKeepVisible = false)
     {
-        float timer = 0f;
+        Managers.Sound.Play("SE/Warning");
 
-        while (timer < duration)
+        if (isKeepVisible)
         {
             ToggleVisibility(true);
 
-            yield return new WaitForSeconds(blinkInterval);
-
-            ToggleVisibility(false);
-
-            yield return new WaitForSeconds(blinkInterval);
-
-            timer += blinkInterval * 2;
+            yield return new WaitForSeconds(warningDuration);
         }
+        else
+        {
+            float timer = 0f;
 
-        WarnEnded.Invoke();
+            while (timer < warningDuration)
+            {
+                ToggleVisibility(true);
+
+                yield return new WaitForSeconds(blinkInterval);
+
+                ToggleVisibility(false);
+
+                yield return new WaitForSeconds(blinkInterval);
+
+                timer += blinkInterval * 2;
+            }
+        }
         //Object Hiding
         ToggleVisibility(false);
+        WarnEnded.Invoke();
     }
 
     public void ToggleVisibility(bool isVisible, bool hardStop = false)
     {
-        if(hardStop)
-            StopCoroutine(Blinker());
-        _sprite.enabled = isVisible;
+        if (_sprites != null)
+        {
+            foreach (var sprite in _sprites)
+            {
+                if (sprite != null)
+                    sprite.enabled = isVisible;
+            }
+        }
+
+        if (hardStop)
+            StopCoroutine("Blinker");
     }
 }

@@ -9,7 +9,6 @@ public class ForestGimmick : BaseGimmick
     private GameObject beam;
     private GameObject mark;
     private GameObject _currentTargetMob;
-    private bool _isGimmickActive = false;
     
     private int _targetRailIndex;
     private float _targetX;
@@ -18,8 +17,8 @@ public class ForestGimmick : BaseGimmick
     {
         base.Init();
 
-        maxTime = 6.0f;
-        maxTime = 8.0f;
+        maxTime = 7.0f;
+        maxTime = 9.0f;
 
         if (warning != null)
         {

@@ -202,11 +202,33 @@ public class PlayerStat : Stat
 
     #endregion
 
-    public override void OnPlAttacked(GameObject enemy)
+    public void TrueDmgAttacked(float power = 1.0f)
+    {
+        if (power > 0)
+        {
+            CurrentHp -= power;
+            HpCountAction?.Invoke(CurrentHp);
+
+            if (CurrentHp > 0)
+            {
+                StartCoroutine(InvincibleProcess(true, _invincibleTime));
+
+                if (_controller != null)
+                {
+                    if (_controller.CurrentState == Define.PlayerStatus.Running || _controller.CurrentState == Define.PlayerStatus.Attack || _controller.CurrentState == Define.PlayerStatus.Attacking)
+                        _controller.CurrentState = Define.PlayerStatus.Damaged;
+                    else
+                        Managers.Sound.Play("SE/Hit");
+                }
+            }
+        }
+    }
+
+    public override void OnPlAttacked(GameObject enemy, float duration = 1.0f)
     {
         if (IsInvincible) return;
 
-        if (GetComponent<PlayerController>().CurrentState == Define.PlayerStatus.BossAtk)
+        if (GetComponent<PlayerController>().CurrentState == Define.PlayerStatus.BossAtk || GetComponent<PlayerController>().CurrentState == Define.PlayerStatus.BossKeepAtk)
             return;
 
         if (_controller != null)
@@ -226,6 +248,8 @@ public class PlayerStat : Stat
             power = enemyStat.Atk;
         else
             power = 1f;
+
+        power *= duration;
 
         if (_currentShieldHealth > 0)
         {

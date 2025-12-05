@@ -10,7 +10,7 @@ public abstract class BaseMobController : MonoBehaviour
     protected enum AnimParameters
     {
         IsDead,
-        IsStunned,
+        TriggerStun,
         IsCasting,
         TriggerAtk,
         TriggerSpAtk,

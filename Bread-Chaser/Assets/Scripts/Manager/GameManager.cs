@@ -20,7 +20,7 @@ public class GameManager
     private GameObject          PLAYER;
     private PlayerStat          _playerStat;
     private PlayerController    _playerCont;
-    public int                  BossBattleScoreCut { get; private set; } = 10; //5900
+    public int BossBattleScoreCut { get; private set; } = 5900;
     public float                StageStartScore { get; private set; } = 0f;
     public bool                 IsBossBattleStarted { get; private set; } = false;
 
@@ -36,6 +36,7 @@ public class GameManager
     public GameObject GetPlayer() { return PLAYER; }
     public Define.GameState GetGameState() { return gameState; }
     public int ShowScore() { return ScorePoint; }
+    public int BossStagPointChanger(int value) { return BossBattleScoreCut = value; }
 
     public void SearchPlayer() 
     { 

@@ -1,13 +1,16 @@
 using UnityEngine;
 
-public class ForestScene : BaseScene
+public class UniverseScene : BaseScene
 {
     protected override void Init()
     {
         base.Init();
-        SceneType = Define.Scene.Forest;
-        _bossId = (int)MonsterID.ForestBoss;
-        _mobid = (int)MonsterID.ForestMob;
+        SceneType = Define.Scene.Universe;
+        _bossId = (int)MonsterID.Velve;
+        _mobid = (int)MonsterID.UniverseMob;
+        Managers.Game.BossStagPointChanger(Managers.Game.BossBattleScoreCut / 2);
+
+        //Managers.Sound.Play("BGM/Bagel Street (loop)", Define.Sound.Bgm);
 
         for (int i = 0; i < 3; i++)
         {
